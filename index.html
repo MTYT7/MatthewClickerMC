@@ -307,7 +307,7 @@ function startBearParticles(){
     ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,350,0,Math.PI*2);ctx.fill();
     // Animate head tilt and jaw drop using clipped artwork plus jaw movement.
     ctx.save();ctx.rotate(Math.sin(scareT*16)*.06+Math.sin(scareT*31)*.018);
-    ctx.drawImage(art,-250,-280,500,560);
+    ctx.filter="brightness(.78)";ctx.drawImage(art,-250,-280,500,560);ctx.filter="none";
     if(scareT<1.0){
       const jawOpen=Math.max(0,Math.sin(scareT*19))*(scareT<.65?28:13);
       ctx.globalCompositeOperation="source-over";
