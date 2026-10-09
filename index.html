@@ -29,6 +29,8 @@ small{color:#d7c6e8}.close{float:right}
 /* FNAF-style jumpscare for the soap meme track */
 #fnafJumpscare{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,#171717 0%,#030303 65%,#000 100%);isolation:isolate}
 #fnafJumpscare.active{display:flex;animation:scareFlicker 1.7s steps(2,end) forwards}
+#fnafJumpscare.active{animation:scareFlicker 1.7s steps(2,end) forwards,scareShake 1.7s linear forwards}
+@keyframes scareShake{0%,100%{transform:translate(0,0) scale(1)}8%{transform:translate(-9px,5px) scale(1.02)}14%{transform:translate(11px,-6px) scale(1.03)}21%{transform:translate(-13px,-4px) scale(1.04)}29%{transform:translate(10px,8px) scale(1.02)}37%{transform:translate(-7px,3px) scale(1.01)}46%{transform:translate(8px,-4px) scale(1.03)}58%{transform:translate(-4px,2px)}72%{transform:translate(3px,-2px)}90%{transform:translate(0,0)}}
 #fnafJumpscare:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#0008 4px 5px);opacity:.65}
 #fnafJumpscare .scare-face{position:relative;width:min(86vw,650px);height:min(90vh,700px);transform:scale(.06);filter:drop-shadow(0 0 30px #8b0000);animation:scareLunge 1.7s cubic-bezier(.12,.8,.2,1) forwards}
 #fnafJumpscare .bear-head{position:absolute;left:10%;top:13%;width:80%;height:75%;border-radius:47% 47% 42% 42%;background:radial-gradient(ellipse at 48% 25%,#62564a 0%,#302923 43%,#100e0d 75%);border:7px solid #080706;box-shadow:inset 0 0 30px #000,0 0 35px #5c0000}
@@ -326,11 +328,15 @@ function triggerFnafJumpscare(){
       if(AC){
         soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();
         const ctx=soundContext,now=ctx.currentTime;
-        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.32,now+.018);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
-        const shriek=ctx.createOscillator(),sg=ctx.createGain();shriek.type="sawtooth";shriek.frequency.setValueAtTime(260,now);shriek.frequency.exponentialRampToValueAtTime(1550,now+.16);shriek.frequency.exponentialRampToValueAtTime(310,now+.68);sg.gain.setValueAtTime(.0001,now);sg.gain.linearRampToValueAtTime(.7,now+.025);sg.gain.exponentialRampToValueAtTime(.0001,now+.78);shriek.connect(sg);sg.connect(master);shriek.start(now);shriek.stop(now+.8);
-        const bass=ctx.createOscillator(),bg=ctx.createGain();bass.type="triangle";bass.frequency.setValueAtTime(95,now);bass.frequency.exponentialRampToValueAtTime(28,now+.45);bg.gain.setValueAtTime(.7,now);bg.gain.exponentialRampToValueAtTime(.0001,now+.5);bass.connect(bg);bg.connect(master);bass.start(now);bass.stop(now+.52);
-        const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.32),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
-        const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(1900,now);filter.Q.value=.7;ng.gain.setValueAtTime(.45,now);ng.gain.exponentialRampToValueAtTime(.0001,now+.32);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
+        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.62,now+.012);master.gain.setValueAtTime(.42,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.35);master.connect(ctx.destination);
+        // Layered, harsh synthetic screech with a rapid pitch dive and rough distortion.
+        const sh=ctx.createWaveShaper();const curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*3.8)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
+        for(const spec of [{type:"sawtooth",start:480,peak:2100,end:190,dur:.88,gain:.42},{type:"square",start:760,peak:1650,end:240,dur:.63,gain:.17},{type:"triangle",start:130,peak:90,end:32,dur:.95,gain:.5}]){
+          const o=ctx.createOscillator(),g=ctx.createGain();o.type=spec.type;o.frequency.setValueAtTime(spec.start,now);o.frequency.exponentialRampToValueAtTime(spec.peak,now+.075);o.frequency.exponentialRampToValueAtTime(spec.end,now+spec.dur);g.gain.setValueAtTime(.0001,now);g.gain.linearRampToValueAtTime(spec.gain,now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+spec.dur);o.connect(g);g.connect(sh);o.start(now);o.stop(now+spec.dur+.02);
+        }
+        // Burst of filtered noise gives the attack a crunchy, tearing edge.
+        const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.72),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
+        const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(2600,now);filter.frequency.exponentialRampToValueAtTime(650,now+.45);filter.Q.value=.8;ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.32,now+.008);ng.gain.exponentialRampToValueAtTime(.0001,now+.72);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
       }
     }catch(e){}
     fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},1800);
