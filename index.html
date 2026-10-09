@@ -29,7 +29,7 @@ small{color:#d7c6e8}.close{float:right}
 <body>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.20 · PLAIN STARTING AVATAR</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.21 · PERFORMANCE OPTIMISATION</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: NAMED SAVE SLOTS + CRYSTAL ACCESSORY SHOP BELOW</div>
 <div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">🙂<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile & Accessories</button></div>
@@ -59,7 +59,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.20</div>
+<div class="footer">Matthew Clicker · v1.21</div>
 </div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
@@ -239,8 +239,9 @@ document.getElementById("profileShopButton")?.addEventListener("click",safeOpenP
 document.getElementById("profileShopMenuButton")?.addEventListener("click",safeOpenProfileShop);
 window.addEventListener("error",event=>{if(event?.message)showRuntimeError("JavaScript error",event.message)});
 clickBtn.onclick=clickGame;rebirthBtn.onclick=rebirth;load();buildControls();applyTheme();renderUpgrades();refresh();
-setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);refresh()},100);
-setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");document.body.style.background=s.bg}},60);
+let uiRefreshElapsed=0;
+setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);uiRefreshElapsed+=dt;if(uiRefreshElapsed>=.25){uiRefreshElapsed=0;refresh()}},100);
+setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");if(document.body.style.background!==s.bg)document.body.style.background=s.bg}},100);
 setTimeout(spawnGolden,30000);setInterval(()=>setTimeout(spawnGolden,Math.random()*25000+35000),35000);
 setTimeout(startRush,45000);setInterval(()=>setTimeout(startRush,Math.random()*40000+60000),60000);
 window.addEventListener("beforeunload",()=>{save()});document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){save()}});
