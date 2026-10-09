@@ -31,7 +31,7 @@ small{color:#d7c6e8}.close{float:right}
 <div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 SCORE</strong><small id="saveBestValue">BEST: 0</small></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.33</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.34</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: BRIGHTER COLOUR GLOWS + SOUND SETTINGS</div>
 <div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">🙂<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile & Accessories</button></div>
@@ -61,7 +61,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.33</div>
+<div class="footer">Matthew Clicker · v1.34</div>
 </div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
@@ -151,7 +151,21 @@ const musicSongs=[
 {name:"Pixel Panic",tempo:90,wave:"square",volume:.03,notes:[784,0,659,784,988,0,880,784,659,0,587,659,784,0,523,587,659,0,698,784,880,0,784,698,659,0,523,659,784,988,880,0]},
 {name:"Moonlit Adventure",tempo:125,wave:"triangle",volume:.045,notes:[392,523,659,784,659,523,440,523,587,698,587,523,392,494,587,659,784,659,587,494,349,440,523,659,587,523,440,0,392,523,659,784]}
 ];
-function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name:"Music is off"}
+// Stretch every melody into a roughly 60-second arrangement at its own tempo.
+// Each track cycles its original motif with a longer phrase structure.
+for(const song of musicSongs){
+  const targetSteps=Math.max(song.notes.length,Math.round(60000/song.tempo));
+  const original=song.notes.slice();
+  song.notes=Array.from({length:targetSteps},(_,i)=>original[i%original.length]);
+}
+musicSongs.push({
+  name:"Soap in My Arse (original meme tune)",
+  tempo:125,wave:"square",volume:.035,
+  notes:[392,392,523,587,659,0,587,523,440,440,523,587,659,0,784,659,587,523,392,0,440,523,587,0,659,587,523,440,392,0,392,0]
+});
+const soapLyrics="There is soap in my arse · There is soap in my arse · There is soap in my arse · There is soap in my arse";
+
+function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name+(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse")?" — 🎤 "+soapLyrics:""):"Music is off"}
 function stopMusic(){if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}musicTick=null;if(musicGain){try{musicGain.gain.setTargetAtTime(0,soundContext.currentTime,.15)}catch(e){}musicGain=null}}
 function setMusic(enabled){s.music=!!enabled;save();if(s.music)startMusic();else{stopMusic();updateMusicLabel()}}
 function skipSong(){if(!s.music){s.music=true;save();startMusic();return}musicSongIndex=(musicSongIndex+1)%musicSongs.length;musicStep=0;if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}updateMusicLabel();if(musicTick)musicTick()}
