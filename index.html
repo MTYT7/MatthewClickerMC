@@ -309,8 +309,8 @@ function startBearParticles(){
     // Animate head tilt and jaw drop using clipped artwork plus jaw movement.
     ctx.save();ctx.rotate(Math.sin(scareT*16)*.06+Math.sin(scareT*31)*.018);
     ctx.drawImage(art,-250,-280,500,560);
-    if(t<1.5){
-      const jawOpen=Math.max(0,Math.sin(t*19))*(t<.65?28:13);
+    if(scareT<1.0){
+      const jawOpen=Math.max(0,Math.sin(scareT*19))*(scareT<.65?28:13);
       ctx.globalCompositeOperation="source-over";
       ctx.fillStyle="#030303";ctx.beginPath();ctx.ellipse(0,181+jawOpen*.5,94,42+jawOpen,0,0,Math.PI*2);ctx.fill();
       // Re-draw a snapping lower jaw as a moving plate with teeth.
@@ -324,8 +324,8 @@ function startBearParticles(){
     for(const ex of [-73,72]){ctx.save();ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.45+eyePulse*.45;ctx.fillStyle="#ff2a00";ctx.shadowColor="#ff2400";ctx.shadowBlur=18+eyePulse*30;ctx.beginPath();ctx.ellipse(ex,-17,7,11,0,0,Math.PI*2);ctx.fill();ctx.restore()}
     ctx.restore();ctx.restore();
     // brief full-frame exposure pop timed to the lunge
-    if(t>.27&&t<.34){ctx.fillStyle="rgba(255,255,255,.28)";ctx.fillRect(0,0,w,h)}
-    if(t<1.9)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
+    if(scareT>.27&&scareT<.34){ctx.fillStyle="rgba(255,255,255,.28)";ctx.fillRect(0,0,w,h)}
+    if(t<5.8)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
   };
   bearParticleFrame=requestAnimationFrame(draw);
 }
