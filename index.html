@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Matthew Clicker v1.31</title>
+<title>Matthew Clicker v1.39</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
 #app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}.save-score-badge{position:fixed;top:12px;right:12px;z-index:10;background:#180e21;border:1px solid #ffb703;border-radius:10px;padding:9px 12px;text-align:right;box-shadow:0 3px 12px #0006;max-width:calc(100vw - 24px);font-size:12px}.save-score-badge strong{display:block;color:#ffb703;font-size:15px;margin-top:3px}.save-score-badge small{display:block;color:#d7c6e8}@media(max-width:600px){.save-score-badge{position:absolute;top:8px;right:8px;padding:6px 8px;font-size:10px}.save-score-badge strong{font-size:12px}.title{padding-top:42px}}
@@ -90,7 +90,7 @@ small{color:#d7c6e8}.close{float:right}
 <div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 SCORE</strong><small id="saveBestValue">BEST: 0</small></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.34</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.39</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div id="localClock" role="timer" aria-label="Your local time"><span aria-hidden="true">🕒</span><div><div class="clock-label">YOUR LOCAL TIME</div><div><span id="localClockTime" class="clock-time">--:--:--</span> <span id="localClockDate" class="clock-date"></span></div></div></div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: BRIGHTER COLOUR GLOWS + SOUND SETTINGS</div>
@@ -121,7 +121,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.38</div>
+<div class="footer">Matthew Clicker · v1.39</div>
 </div>
 <div id="fnafJumpscare" aria-hidden="true"><canvas id="bearParticleCanvas"></canvas></div>
 <div id="floatbox"></div>
