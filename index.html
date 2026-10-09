@@ -140,7 +140,7 @@ small{color:#d7c6e8}.close{float:right}
 <h2 style="text-align:center;color:#a5f3fc">⚔️ MATTHEW RPG: THE FALLEN LIGHT</h2><p style="text-align:center;color:#c4b5fd;font-size:11px;margin-top:-8px">VERSION 1.3 · PIXEL ART + SOUL DODGE BATTLES</p>
 <div id="rpgScene" style="background:#100b18;border:2px solid #6d5a91;border-radius:12px;padding:16px;min-height:155px;box-shadow:inset 0 0 22px #0008">
 <div id="rpgLocation" style="color:#a5f3fc;font-size:12px;letter-spacing:2px;margin-bottom:10px">THE QUIET KINGDOM</div>
-<div id="rpgArt" aria-label="Pixel art scene" style="display:grid;grid-template-columns:repeat(16,12px);gap:2px;justify-content:center;margin:0 auto 14px"></div>
+<canvas id="rpgArt" width="640" height="260" aria-label="Detailed illustrated pixel-art RPG location" style="display:block;width:100%;max-width:760px;height:auto;image-rendering:pixelated;border:2px solid #55436d;border-radius:8px;margin:0 auto 14px;background:#100b18;box-shadow:0 8px 22px #0008"></canvas>
 <div id="rpgDialogue" style="font-size:17px;line-height:1.6;white-space:pre-line">god leo has given up on us....</div>
 </div>
 <div id="rpgBattleWrap" style="display:none;background:#050509;border:2px solid #a78bfa;border-radius:10px;padding:8px;margin-top:12px;text-align:center"><div id="rpgBattleCaption" style="color:#fca5a5;font-size:12px;margin-bottom:6px">DODGE THE ATTACK!</div><canvas id="rpgBattleCanvas" width="360" height="180" style="display:block;width:100%;max-width:540px;height:auto;image-rendering:pixelated;margin:auto;background:#080812;border:1px solid #475569"></canvas><div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:8px"><button onclick="rpgMoveSoul(-1,0)">⬅</button><button onclick="rpgMoveSoul(0,-1)">⬆</button><button onclick="rpgMoveSoul(0,1)">⬇</button><button onclick="rpgMoveSoul(1,0)">➡</button></div><p style="color:#94a3b8;font-size:11px;margin:5px 0">Move the red SOUL with arrow keys or buttons. Avoid glowing projectiles!</p></div><div id="rpgStats" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0;color:#fde68a"><span>❤️ HP: <b id="rpgHP">24 / 24</b></span><span>✦ SOUL: <b id="rpgSoul">0</b></span><span>☠️ Foes: <b id="rpgBoss">None</b></span></div>
@@ -736,14 +736,45 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
   {loc:"THE BROKEN SHRINE",lines:["Beyond the woods, a shrine lies split in two. Its broken stones are warm, though the night air bites at your hands.","Beneath the altar, you find a record scratched into black glass: ‘THE FIRST WITNESS WAS NOT BORN. THE FIRST WITNESS REMEMBERS.’","Aiden reads it twice. AIDEN: Infinite Kye. I thought that was a bedtime story. My grandmother used to lock the windows when she told it.","A golden mask floats above the altar. THE HOLLOW KNIGHT awakens. Its empty eyeholes reflect a sky with one extra star.","HOLLOW KNIGHT: FAITH IS A CHAIN. I WILL BREAK YOURS.","HOLLOW KNIGHT: I guarded this place for a name I was ordered to forget. Even now, when I close my eyes, I can hear someone counting down from numbers that do not exist."],boss:{name:"THE HOLLOW KNIGHT",hp:28,atk:5,desc:"A knight whose vows outlived the god he served."}},
   {loc:"THE LAST LIGHT",lines:["A stairway spirals into a sky with no stars. Halfway up, you realise your footsteps echo before your boots touch the stone.","At the summit, a familiar figure waits: GOD LEO. Behind him floats a dark outline shaped like a person, but it has no face and casts no shadow.","GOD LEO: I did not give up on you. I gave up believing I could save you all alone.","You ask about the figure behind him. Leo’s expression changes. For the first time, the god looks genuinely afraid.","GOD LEO: The Infinite Kye is not a god. Gods have beginnings. Kye is what remains when the last page is turned, the book is burned, and someone still remembers the story.","GOD LEO: It appeared in the gaps between our chapters. It never attacked. It only watched. And every time I tried to name it, I forgot something important about myself.","GOD LEO: Show me what you have learned. Let this be our final battle. If the lights go out... do not follow the voice that calls you by a name you never told anyone."],boss:{name:"GOD LEO",hp:38,atk:6,desc:"The fallen light. Fight, listen, or choose mercy."}}
  ];
- function drawArt(loc,text){const el=$("rpgArt");if(!el)return;const key=((loc||"")+" "+(text||"")).toLowerCase();let rows;
- if(key.includes("mourn")||key.includes("woods"))rows=["......GGGG......",".....GWWWWG.....","....GGWWWWGG....","....GWWWWWWG....",".....GGGGGG......","....BBBBBBBB....","...BBBOOBBBB.....","...BBBBBBBBBB....","....BB.BB.BB.....",".....BB..BB......","....BB....BB.....","...BB......BB...."];
- else if(key.includes("knight")||key.includes("shrine"))rows=[".......YYYY......","......YKKKKY.....","......YKKKKY.....",".......YYYY......",".....RRYYYYRR....","....RRRYYYYRRR...","....RRYYYYYYRR...",".....RRRRRRRR....","......RR..RR.....",".....RR....RR....","....RR......RR...","...RR........RR.."];
- else if(key.includes("leo")||key.includes("light"))rows=[".......YYYY......","......YWWWWY.....",".....YWWWWWWY....",".....YWWYYWWY....","......YWWWWY.....",".......YYYY......","....PPYYYYYYPP...","...PPPYYYYYYPPP..","...PP.YYYYYY.PP..","......PP..PP......",".....PP....PP.....","....PP......PP...."];
- else rows=["......GGGG......",".....G....G......","....G..YY..G.....","....G.YYYY.G.....",".....G.YY.G......","......GGGG.......","....BBBBBBBB.....","...BBB.BB.BBB....","......BBBB........",".....BB..BB.......","....BB....BB......","...BB......BB....."];
- const palette={G:"#34d399",W:"#f8fafc",B:"#64748b",O:"#fb923c",Y:"#facc15",K:"#27272a",R:"#ef4444",P:"#a78bfa"};
- el.innerHTML=rows.join("").split("").map(ch=>ch==="."?'<span style="width:12px;height:12px"></span>':'<span style="width:12px;height:12px;border-radius:50%;display:block;background:'+palette[ch]+';box-shadow:0 0 5px '+palette[ch]+'66"></span>').join("");
-}
+ function drawArt(loc,text){
+ const c=$("rpgArt");if(!c)return;const x=c.getContext("2d");const W=640,H=260,key=((loc||"")+" "+(text||"")).toLowerCase();
+ const isWoods=key.includes("wood")||key.includes("mourn"),isRiver=key.includes("river"),isRuin=key.includes("ruin")||key.includes("shrine")||key.includes("knight"),isMeadow=key.includes("meadow"),isLeo=key.includes("leo")||key.includes("light"),isNote=key.includes("note"),isDark=key.includes("between")||key.includes("stranger")||key.includes("last page");
+ const sky=isDark?"#100c28":isWoods?"#152c35":isRiver?"#4a8291":isMeadow?"#83c9dc":isLeo?"#302b58":"#34365f";
+ const ground=isDark?"#151125":isWoods?"#234b3c":isRiver?"#396b68":isMeadow?"#4d985d":isRuin?"#51465a":"#41634c";
+ const rect=(xx,yy,w,h,col)=>{x.fillStyle=col;x.fillRect(Math.round(xx),Math.round(yy),Math.round(w),Math.round(h))};
+ const poly=(pts,col)=>{x.fillStyle=col;x.beginPath();x.moveTo(pts[0][0],pts[0][1]);pts.slice(1).forEach(p=>x.lineTo(p[0],p[1]));x.closePath();x.fill()};
+ x.clearRect(0,0,W,H);let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,sky);g.addColorStop(1,isDark?"#24193b":"#c07872");x.fillStyle=g;x.fillRect(0,0,W,H);
+ // stars, moon, and distant atmospheric layers
+ for(let i=0;i<76;i++){const sx=(i*97+31)%W,sy=(i*43+13)%145;rect(sx,sy,i%7===0?3:2,i%7===0?3:2,i%4===0?"#fff0ba":"#e6e6ff")}
+ if(!isDark){x.fillStyle=isLeo?"#fff0a6":"#ffe9bd";x.beginPath();x.arc(518,48,isLeo?25:18,0,Math.PI*2);x.fill();x.fillStyle=sky;x.beginPath();x.arc(528,41,18,0,Math.PI*2);x.fill()}
+ poly([[0,155],[75,94],[138,143],[226,78],[315,151],[410,97],[500,150],[570,105],[640,150],[640,210],[0,210]],isDark?"#242044":isWoods?"#1d3d40":"#41476b");
+ poly([[0,180],[105,132],[180,178],[285,121],[370,178],[475,128],[570,176],[640,142],[640,218],[0,218]],isDark?"#2e294b":"#526078");
+ // far kingdom skyline
+ if(!isWoods&&!isRiver&&!isMeadow&&!isDark){
+  for(let i=0;i<9;i++){let bx=i*76-10,by=142+(i%3)*13;rect(bx,by,54,65,"#282b48");rect(bx+7,by-14,40,15,"#373452");for(let wx=0;wx<3;wx++)for(let wy=0;wy<3;wy++)rect(bx+8+wx*14,by+10+wy*15,5,7,(i+wx+wy)%3===0?"#ffd88a":"#786a8c")}
+  // distant clocktower
+  rect(470,72,36,105,"#26233f");rect(462,62,52,18,"#49405f");poly([[459,63],[488,34],[517,63]],"#5c4d73");rect(480,91,16,16,"#ffe9a3");rect(487,91,2,16,"#5a4163");rect(480,98,16,2,"#5a4163");
+ }
+ // forest silhouettes and textured trees
+ if(isWoods||isDark){for(let i=0;i<9;i++){let tx=i*82-12,th=70+(i*19)%60;rect(tx+18,175-th*.35,14,th,"#3a2b40");poly([[tx-8,160-th*.4],[tx+25,95-th*.55],[tx+55,160-th*.4]],i%2?"#17413e":"#1b5148");poly([[tx-3,140-th*.25],[tx+25,80-th*.45],[tx+50,140-th*.25]],"#276454");rect(tx+20,150-th*.3,4,4,"#7bc6a1")}}
+ // ground, path, river, flowers and stones
+ rect(0,194,W,66,ground);
+ if(isRiver){poly([[0,192],[140,183],[220,203],[355,192],[470,212],[640,195],[640,260],[0,260]],"#397f98");for(let i=0;i<17;i++){let yy=205+(i*13)%45;rect((i*53)%620,yy,18,2,i%2?"#a8e4e5":"#6bb9c9")}poly([[0,189],[130,183],[210,196],[0,205]],"#c6b58b")}
+ else if(!isWoods&&!isDark){poly([[245,260],[300,260],[355,194],[320,194]],isMeadow?"#c7b77d":"#b69a80");poly([[0,222],[120,214],[190,226],[270,215],[380,229],[500,213],[640,224],[640,260],[0,260]],ground)}
+ // ruins / broken shrine architecture
+ if(isRuin){rect(92,117,18,83,"#83778a");rect(105,110,160,13,"#a99aaa");rect(118,123,13,67,"#756b83");rect(151,123,13,67,"#756b83");rect(184,123,13,67,"#756b83");rect(217,123,13,67,"#756b83");rect(88,194,190,12,"#b4a2ad");poly([[92,117],[145,73],[173,106],[202,64],[265,117]],"#6c607d");rect(298,170,42,28,"#b8b1b7");rect(309,150,9,20,"#e8d9a6");for(let i=0;i<15;i++)rect(82+(i*41)%210,199+(i*17)%25,8,4,"#a3b18a")}
+ // grass blades and flowers
+ for(let i=0;i<95;i++){let gx=(i*67+11)%W,gy=198+(i*19)%58;rect(gx,gy,2,4,i%3===0?"#9dc978":i%3===1?"#2b493b":"#6fbd78");if(i%6===0)rect(gx-2,gy-3,5,3,isMeadow?"#fff0bd":"#e7b4e7")}
+ // detailed Aiden/player silhouette with face, cloak, boots, gear
+ const px=isRiver?300:isWoods?395:isRuin?355:isMeadow?260:335,py=171;
+ rect(px-11,py-36,22,22,"#e9b58a");rect(px-14,py-40,28,9,"#3b263b");rect(px-17,py-34,7,13,"#3b263b");rect(px+10,py-34,7,13,"#3b263b");rect(px-7,py-27,4,3,"#30243a");rect(px+4,py-27,4,3,"#30243a");rect(px-8,py-19,16,5,"#c28c73");poly([[px-14,py-14],[px+14,py-14],[px+21,py+17],[px-21,py+17]],"#3f3561");rect(px-17,py-8,7,20,"#d5a27f");rect(px+10,py-8,7,20,"#d5a27f");rect(px-14,py+15,10,12,"#24223a");rect(px+4,py+15,10,12,"#24223a");rect(px-15,py+26,12,4,"#171625");rect(px+3,py+26,12,4,"#171625");rect(px+12,py-8,3,17,"#e8d9a6");
+ // warm window glow and drifting motes
+ for(let i=0;i<12;i++){const mx=(i*59+23)%W,my=105+(i*37)%140;rect(mx,my,2,2,i%2?"#ffe4a1":"#b7f7e8")}
+ if(isLeo){x.save();x.shadowColor="#ffe16b";x.shadowBlur=22;rect(558,91,13,57,"#fff0a6");rect(541,108,47,13,"#ffe16b");x.restore()}
+ if(isNote){rect(430,177,36,27,"#e7d8b5");rect(435,182,25,2,"#66536a");rect(435,188,19,2,"#66536a");rect(435,194,22,2,"#66536a")}
+ // fine frame and cinematic caption strip
+ rect(0,0,W,3,"#a78bfa");rect(0,H-4,W,4,"#a78bfa");x.fillStyle="#080b18b8";x.fillRect(8,8,190,22);x.fillStyle="#fff1c2";x.font="bold 11px monospace";x.fillText((loc||"THE QUIET KINGDOM").toUpperCase().slice(0,27),16,23);
+ }
  function say(text,loc){
   if(dialogueTimer){clearInterval(dialogueTimer);dialogueTimer=null}
   dialogueFullText=String(text||"");
