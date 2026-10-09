@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4c147d"/><stop offset="1" stop-color="#140b27"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#fff36b"/><stop offset=".45" stop-color="#ffbf00"/><stop offset="1" stop-color="#e87500"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dy="2"/><feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="3" y="3" width="122" height="122" rx="25" fill="url(#bg)" stroke="#ffcf28" stroke-width="4"/>
+<circle cx="64" cy="57" r="39" fill="#8e3ad2" opacity=".5"/>
+<circle cx="64" cy="54" r="35" fill="url(#gold)" stroke="#fff080" stroke-width="3" filter="url(#shadow)"/>
+<circle cx="64" cy="54" r="28" fill="#b95b00" stroke="#ffdf42" stroke-width="2"/>
+<path d="M43 72V35h11l10 15 10-15h11v37H74V53L64 67 54 53v19z" fill="#ffdf25" stroke="#4c1766" stroke-width="3" stroke-linejoin="round"/>
+<path d="M73 66l22 23-9 1 2 13-10 2-3-14-7 5z" fill="#fff" stroke="#170c24" stroke-width="4" stroke-linejoin="round"/>
+<path d="M24 32l3-7 3 7 7 3-7 3-3 7-3-7-7-3zM98 27l2-5 2 5 5 2-5 2-2 5-2-5-5-2z" fill="#f4aaff"/>
+<path d="M25 100h78" stroke="#b04cff" stroke-width="3" stroke-linecap="round"/>
+<text x="64" y="115" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff" stroke="#321044" stroke-width="2" paint-order="stroke">MC</text>
+</svg>
