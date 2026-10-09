@@ -768,7 +768,33 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  document.addEventListener("keydown",e=>{if(!battleActive)return;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();window.rpgMoveSoul(e.key==="ArrowLeft"?-1:e.key==="ArrowRight"?1:0,e.key==="ArrowUp"?-1:e.key==="ArrowDown"?1:0)}});
  function stats(){ $("rpgHP").textContent=hp+" / "+maxHp;$("rpgSoul").textContent=soul;$("rpgBoss").textContent=foe?foe.name:"None" }
  function hint(t){$("rpgHint").textContent=t}
- function intro(){chapter=0;hp=maxHp=24;soul=0;foe=null;turn=0;guard=false;finished=false;spared=[];window.rpgAttackBonus=0;window.rpgHealBonus=0;say("god leo has given up on us....\n\nThe kingdom has forgotten the sound of hope. Aiden looks toward the sealed road.\n\nAIDEN: If that's true... why is the old shrine still glowing?","THE QUIET KINGDOM");hint("Explore, make friends, and upgrade with Matthew Points before bosses.");choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"},{id:"explore",label:"🧭 Explore the village"},{id:"upgrade",label:"⬆ Upgrade with Matthew Points"},{id:"listen",label:"♡ Listen to the silence"}]);stats()}
+ function intro(){
+ chapter=0;hp=maxHp=24;soul=0;foe=null;turn=0;guard=false;finished=false;spared=[];window.rpgAttackBonus=0;window.rpgHealBonus=0;
+ let seen=false;try{seen=localStorage.getItem("matthewRpgSeenIntro")==="1"}catch(e){}
+ if(seen){kyeOffer();return}
+ try{localStorage.setItem("matthewRpgSeenIntro","1")}catch(e){}
+ say("god leo has given up on us....\\n\\nThe kingdom has forgotten the sound of hope. Aiden looks toward the sealed road.\\n\\nAIDEN: If that's true... why is the old shrine still glowing?","THE QUIET KINGDOM");
+ hint("Explore, make friends, and upgrade with Matthew Points before bosses.");
+ choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"},{id:"explore",label:"🧭 Explore the village"},{id:"upgrade",label:"⬆ Upgrade with Matthew Points"},{id:"listen",label:"♡ Listen to the silence"}]);stats()
+ }
+ function kyeOffer(){
+ chapter=4;foe=null;finished=false;
+ say("You remember the ending. Or perhaps you remember a version of the ending.\\n\\nThe screen goes dark. A voice speaks from somewhere beyond the story.\\n\\nINFINITE KYE: You came back. I wondered how many times you would walk the same road before you noticed the door.\\n\\nA figure stands in a place with no ground and no sky. Behind him, infinite universes unfold like pages in a book that never reaches its last line. In every universe, there is only you... and me. No kingdom to save. No one left to disappoint. No one left to lose.\\n\\nINFINITE KYE: I can let you redo everything. You could become a god. A god with infinite worlds waiting, and no one to tell you what you must be.\\n\\nINFINITE KYE: Join me, and we will reach the final page together. Or turn away. Replay your little story. Search its cracks for clues about what I am. Every hint you find is a door I chose not to close.","THE SPACE BETWEEN ENDINGS");
+ hint("A second journey begins. Your choice changes the story.");
+ choices([{id:"kyejoin",label:"♾ Join Infinite Kye",color:"#581c87"},{id:"kyereplay",label:"↻ Replay and search for clues",color:"#0e7490"}]);stats()
+ }
+ function startKyeRoute(){
+ chapter=5;hp=maxHp=36;soul=0;foe=null;
+ say("INFINITE KYE: Then let the old world fall away.\\n\\nYou step through a universe where every star is shaped like a closed eye. There are no people here, no voices, no footsteps but yours. The other universes are beautiful and empty. Every version of you is waiting at the centre, each one wearing a crown.\\n\\nINFINITE KYE: I promised you godhood. I never promised you that godhood would feel like living.\\n\\nFor the first time, Kye's voice falters. The crowns begin to crack. Somewhere far below the infinite sky, you hear a familiar voice calling from inside a locked light. Leo is alive.","THE INFINITE REALM");
+ hint("The promise is beginning to unravel. Prepare for the truth.");
+ choices([{id:"kyereveal",label:"◉ Ask what happened to Leo"},{id:"kyefight",label:"⚔️ Challenge Infinite Kye",color:"#991b1b"},{id:"kyeturn",label:"♡ Tell Kye you want to go home"}]);stats()
+ }
+ function fightKye(){
+ chapter=6;foe={name:"INFINITE KYE",hp:52,atk:7,desc:"The witness outside the story. It has watched every ending, including the ones you have not chosen.",maxHp:52,stage:0};
+ say("INFINITE KYE: You still think this is a battle you can win. I have watched you choose every path. I know the shape of every attack before you decide to move.\\n\\nYou raise your weapon anyway. The infinite universes fall silent. For the first time, Kye steps forward instead of watching from a distance.","THE LAST PAGE");
+ hint("Final secret boss: dodge carefully, heal, block, and keep attacking.");
+ choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Ask Kye why it chose you"},{id:"defend",label:"🛡️ Block next attack"},{id:"heal",label:"✚ Heal with starfruit"}]);stats()
+ }
  function beginChapter(){chapter=1;chapterDialogue(0)}
  function chapterDialogue(index){const c=chapters[chapter];say(c.lines[index],c.loc);if(index<c.lines.length-1)choices([{id:"nextline",label:"▼ Continue",color:"#0e7490"}]);else if(c.boss){foe={...c.boss,maxHp:c.boss.hp,stage:0};hint(foe.desc);stats();choices([{id:"fight",label:"⚔️ Face "+foe.name,color:"#991b1b"},{id:"talk",label:"♡ Talk first"},{id:"inspect",label:"◉ Inspect foe"},{id:"run",label:"↩ Try to flee"}])}else{choices([{id:"begin",label:"▶ Set out",color:"#0e7490"}])}}
  function attack(){if(!foe||battleActive)return;const dmg=5+Math.floor(Math.random()*5)+(window.rpgAttackBonus||0)-(chapter===3?1:0);foe.hp-=Math.max(2,dmg);$("rpgBattleWrap").style.display="block";drawBattle();$("rpgBattleCaption").textContent="STRIKE!";say("You dash forward in a flash of light and strike "+foe.name+" for "+Math.max(2,dmg)+" damage!","BATTLE");stats();if(foe.hp<=0){setTimeout(()=>{$("rpgBattleWrap").style.display="none";victory(false)},450);return}setTimeout(()=>{if(foe)startDodge()},450)}
