@@ -277,7 +277,11 @@ function importSaveFile(input){let file=input.files?.[0];if(!file)return;let rea
 function setStatus(t,c="#ffb703"){statusEl.textContent=t;statusEl.style.color=c}
 let soundContext=null;let musicTimer=null,musicStep=0,musicSongIndex=0,musicGain=null,musicTick=null;
 const musicSongs=[
-{name:"Neon Boss Rush",tempo:170,wave:"sawtooth",volume:.04,notes:[196,0,196,392,0,294,0,349,392,0,523,466,392,349,294,0,220,0,220,440,0,330,0,392,440,0,587,523,440,392,330,0]}
+{name:"Neon Boss Rush",tempo:170,wave:"sawtooth",volume:.04,notes:[196,0,196,392,0,294,0,349,392,0,523,466,392,349,294,0,220,0,220,440,0,330,0,392,440,0,587,523,440,392,330,0]},
+{name:"Starlit Resolve",tempo:158,wave:"square",volume:.035,notes:[523,659,784,0,880,784,659,523,587,698,880,0,784,698,587,0,440,523,659,784,0,988,880,784,659,587,523,0,392,523,659,0]},
+{name:"Chaos Circuit",tempo:184,wave:"sawtooth",volume:.032,notes:[196,196,0,196,392,0,349,392,466,0,523,466,392,0,294,349,392,0,587,523,466,392,349,0,233,233,0,349,466,523,587,0]},
+{name:"Eveil Aiden Theme Song",tempo:176,wave:"square",volume:.038,notes:[220,0,330,440,0,392,330,0,220,0,330,494,440,392,0,330,294,0,440,523,0,494,440,392,0,294,330,392,0,523,494,0]},
+{name:"Last Heartbeat",tempo:166,wave:"triangle",volume:.034,notes:[392,523,659,0,784,659,523,0,440,587,698,0,880,698,587,0,349,440,523,659,0,784,659,523,0,392,494,587,0,698,587,0]}
 ];
 // Stretch every melody into a roughly 60-second arrangement at its own tempo.
 // Each track cycles its original motif with a longer phrase structure.
