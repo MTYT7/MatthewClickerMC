@@ -163,6 +163,7 @@ musicSongs.push({
   tempo:125,wave:"square",volume:.035,
   notes:[392,392,523,587,659,0,587,523,440,440,523,587,659,0,784,659,587,523,392,0,440,523,587,0,659,587,523,440,392,0,392,0]
 });
+{const song=musicSongs[musicSongs.length-1],original=song.notes.slice(),targetSteps=Math.max(original.length,Math.round(60000/song.tempo));song.notes=Array.from({length:targetSteps},(_,i)=>original[i%original.length]);}
 const soapLyrics="There is soap in my arse · There is soap in my arse · There is soap in my arse · There is soap in my arse";
 
 function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name+(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse")?" — 🎤 "+soapLyrics:""):"Music is off"}
