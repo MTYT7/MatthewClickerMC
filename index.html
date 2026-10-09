@@ -335,23 +335,26 @@ function startBearParticles(){
 }
 function playFnafScareSound(){
   try{
-    const AC=window.AudioContext||window.webkitAudioContext;
-    if(!AC)return;
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
     soundContext=soundContext||new AC();
     if(soundContext.state==="suspended")soundContext.resume().catch(e=>console.warn("Could not resume jumpscare audio:",e));
     const ctx=soundContext,now=ctx.currentTime;
-    // Short, layered horror sting: low impact, metallic scrape, and descending dissonant tones.
-    const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.62,now+.018);master.gain.setValueAtTime(.48,now+.12);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
-    const sh=ctx.createWaveShaper(),curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*2.1)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
-    // Low, punchy impact underneath the screech.
-    const bass=ctx.createOscillator(),bg=ctx.createGain();bass.type="sine";bass.frequency.setValueAtTime(125,now);bass.frequency.exponentialRampToValueAtTime(42,now+.42);bg.gain.setValueAtTime(.0001,now);bg.gain.linearRampToValueAtTime(.42,now+.012);bg.gain.exponentialRampToValueAtTime(.0001,now+.48);bass.connect(bg);bg.connect(master);bass.start(now);bass.stop(now+.5);
-    // Uneasy descending, dissonant metallic chord.
-    for(const spec of [{start:620,end:155,dur:.88,gain:.18,type:"sawtooth"},{start:466,end:116,dur:.78,gain:.13,type:"triangle"},{start:311,end:78,dur:.92,gain:.16,type:"sawtooth"}]){
-      const o=ctx.createOscillator(),g=ctx.createGain();o.type=spec.type;o.frequency.setValueAtTime(spec.start,now);o.frequency.exponentialRampToValueAtTime(spec.end,now+spec.dur);g.gain.setValueAtTime(.0001,now);g.gain.linearRampToValueAtTime(spec.gain,now+.025);g.gain.exponentialRampToValueAtTime(.0001,now+spec.dur);o.connect(g);g.connect(sh);o.start(now);o.stop(now+spec.dur+.02);
+    const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.72,now+.02);master.gain.setValueAtTime(.58,now+.95);master.gain.exponentialRampToValueAtTime(.0001,now+2.0);master.connect(ctx.destination);
+    const sh=ctx.createWaveShaper(),curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*2.7)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
+    // A slow, uneven wooden groan before Freddy appears.
+    for(const c of [{at:0,dur:.72,start:170,end:92,gain:.19},{at:.23,dur:.58,start:128,end:73,gain:.16},{at:.58,dur:.42,start:105,end:62,gain:.12}]){
+      const o=ctx.createOscillator(),g=ctx.createGain(),lp=ctx.createBiquadFilter();o.type="triangle";o.frequency.setValueAtTime(c.start,now+c.at);o.frequency.linearRampToValueAtTime(c.end,now+c.at+c.dur*.55);o.frequency.linearRampToValueAtTime(c.end*1.22,now+c.at+c.dur*.72);o.frequency.linearRampToValueAtTime(c.end*.88,now+c.at+c.dur);g.gain.setValueAtTime(.0001,now+c.at);g.gain.linearRampToValueAtTime(c.gain,now+c.at+.08);g.gain.setValueAtTime(c.gain*.7,now+c.at+c.dur*.55);g.gain.exponentialRampToValueAtTime(.0001,now+c.at+c.dur);lp.type="lowpass";lp.frequency.value=520;o.connect(g);g.connect(lp);lp.connect(master);o.start(now+c.at);o.stop(now+c.at+c.dur+.02);
     }
-    // Brief rough, filtered scrape rather than a piercing constant tone.
-    const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.42),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
-    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(1450,now);filter.frequency.exponentialRampToValueAtTime(380,now+.36);filter.Q.value=1.25;ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.12,now+.012);ng.gain.exponentialRampToValueAtTime(.0001,now+.42);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
+    const wood=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.95),ctx.sampleRate),wd=wood.getChannelData(0);for(let i=0;i<wd.length;i++)wd[i]=(Math.random()*2-1)*Math.pow(1-i/wd.length,2);
+    const wn=ctx.createBufferSource(),wf=ctx.createBiquadFilter(),wg=ctx.createGain();wn.buffer=wood;wf.type="bandpass";wf.frequency.value=430;wf.Q.value=2.8;wg.gain.setValueAtTime(.0001,now);wg.gain.linearRampToValueAtTime(.12,now+.12);wg.gain.setValueAtTime(.075,now+.42);wg.gain.exponentialRampToValueAtTime(.0001,now+.96);wn.connect(wf);wf.connect(wg);wg.connect(master);wn.start(now);
+    // A deep metallic screech lands exactly with Freddy's reveal at 0.78s.
+    const hitAt=now+.78;
+    const impact=ctx.createOscillator(),ig=ctx.createGain();impact.type="sine";impact.frequency.setValueAtTime(92,hitAt);impact.frequency.exponentialRampToValueAtTime(38,hitAt+.42);ig.gain.setValueAtTime(.0001,hitAt);ig.gain.linearRampToValueAtTime(.65,hitAt+.018);ig.gain.exponentialRampToValueAtTime(.0001,hitAt+.62);impact.connect(ig);ig.connect(master);impact.start(hitAt);impact.stop(hitAt+.65);
+    for(const c of [{start:390,end:105,dur:1.05,gain:.3,type:"sawtooth"},{start:285,end:82,dur:.95,gain:.26,type:"square"},{start:196,end:58,dur:1.12,gain:.28,type:"sawtooth"}]){
+      const o=ctx.createOscillator(),g=ctx.createGain(),filter=ctx.createBiquadFilter();o.type=c.type;o.frequency.setValueAtTime(c.start,hitAt);o.frequency.exponentialRampToValueAtTime(c.end,hitAt+c.dur);g.gain.setValueAtTime(.0001,hitAt);g.gain.linearRampToValueAtTime(c.gain,hitAt+.025);g.gain.setValueAtTime(c.gain*.8,hitAt+.18);g.gain.exponentialRampToValueAtTime(.0001,hitAt+c.dur);filter.type="lowpass";filter.frequency.setValueAtTime(1250,hitAt);filter.frequency.exponentialRampToValueAtTime(480,hitAt+.8);o.connect(g);g.connect(filter);filter.connect(sh);o.start(hitAt);o.stop(hitAt+c.dur+.02);
+    }
+    const metal=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.78),ctx.sampleRate),md=metal.getChannelData(0);for(let i=0;i<md.length;i++)md[i]=(Math.random()*2-1)*(1-i/md.length);
+    const mn=ctx.createBufferSource(),mf=ctx.createBiquadFilter(),mg=ctx.createGain();mn.buffer=metal;mf.type="bandpass";mf.frequency.setValueAtTime(780,hitAt);mf.frequency.exponentialRampToValueAtTime(240,hitAt+.7);mf.Q.value=1.7;mg.gain.setValueAtTime(.0001,hitAt);mg.gain.linearRampToValueAtTime(.24,hitAt+.018);mg.gain.exponentialRampToValueAtTime(.0001,hitAt+.78);mn.connect(mf);mf.connect(mg);mg.connect(sh);mn.start(hitAt);
   }catch(e){console.error("Jumpscare audio failed:",e)}
 }
 function triggerFnafJumpscare(){
