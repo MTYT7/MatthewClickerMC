@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Matthew Clicker v1.15 - Save Names & Profile Shop</title>
+<title>Matthew Clicker v1.16 - Shop & Save Fixes</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
 #app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}
@@ -29,10 +29,10 @@ small{color:#d7c6e8}.close{float:right}
 <body>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.15 · SAVE NAMES + PROFILE ACCESSORY SHOP</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.16 · WORKING PROFILE SHOP + NAMED SAVES</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: NAMED SAVE SLOTS + CRYSTAL ACCESSORY SHOP BELOW</div>
-<div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">😎<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button onclick="profileShop()">🎨 Profile & Accessories</button></div>
+<div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">😎<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button">🎨 Profile & Accessories</button></div>
 
 <div class="top-layout">
   <section class="panel click-panel">
@@ -59,7 +59,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.14</div>
+<div class="footer">Matthew Clicker · v1.16</div>
 </div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
@@ -112,8 +112,9 @@ function load(){try{saveSlots=JSON.parse(localStorage.getItem(SLOTS_KEY)||"{}");
 function freshState(){return {clicks:0,total:0,manual:0,auto:0,rebirths:0,crystals:0,crystalClick:0,crystalAuto:0,crystalClick2:0,crystalAuto2:0,lastChest:0,lastSpin:0,quest:0,goal:100,bg:"#24152f",rainbow:false,usedCodes:[],profileName:"My Matthew",profileAvatar:"😎",ownedAccessories:[],equippedAccessory:""}}
 function resetUpgrades(){upgrades.forEach(u=>{u.level=0;u.cost=u.base})}
 function saveManager(){save();let cards="";for(let i=1;i<=5;i++){let slot=saveSlots[i],d=slot?.data;let summary=d?`${fmt(d.clicks||0)} points · ${d.rebirths||0} rebirths · ${d.crystals||0} crystals`:"Empty slot";cards+=`<div class="save-slot-card"><strong>Slot ${i}: ${escapeHtml(slot?.name||`Save ${i}`)}</strong><p>${summary}${i===activeSlot?" · <b>ACTIVE</b>":""}</p><button onclick="switchSave(${i})" ${d&&i===activeSlot?"disabled":""}>${d?(i===activeSlot?"Current Save":"Load Save"):"Create Save"}</button> <button onclick="renameSave(${i})">Rename</button> <button onclick="deleteSave(${i})" ${d?"":"disabled"}>Delete</button></div>`}openModal(`<h2>💾 Save Manager</h2><p>Each save has its own name, points, upgrades, crystals and profile accessories. Creating a save asks you to name it.</p>${cards}<p><button onclick="exportSave()">Export Active Save</button> <button onclick="document.getElementById('importSaveFile').click()">Import Save</button><input id="importSaveFile" type="file" accept="application/json,.json" style="display:none" onchange="importSaveFile(this)"></p>`)}
-function createNamedSave(i){let name=prompt(`Choose a name for Save Slot ${i}:`,`Save ${i}`);if(name===null)return null;name=name.trim().slice(0,32);if(!name){alert("Please enter a save name.");return null}return name}
-function switchSave(i){save();if(!saveSlots[i]?.data){const name=createNamedSave(i);if(!name)return;saveSlots[i]={name,data:{...freshState(),levels:upgrades.map(()=>0),costs:upgrades.map(u=>u.base),saved:Date.now()}}}activeSlot=i;localStorage.setItem(ACTIVE_KEY,String(i));s=freshState();applySave(saveSlots[i].data);save();applyTheme();renderUpgrades();refresh();setStatus(`Loaded ${saveSlots[i].name}!`,"#00ffcc");saveManager()}
+function createNamedSave(i){openModal('<h2>💾 Name Save Slot '+i+'</h2><p>Choose a name for this save (up to 32 characters).</p><input id="newSaveName" maxlength="32" class="leaderboard-input" placeholder="e.g. Main Save" value="Save '+i+'"><button type="button" onclick="confirmCreateSave('+i+')">Create Save</button>');const input=document.getElementById("newSaveName");if(input)input.focus()}
+function confirmCreateSave(i){const input=document.getElementById("newSaveName");const name=(input?.value||"").trim().slice(0,32);if(!name){let note=document.getElementById("saveNameError");if(!note){note=document.createElement("p");note.id="saveNameError";note.style.color="#ff4d6d";note.textContent="Please enter a save name.";input?.insertAdjacentElement("afterend",note)}return}save();saveSlots[i]={name:name,data:{...freshState(),levels:upgrades.map(()=>0),costs:upgrades.map(u=>u.base),saved:Date.now()}};activeSlot=i;localStorage.setItem(ACTIVE_KEY,String(i));s=freshState();applySave(saveSlots[i].data);save();applyTheme();renderUpgrades();refresh();setStatus("Created save: "+name,"#00ffcc");saveManager()}
+function switchSave(i){if(!saveSlots[i]?.data){createNamedSave(i);return}save();activeSlot=i;localStorage.setItem(ACTIVE_KEY,String(i));s=freshState();applySave(saveSlots[i].data);save();applyTheme();renderUpgrades();refresh();setStatus("Loaded "+saveSlots[i].name+"!","#00ffcc");saveManager()}
 function renameSave(i){if(!saveSlots[i])saveSlots[i]={name:`Save ${i}`,data:null};let name=prompt("Name this save:",saveSlots[i].name||`Save ${i}`);if(name===null)return;name=name.trim().slice(0,32);if(!name){alert("Please enter a name.");return}saveSlots[i].name=name;save();saveManager()}
 function deleteSave(i){
   const slot=saveSlots[i];
@@ -228,8 +229,9 @@ async function refreshLeaderboard(){
   try{const token=await lbGetToken();await submitLeaderboard(true);const q={structuredQuery:{from:[{collectionId:"leaderboard"}],orderBy:[{field:{fieldPath:"highestPoints"},direction:"DESCENDING"}],limit:50}};const r=await fetch("https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(FIREBASE_CONFIG.projectId)+"/databases/(default)/documents:runQuery",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify(q)});const data=await r.json();if(!r.ok)throw Error(data.error?.message||"Could not load rankings.");const entries=data.map(x=>x.document).filter(Boolean).map(d=>{const f=d.fields||{};return {id:d.name.split("/").pop(),name:f.displayName?.stringValue||"Player",points:lbNum(f.highestPoints?.doubleValue??f.highestPoints?.integerValue),rebirths:lbNum(f.rebirths?.integerValue??f.rebirths?.doubleValue)}}).sort((a,b)=>b.points-a.points).slice(0,50);if(!entries.length){rows.innerHTML="<p>No scores yet — be the first on the board!</p>"}else{rows.innerHTML=entries.map((e,i)=>`<div class="leaderboard-row"><span class="leaderboard-rank">#${i+1}</span><span class="leaderboard-name">${escapeHtml(e.name)}<br><small>${e.rebirths} rebirths</small></span><span class="leaderboard-score">${fmt(e.points)}</span></div>`).join("")};lbSetStatus("Connected · Top "+entries.length+" players shown · highest-ever points");
   }catch(e){console.warn("Leaderboard load failed",e);lbSetStatus("Could not connect: "+e.message);rows.innerHTML='<p class="leaderboard-note">Check that Firebase Authentication (Anonymous) and Cloud Firestore are enabled and the database rules are installed.</p>'}
 }
-function buildControls(){controlsEl.innerHTML=`<button onclick="showUpgrades()">Upgrades</button><button onclick="stats()">Statistics</button><button onclick="settings()">Settings</button><button onclick="save()">Save</button><button onclick="saveManager()">Save Manager</button><button onclick="reset()">Reset</button><button onclick="chest()">Daily Chest</button><button onclick="spin()">Lucky Spin</button><button onclick="crystalShop()">Crystal Shop</button><button onclick="profileShop()">🎨 Profile Shop</button><button onclick="codes()">Redeem Codes</button><button onclick="window.close()">Quit</button>`}
+function buildControls(){controlsEl.innerHTML=`<button onclick="showUpgrades()">Upgrades</button><button onclick="stats()">Statistics</button><button onclick="settings()">Settings</button><button onclick="save()">Save</button><button onclick="saveManager()">Save Manager</button><button onclick="reset()">Reset</button><button onclick="chest()">Daily Chest</button><button onclick="spin()">Lucky Spin</button><button onclick="crystalShop()">Crystal Shop</button><button id="profileShopMenuButton" type="button">🎨 Profile Shop</button><button onclick="codes()">Redeem Codes</button><button onclick="window.close()">Quit</button>`}
 clickBtn.onclick=clickGame;rebirthBtn.onclick=rebirth;load();buildControls();applyTheme();renderUpgrades();refresh();
+document.getElementById("profileShopButton")?.addEventListener("click",()=>{try{profileShop()}catch(err){console.error("Profile shop failed:",err);openModal("<h2>Profile Shop Error</h2><p>The shop hit an error: "+escapeHtml(err.message||String(err))+"</p>")}});document.getElementById("profileShopMenuButton")?.addEventListener("click",()=>{try{profileShop()}catch(err){console.error("Profile shop failed:",err);openModal("<h2>Profile Shop Error</h2><p>The shop hit an error: "+escapeHtml(err.message||String(err))+"</p>")}});
 setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);refresh()},100);
 setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");document.body.style.background=s.bg}},60);
 setTimeout(spawnGolden,30000);setInterval(()=>setTimeout(spawnGolden,Math.random()*25000+35000),35000);
