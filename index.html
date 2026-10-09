@@ -228,40 +228,57 @@ function startBearParticles(){
   if(!canvas||!overlay)return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
   let w=0,h=0,dpr=1,started=performance.now();
-  const palette=["#e0a35c","#aa6b42","#6d4635","#382923","#d6c3a1","#f1d77b","#ff9b32","#b9231b","#f4eee0","#101014"];
   const resize=()=>{
     dpr=Math.min(window.devicePixelRatio||1,1.7);w=window.innerWidth;h=window.innerHeight;
     canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
-    const off=document.createElement("canvas"),ow=180,oh=200;off.width=ow;off.height=oh;
+    const off=document.createElement("canvas"),ow=220,oh=240;off.width=ow;off.height=oh;
     const g=off.getContext("2d");
-    // Build a bear-like animatronic silhouette, then sample it into individual dots.
-    g.fillStyle="#171311";g.beginPath();g.ellipse(48,29,23,25,-.2,0,Math.PI*2);g.ellipse(132,29,23,25,.2,0,Math.PI*2);g.fill();
-    g.fillStyle="#584536";g.beginPath();g.ellipse(90,105,69,79,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#30251f";g.beginPath();g.ellipse(90,111,56,65,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#b59a78";g.beginPath();g.ellipse(90,119,39,27,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#090909";g.beginPath();g.ellipse(62,86,17,13,0,0,Math.PI*2);g.ellipse(118,86,17,13,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#ffbd4c";g.shadowColor="#ff3c16";g.shadowBlur=8;g.beginPath();g.arc(63,86,7,0,Math.PI*2);g.arc(117,86,7,0,Math.PI*2);g.fill();g.shadowBlur=0;
-    g.fillStyle="#080707";g.beginPath();g.ellipse(90,104,13,8,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#050404";g.beginPath();g.roundRect(48,137,84,39,8);g.fill();
-    for(let i=0;i<7;i++){g.fillStyle=i%2?"#c7bba5":"#f0e4ca";g.beginPath();g.moveTo(52+i*11,138);g.lineTo(61+i*11,138);g.lineTo(57+i*11,151+(i%3)*2);g.closePath();g.fill()}
-    g.fillStyle="#9c211a";g.fillRect(50,158,80,3);
-    const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.82/ow,h*.88/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
+    // Draw a clearly readable, high-contrast animatronic bear before turning it into particles.
+    g.fillStyle="#171311";
+    g.beginPath();g.ellipse(48,42,24,30,-.2,0,Math.PI*2);g.ellipse(172,42,24,30,.2,0,Math.PI*2);g.fill();
+    g.fillStyle="#765039";g.beginPath();g.ellipse(110,126,82,94,0,0,Math.PI*2);g.fill();
+    g.fillStyle="#a77a50";g.beginPath();g.ellipse(110,117,66,75,0,0,Math.PI*2);g.fill();
+    // Top hat and brim make the bear silhouette instantly recognizable.
+    g.fillStyle="#211914";g.fillRect(77,14,66,13);g.fillRect(88,0,44,23);
+    g.fillStyle="#b52c24";g.fillRect(88,17,44,5);
+    // Dark eye sockets, bright eyes, and eyebrows.
+    g.fillStyle="#211712";g.beginPath();g.ellipse(79,104,22,20,-.1,0,Math.PI*2);g.ellipse(141,104,22,20,.1,0,Math.PI*2);g.fill();
+    g.fillStyle="#f7c74e";g.shadowColor="#ff4018";g.shadowBlur=13;
+    g.beginPath();g.arc(81,105,9,0,Math.PI*2);g.arc(139,105,9,0,Math.PI*2);g.fill();g.shadowBlur=0;
+    g.fillStyle="#17100d";g.beginPath();g.arc(83,105,3.5,0,Math.PI*2);g.arc(141,105,3.5,0,Math.PI*2);g.fill();
+    g.fillStyle="#4b3022";g.beginPath();g.ellipse(110,139,49,34,0,0,Math.PI*2);g.fill();
+    g.fillStyle="#d9b58a";g.beginPath();g.ellipse(110,141,35,23,0,0,Math.PI*2);g.fill();
+    g.fillStyle="#211713";g.beginPath();g.ellipse(110,128,13,9,0,0,Math.PI*2);g.fill();
+    g.strokeStyle="#211713";g.lineWidth=5;g.beginPath();g.moveTo(110,135);g.lineTo(110,151);g.stroke();
+    // Open mechanical jaw and distinct teeth.
+    g.fillStyle="#120d0b";g.beginPath();g.roundRect(64,159,92,43,9);g.fill();
+    for(let i=0;i<7;i++){g.fillStyle=i%2?"#f4e8cf":"#d5c6a8";g.beginPath();g.moveTo(69+i*12,161);g.lineTo(78+i*12,161);g.lineTo(74+i*12,175+(i%3)*2);g.closePath();g.fill()}
+    g.fillStyle="#a9201c";g.fillRect(68,183,84,4);
+    for(let i=0;i<6;i++){g.fillStyle="#c6b18e";g.fillRect(72+i*13,188,7,9)}
+    const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.76/ow,h*.86/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
     const targets=[];
-    for(let y=0;y<oh;y+=2)for(let x=0;x<ow;x+=2){const k=(y*ow+x)*4;if(img.data[k+3]>80){targets.push({x:ox+x*scale,y:oy+y*scale,c:palette[Math.floor(Math.random()*palette.length)],r:Math.random()*1.7+.7,phase:Math.random()*6.28})}}
-    bearParticleDots=targets.map(t=>({...t,sx:Math.random()*w,sy:Math.random()*h,delay:Math.random()*.5}));
+    for(let y=0;y<oh;y+=2)for(let x=0;x<ow;x+=2){
+      const k=(y*ow+x)*4;if(img.data[k+3]>100){
+        // Keep the original artwork's colors instead of assigning random rainbow dots.
+        const shade=.82+Math.random()*.32;
+        const c="rgb("+Math.min(255,img.data[k]*shade|0)+","+Math.min(255,img.data[k+1]*shade|0)+","+Math.min(255,img.data[k+2]*shade|0)+")";
+        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:1.25+Math.random()*1.1,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
+      }
+    }
+    bearParticleDots=targets.map(t=>({...t,sx:Math.random()*w,sy:Math.random()*h,delay:Math.random()*.35}));
   };
   resize();bearParticleResize=resize;
   window.addEventListener("resize",resize);
   const draw=now=>{
     const elapsed=(now-started)/1000;ctx.clearRect(0,0,w,h);
-    const assemble=Math.min(1,Math.max(0,(elapsed-.08)/.58));
+    const assemble=Math.min(1,Math.max(0,(elapsed-.04)/.48));
     for(const p of bearParticleDots){
       const ease=1-Math.pow(1-assemble,3);
-      const jitter=elapsed>1?Math.sin(elapsed*7+p.phase)*1.8:0;
+      const jitter=elapsed>1?Math.sin(elapsed*5+p.phase)*.65:0;
       const x=p.sx+(p.x-p.sx)*ease+jitter,y=p.sy+(p.y-p.sy)*ease+jitter;
-      const twinkle=.65+.35*Math.sin(elapsed*9+p.phase);
-      ctx.globalAlpha=twinkle;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(x,y,p.r*(elapsed<.65?1.25:1),0,Math.PI*2);ctx.fill();
-      if(p.c==="#ffbd4c"||p.c==="#f1d77b"||p.c==="#ff9b32"){ctx.globalAlpha=.15;ctx.fillStyle="#ff5b1b";ctx.beginPath();ctx.arc(x,y,p.r*3.5,0,Math.PI*2);ctx.fill()}
+      const twinkle=.88+.12*Math.sin(elapsed*7+p.phase);
+      ctx.globalAlpha=twinkle;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fill();
+      if(p.glow){ctx.globalAlpha=.2;ctx.fillStyle="#ff5b1b";ctx.beginPath();ctx.arc(x,y,p.r*2.8,0,Math.PI*2);ctx.fill()}
     }
     ctx.globalAlpha=1;
     if(elapsed<1.78)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
