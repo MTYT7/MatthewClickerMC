@@ -338,16 +338,20 @@ function playFnafScareSound(){
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)return;
     soundContext=soundContext||new AC();
-    // This is called immediately from the song-start interaction, not from a timer.
     if(soundContext.state==="suspended")soundContext.resume().catch(e=>console.warn("Could not resume jumpscare audio:",e));
     const ctx=soundContext,now=ctx.currentTime;
-    const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.92,now+.012);master.gain.setValueAtTime(.82,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.15);master.connect(ctx.destination);
-    const sh=ctx.createWaveShaper(),curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*4.5)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
-    for(const spec of [{type:"sawtooth",start:480,peak:2100,end:190,dur:.88,gain:.48},{type:"square",start:760,peak:1650,end:240,dur:.63,gain:.2},{type:"triangle",start:130,peak:90,end:32,dur:.95,gain:.5}]){
-      const o=ctx.createOscillator(),g=ctx.createGain();o.type=spec.type;o.frequency.setValueAtTime(spec.start,now);o.frequency.exponentialRampToValueAtTime(spec.peak,now+.075);o.frequency.exponentialRampToValueAtTime(spec.end,now+spec.dur);g.gain.setValueAtTime(.0001,now);g.gain.linearRampToValueAtTime(spec.gain,now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+spec.dur);o.connect(g);g.connect(sh);o.start(now);o.stop(now+spec.dur+.02);
+    // Short, layered horror sting: low impact, metallic scrape, and descending dissonant tones.
+    const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.62,now+.018);master.gain.setValueAtTime(.48,now+.12);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
+    const sh=ctx.createWaveShaper(),curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*2.1)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
+    // Low, punchy impact underneath the screech.
+    const bass=ctx.createOscillator(),bg=ctx.createGain();bass.type="sine";bass.frequency.setValueAtTime(125,now);bass.frequency.exponentialRampToValueAtTime(42,now+.42);bg.gain.setValueAtTime(.0001,now);bg.gain.linearRampToValueAtTime(.42,now+.012);bg.gain.exponentialRampToValueAtTime(.0001,now+.48);bass.connect(bg);bg.connect(master);bass.start(now);bass.stop(now+.5);
+    // Uneasy descending, dissonant metallic chord.
+    for(const spec of [{start:620,end:155,dur:.88,gain:.18,type:"sawtooth"},{start:466,end:116,dur:.78,gain:.13,type:"triangle"},{start:311,end:78,dur:.92,gain:.16,type:"sawtooth"}]){
+      const o=ctx.createOscillator(),g=ctx.createGain();o.type=spec.type;o.frequency.setValueAtTime(spec.start,now);o.frequency.exponentialRampToValueAtTime(spec.end,now+spec.dur);g.gain.setValueAtTime(.0001,now);g.gain.linearRampToValueAtTime(spec.gain,now+.025);g.gain.exponentialRampToValueAtTime(.0001,now+spec.dur);o.connect(g);g.connect(sh);o.start(now);o.stop(now+spec.dur+.02);
     }
-    const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.72),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
-    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(2600,now);filter.frequency.exponentialRampToValueAtTime(650,now+.45);filter.Q.value=.8;ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.32,now+.008);ng.gain.exponentialRampToValueAtTime(.0001,now+.72);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
+    // Brief rough, filtered scrape rather than a piercing constant tone.
+    const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.42),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
+    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(1450,now);filter.frequency.exponentialRampToValueAtTime(380,now+.36);filter.Q.value=1.25;ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.12,now+.012);ng.gain.exponentialRampToValueAtTime(.0001,now+.42);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
   }catch(e){console.error("Jumpscare audio failed:",e)}
 }
 function triggerFnafJumpscare(){
