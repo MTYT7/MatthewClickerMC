@@ -96,15 +96,18 @@ small{color:#d7c6e8}.close{float:right}
 .tetris-cell.filled{background:#22d3ee;box-shadow:inset 0 0 0 2px #ffffff33}
 #tetrisControls{display:flex;justify-content:center;flex-wrap:wrap;gap:3px}
 #tetrisControls button{min-width:54px}
-#bbBoard{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;width:min(80vw,340px);margin:12px auto;background:#100a18;padding:5px;border:2px solid #a78bfa;border-radius:7px;touch-action:manipulation}
-.bb-cell{aspect-ratio:1;background:#251b30;border-radius:3px;cursor:pointer}
+#bbBoard{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:min(92vw,400px);margin:12px auto;background:#100a18;padding:6px;border:2px solid #a78bfa;border-radius:7px;touch-action:manipulation}
+.bb-cell{aspect-ratio:1;background:#251b30;border:1px solid #493557;border-radius:4px;cursor:pointer;touch-action:manipulation;min-width:0}
 .bb-cell.filled{background:#f97316;box-shadow:inset 0 0 0 2px #ffffff33}
-.bb-cell.preview{background:#fbbf24}
-.bb-piece{background:#21152d;border:2px solid #8062a0;border-radius:10px;padding:8px;min-width:82px;cursor:pointer}
+.bb-cell.preview{background:#fbbf24;outline:2px solid #fff;outline-offset:-2px}
+.bb-piece{background:#21152d;border:3px solid #8062a0;border-radius:10px;padding:10px;min-width:94px;min-height:74px;cursor:pointer;font-size:14px}
 .bb-piece.selected{border-color:#fbbf24;box-shadow:0 0 12px #fbbf2477}
 .bb-mini{display:grid;grid-template-columns:repeat(4,12px);gap:2px;justify-content:center;margin-top:5px}
-.bb-mini-cell{width:12px;height:12px;background:#382744;border-radius:2px}
+.bb-mini-cell{width:14px;height:14px;background:#382744;border-radius:2px}
 .bb-mini-cell.filled{background:#fb923c}
+#snakeBoard{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:2px;width:min(88vw,400px);margin:14px auto;padding:5px;background:#101820;border:3px solid #65a30d;border-radius:8px;touch-action:manipulation}
+.snake-cell{aspect-ratio:1;background:#1f2937;border-radius:2px}.snake-cell.snake{background:#84cc16;border-radius:4px}.snake-cell.head{background:#d9f99d;border:2px solid #65a30d}.snake-cell.apple{background:#ef4444;border-radius:50%;box-shadow:0 0 5px #ef4444}
+#snakeControls button{padding:12px 4px;font-size:20px;min-width:58px;min-height:48px}
 
 
 </style>
@@ -116,6 +119,7 @@ small{color:#d7c6e8}.close{float:right}
     <button onclick="closeGameMenu()">🖱️ Matthew Clicker</button>
     <button onclick="startTetris()">🧱 Play Tetris</button>
     <button onclick="startBlockBlast()">💥 Play Block Blast</button>
+    <button onclick="startSnake()">🐍 Play Snake</button>
     <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
     <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
   </div>
@@ -124,12 +128,23 @@ small{color:#d7c6e8}.close{float:right}
     <p>Place all three shapes on the board. Complete rows or columns to clear them!</p>
     <div>Score: <strong id="bbScore">0</strong> · Best: <strong id="bbBest">0</strong></div>
     <div id="bbBoard" aria-label="Block Blast board"></div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 0"><button onclick="bbRotate()">🔄 Rotate shape</button><button class="gm-secondary" onclick="bbClearSelection()">✋ Deselect</button></div>
     <div id="bbPieces" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:14px 0"></div>
     <p id="bbMessage" aria-live="polite">Choose a shape, then tap the board to place it.</p>
     <p id="bbReward" style="color:#ffb703;font-weight:800"></p>
     <button onclick="startBlockBlast()">🔁 New game</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button>
   </div>
-  <div class="gm-card" id="tetrisScreen" style="display:none">
+  <div class="gm-card" id="snakeScreen" style="display:none">
+<h2>🐍 SNAKE</h2><p>Eat apples, grow longer, and avoid the walls and yourself!</p>
+<div>Score: <strong id="snakeScore">0</strong> · Best: <strong id="snakeBest">0</strong></div>
+<div id="snakeBoard" aria-label="Snake game board"></div>
+<div id="snakeControls" style="display:grid;grid-template-columns:repeat(3,64px);justify-content:center;gap:6px;margin:12px auto">
+<span></span><button onclick="snakeTurn(0,-1)">⬆️</button><span></span>
+<button onclick="snakeTurn(-1,0)">⬅️</button><button onclick="snakePause()">⏯️</button><button onclick="snakeTurn(1,0)">➡️</button>
+<span></span><button onclick="snakeTurn(0,1)">⬇️</button><span></span></div>
+<p id="snakeMessage" aria-live="polite">Use arrow keys or direction buttons.</p>
+<button onclick="startSnake()">🔁 Restart</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button></div>
+<div class="gm-card" id="tetrisScreen" style="display:none">
     <h2>🧱 TETRIS</h2>
     <div>Score: <strong id="tetrisScore">0</strong> · Lines: <strong id="tetrisLines">0</strong></div>
     <div id="tetrisBoard" aria-label="Tetris game board"></div>
@@ -689,9 +704,9 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  function spawn(){piece=randomPiece();px=Math.floor((W-piece[0].length)/2);py=0;if(collides(piece,px,py)){over=true;active=false;document.getElementById("tetrisMessage").textContent="Game over! Press Restart to play again.";clearInterval(timer)}draw()}
  function draw(){let cells=board.map(row=>row.slice());if(piece)piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0&&py+dy<H&&px+dx>=0&&px+dx<W)cells[py+dy][px+dx]=1}));boardEl.innerHTML=cells.flatMap((row,y)=>row.map((v,x)=>'<div class="tetris-cell'+(v?' filled':'')+'" data-x="'+x+'" data-y="'+y+'"></div>')).join("");document.getElementById("tetrisScore").textContent=score;document.getElementById("tetrisLines").textContent=lines}
  function lock(){piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0)board[py+dy][px+dx]=1}));let kept=board.filter(row=>row.some(v=>!v));let cleared=H-kept.length;if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||cleared*200;board=Array.from({length:cleared},()=>Array(W).fill(0)).concat(kept)}spawn()}
- window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";active=false;clearInterval(timer)};
+ window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";active=false;clearInterval(timer);if(window.stopSnake)stopSnake()};
  window.closeGameMenu=function(){overlay.style.display="none";active=false;clearInterval(timer)};
- window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none"};
+ window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";if(window.stopSnake)stopSnake()};
  window.startTetris=function(){clearInterval(timer);home.style.display="none";screen.style.display="block";board=blank();score=0;lines=0;over=false;active=true;document.getElementById("tetrisMessage").textContent="Use arrow keys or buttons to play!";spawn();timer=setInterval(()=>{if(active&&!over){if(!collides(piece,px,py+1))py++;else lock();draw()}},650)};
  window.tetrisMove=function(dx){if(active&&!over&&!collides(piece,px+dx,py)){px+=dx;draw()}};
  window.tetrisRotate=function(){if(!active||over)return;let rotated=piece[0].map((_,i)=>piece.map(row=>row[i]).reverse());if(!collides(rotated,px,py)){piece=rotated;draw()}};
@@ -713,9 +728,26 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  function draw(){boardEl.innerHTML=grid.flatMap((row,y)=>row.map((v,x)=>'<div class="bb-cell'+(v?' filled':'')+'" onclick="bbPlace('+x+','+y+')" data-x="'+x+'" data-y="'+y+'"></div>')).join("");document.getElementById("bbScore").textContent=score;document.getElementById("bbBest").textContent=best}
  function finish(){ended=true;claimed=true;const reward=Math.floor(score/10);const crystals=Math.floor(score/500);try{if(typeof s!=="undefined"){s.clicks+=reward;s.total+=reward;s.bestScore=Math.max(s.bestScore||0,s.total);s.crystals=(s.crystals||0)+crystals;save();refresh()}}catch(e){console.warn("Reward could not be saved",e)}document.getElementById("bbReward").textContent="🏆 Reward: +"+reward.toLocaleString()+" Matthew Points"+(crystals?" and +"+crystals+" 💎 crystals":"")+"!";document.getElementById("bbMessage").textContent="No available placements. Start a new game to play again."}
  function checkMoves(){for(const sh of shapesNow)if(sh)for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(fits(sh,x,y))return true;return false}
- window.startBlockBlast=function(){home.style.display="none";tetris.style.display="none";screen.style.display="block";grid=fresh();score=0;ended=false;claimed=false;document.getElementById("bbReward").textContent="";document.getElementById("bbMessage").textContent="Select a shape, then tap a board position.";spawnPieces();draw()};
+ window.startBlockBlast=function(){home.style.display="none";tetris.style.display="none";document.getElementById("snakeScreen").style.display="none";screen.style.display="block";grid=fresh();score=0;ended=false;claimed=false;document.getElementById("bbReward").textContent="";document.getElementById("bbMessage").textContent="Select a shape, then tap a board position.";spawnPieces();draw()};
  window.bbSelect=function(i){if(ended||!shapesNow[i])return;selected=i;drawPieces()};
+ window.bbClearSelection=function(){selected=-1;drawPieces();document.getElementById("bbMessage").textContent="Choose a shape to continue."};
+ window.bbRotate=function(){if(ended||selected<0||!shapesNow[selected])return;let sh=shapesNow[selected];shapesNow[selected]=sh[0].map((_,i)=>sh.map(row=>row[i]).reverse());drawPieces();document.getElementById("bbMessage").textContent="Shape rotated! Tap a board cell to place it."};
  window.bbPlace=function(x,y){if(ended||selected<0||!shapesNow[selected])return;const sh=shapesNow[selected];if(!fits(sh,x,y)){document.getElementById("bbMessage").textContent="That shape won't fit there. Try another spot.";return}for(let r=0;r<sh.length;r++)for(let c=0;c<sh[r].length;c++)if(sh[r][c])grid[y+r][x+c]=1;score+=sh.flat().filter(Boolean).length;let rows=[];for(let r=0;r<N;r++)if(grid[r].every(Boolean))rows.push(r);let cols=[];for(let c=0;c<N;c++)if(grid.every(row=>row[c]))cols.push(c);if(rows.length||cols.length){for(const r of rows)for(let c=0;c<N;c++)grid[r][c]=0;for(const c of cols)for(let r=0;r<N;r++)grid[r][c]=0;score+=(rows.length+cols.length)*10+Math.max(0,rows.length*cols.length)*5;document.getElementById("bbMessage").textContent="💥 Great clear! Keep going!"}shapesNow[selected]=null;selected=shapesNow.findIndex(Boolean);drawPieces();draw();if(shapesNow.every(x=>!x)){spawnPieces()}if(!checkMoves())finish();else if(!ended)document.getElementById("bbMessage").textContent="Shape placed! Choose your next piece."};
+})();
+</script>
+<script>
+(function(){
+ const N=16,boardEl=document.getElementById("snakeBoard");
+ let body,dir,food,score,best=0,timer=null,alive=false,paused=false;
+ function placeFood(){let free=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!body.some(p=>p.x===x&&p.y===y))free.push({x,y});food=free.length?free[Math.floor(Math.random()*free.length)]:null}
+ function draw(){const map=new Map();body.forEach((p,i)=>map.set(p.x+","+p.y,i===0?"head":"snake"));if(food)map.set(food.x+","+food.y,"apple");boardEl.innerHTML=Array.from({length:N*N},(_,i)=>{let x=i%N,y=Math.floor(i/N),cl=map.get(x+","+y)||"";return '<div class="snake-cell '+cl+'"></div>'}).join("");document.getElementById("snakeScore").textContent=score;document.getElementById("snakeBest").textContent=best}
+ function award(){const pts=score*2,crystals=Math.floor(score/100);try{if(typeof s!=="undefined"){s.clicks+=pts;s.total+=pts;s.bestScore=Math.max(s.bestScore||0,s.total);s.crystals=(s.crystals||0)+crystals;save();refresh()}}catch(e){}document.getElementById("snakeMessage").textContent+=" 🏆 Reward: +"+pts+" Matthew Points"+(crystals?" and +"+crystals+" crystals":"")+"."}
+ function tick(){if(!alive||paused)return;const head=body[0],next={x:head.x+dir.x,y:head.y+dir.y},eats=food&&next.x===food.x&&next.y===food.y;const check=eats?body:body.slice(0,-1);if(next.x<0||next.y<0||next.x>=N||next.y>=N||check.some(p=>p.x===next.x&&p.y===next.y)){alive=false;clearInterval(timer);timer=null;document.getElementById("snakeMessage").textContent="Game over! Score: "+score+".";award();return}body.unshift(next);if(eats){score+=10;best=Math.max(best,score);placeFood();if(!food){alive=false;clearInterval(timer);timer=null;document.getElementById("snakeMessage").textContent="You filled the board! Amazing!";award()}}else body.pop();draw()}
+ window.startSnake=function(){clearInterval(timer);document.getElementById("gameMenuHome").style.display="none";document.getElementById("tetrisScreen").style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="block";body=[{x:7,y:8},{x:6,y:8},{x:5,y:8}];dir={x:1,y:0};score=0;alive=true;paused=false;placeFood();document.getElementById("snakeMessage").textContent="Eat apples! Use arrow keys or direction buttons.";draw();timer=setInterval(tick,145)};
+ window.stopSnake=function(){alive=false;clearInterval(timer);timer=null};
+ window.snakeTurn=function(x,y){if(!alive)return;if(x===-dir.x&&y===-dir.y)return;dir={x,y};paused=false};
+ window.snakePause=function(){if(!alive)return;paused=!paused;document.getElementById("snakeMessage").textContent=paused?"Paused — press a direction or pause to resume.":"Back in action!"};
+ document.addEventListener("keydown",e=>{if(document.getElementById("snakeScreen").style.display!=="block")return;const k=e.key;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(k))e.preventDefault();if(k==="ArrowLeft")snakeTurn(-1,0);else if(k==="ArrowRight")snakeTurn(1,0);else if(k==="ArrowUp")snakeTurn(0,-1);else if(k==="ArrowDown")snakeTurn(0,1);else if(k===" "||k==="Escape")snakePause()});
 })();
 </script>
 </body>
