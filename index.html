@@ -305,7 +305,7 @@ function stopBearParticles(){
   bearParticleFrame=0;
   if(bearParticleResize){window.removeEventListener("resize",bearParticleResize);bearParticleResize=null}
 }
-function startBearParticles(){
+function startRickrollParticles(){
   stopBearParticles();
   const canvas=document.getElementById("bearParticleCanvas"),overlay=document.getElementById("fnafJumpscare");
   if(!canvas||!overlay)return;
@@ -390,21 +390,31 @@ function playFnafScareSound(){
   }catch(e){console.error("Jumpscare audio failed:",e)}
 }
 function triggerFnafJumpscare(){
-  const overlay=document.getElementById("fnafJumpscare");
-  if(!overlay)return;
+  const overlay=document.getElementById("fnafJumpscare");if(!overlay)return;
   overlay.classList.remove("active");stopBearParticles();
   if(fnafScareTimer)clearTimeout(fnafScareTimer);
+  overlay.innerHTML='<div class="scare-face"><div class="bear-head"><div class="bear-ear left"></div><div class="bear-ear right"></div><div class="bear-eye left"></div><div class="bear-eye right"></div><div class="bear-muzzle"></div><div class="bear-nose"></div><div class="bear-jaw"><div class="bear-teeth"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div><div class="scare-caption">I ALWAYS COME BACK</div></div><canvas id="bearParticleCanvas" style="display:none"></canvas>';
   overlay.style.display="none";
-  // No Freddy sound for the Rickroll version; let the dot animation do the reveal.
   fnafScareTimer=setTimeout(()=>{
-    overlay.style.display="";void overlay.offsetWidth;overlay.classList.add("active");startBearParticles();
-    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},2900);
+    overlay.style.display="";void overlay.offsetWidth;overlay.classList.add("active");playFnafScareSound();
+    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none"},2900);
+  },420);
+}
+function triggerRickroll(){
+  const overlay=document.getElementById("fnafJumpscare");if(!overlay)return;
+  overlay.classList.remove("active");stopBearParticles();
+  if(fnafScareTimer)clearTimeout(fnafScareTimer);
+  overlay.innerHTML='<canvas id="bearParticleCanvas"></canvas>';
+  overlay.style.display="none";
+  fnafScareTimer=setTimeout(()=>{
+    overlay.style.display="";void overlay.offsetWidth;overlay.classList.add("active");startRickrollParticles();
+    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},5900);
   },420);
 }
 function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name+(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse")?" — 🎤 "+soapLyrics:""):"Music is off"}
 function stopMusic(){if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}musicTick=null;if(musicGain){try{musicGain.gain.setTargetAtTime(0,soundContext.currentTime,.15)}catch(e){}musicGain=null}}
 function setMusic(enabled){s.music=!!enabled;save();if(s.music)startMusic();else{stopMusic();updateMusicLabel()}}
-function skipSong(){if(!s.music){s.music=true;save();startMusic();return}musicSongIndex=(musicSongIndex+1)%musicSongs.length;musicStep=0;if(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse"))triggerFnafJumpscare();if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}updateMusicLabel();if(musicTick)musicTick()}
+function skipSong(){if(!s.music){s.music=true;save();startMusic();return}musicSongIndex=(musicSongIndex+1)%musicSongs.length;musicStep=0;if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}updateMusicLabel();if(musicTick)musicTick()}
 function startMusic(){stopMusic();if(!s.music){updateMusicLabel();return}try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();musicGain=soundContext.createGain();musicGain.gain.value=.65;musicGain.connect(soundContext.destination);musicSongIndex=musicSongIndex%musicSongs.length;musicStep=0;if(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse"))triggerFnafJumpscare();musicTick=()=>{if(!s.music||!musicGain)return;const song=musicSongs[musicSongIndex],now=soundContext.currentTime,frequency=song.notes[musicStep];if(frequency>0){const osc=soundContext.createOscillator(),gain=soundContext.createGain();osc.type=song.wave;osc.frequency.setValueAtTime(frequency,now);gain.gain.setValueAtTime(.0001,now);gain.gain.linearRampToValueAtTime(song.volume,now+.018);gain.gain.setTargetAtTime(.0001,now+song.tempo/1000*.68,.065);osc.connect(gain);gain.connect(musicGain);osc.start(now);osc.stop(now+song.tempo/1000*.96);if(musicStep%4===0){const sub=soundContext.createOscillator(),sg=soundContext.createGain();sub.type="sine";sub.frequency.setValueAtTime(Math.max(45,frequency/2),now);sg.gain.setValueAtTime(.0001,now);sg.gain.linearRampToValueAtTime(.12,now+.012);sg.gain.exponentialRampToValueAtTime(.0001,now+.16);sub.connect(sg);sg.connect(musicGain);sub.start(now);sub.stop(now+.18)}}musicStep++;if(musicStep>=song.notes.length){musicStep=0;musicSongIndex=(musicSongIndex+1)%musicSongs.length;updateMusicLabel()}musicTimer=setTimeout(musicTick,song.tempo)};updateMusicLabel();musicTick()}catch(e){console.debug("Music unavailable",e)}}
 function playSound(type){if(!s.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();const t=soundContext.currentTime;const ns=type==="buy"?[660,880]:type==="reward"?[523,659,784]:type==="toggle"?[740]:type==="rebirth"?[392,523,784]:[420,560];ns.forEach((f,i)=>{const o=soundContext.createOscillator(),g=soundContext.createGain(),at=t+i*.055;o.type=type==="click"?"triangle":"sine";o.frequency.setValueAtTime(f,at);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(type==="click"?.055:.07,at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+.11);o.connect(g);g.connect(soundContext.destination);o.start(at);o.stop(at+.12)})}catch(e){console.debug("Sound unavailable",e)}}
 function clickGame(){playSound("click");let now=Date.now()/1000;combo=now-lastClick<.65?Math.min(combo+1,50):1;lastClick=now;let cb=1+combo*.02,rb=now<rushEnd?5:1,n=power()*bonus()*cb*rb;if(Math.random()<.1){n*=5;setStatus("CRITICAL CLICK! x5!","#ff4d6d")}else if(rb>1)setStatus("⚡ MATTHEW RUSH! x5! ⚡","#00ffcc");else setStatus(`Combo: ${combo} | Bonus x${cb.toFixed(2)}`);add(n,true);s.quest++;float("+"+fmt(n));checkQuest();refresh()}
@@ -697,7 +707,7 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
 })();
 // Ultra-rare startup easter egg: a 1-in-10,000 chance to trigger the existing Freddy jumpscare.
 // Delay it briefly so the game has time to initialize before the scare starts.
-if(Math.random()<1/10000){setTimeout(()=>triggerFnafJumpscare(),1200)}
+if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
 </script>
 </body>
 </html>
