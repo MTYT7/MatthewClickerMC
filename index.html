@@ -27,12 +27,25 @@ small{color:#d7c6e8}.close{float:right}
 @media(max-width:760px){.top-layout{grid-template-columns:1fr}.button-panel{min-height:auto}.click-panel{min-height:auto}.upgrade-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.upgrade-column{max-height:360px;padding:6px}.upgrade-column h3{font-size:13px}.upgrade{padding:8px 6px;font-size:12px}.upgrade small{font-size:10px}}@media(max-width:360px){.upgrade-grid{grid-template-columns:1fr}}
 
 /* FNAF-style jumpscare for the soap meme track */
-#fnafJumpscare{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;overflow:hidden;background:#050000;animation:none}
-#fnafJumpscare.active{display:flex;animation:fnafFlash 1.25s steps(2,end) forwards}
-#fnafJumpscare .scare-face{font-size:min(75vw,70vh);filter:contrast(1.7) drop-shadow(0 0 24px #f00);transform:scale(.15) rotate(-8deg);animation:fnafLunge 1.25s cubic-bezier(.12,.8,.2,1) forwards}
-#fnafJumpscare .scare-caption{position:absolute;bottom:8%;font:900 clamp(24px,5vw,58px) Impact,sans-serif;letter-spacing:.12em;color:#fff;text-shadow:4px 4px #b00000}
-@keyframes fnafLunge{0%{transform:scale(.15) rotate(-8deg)}25%{transform:scale(1.35) rotate(5deg)}45%{transform:scale(1.05) rotate(-3deg)}100%{transform:scale(1.15) rotate(0)}}
-@keyframes fnafFlash{0%,18%,36%,54%{background:#fff}9%,27%,45%,100%{background:#050000}}
+#fnafJumpscare{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,#171717 0%,#030303 65%,#000 100%);isolation:isolate}
+#fnafJumpscare.active{display:flex;animation:scareFlicker 1.7s steps(2,end) forwards}
+#fnafJumpscare:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#0008 4px 5px);opacity:.65}
+#fnafJumpscare .scare-face{position:relative;width:min(86vw,650px);height:min(90vh,700px);transform:scale(.06);filter:drop-shadow(0 0 30px #8b0000);animation:scareLunge 1.7s cubic-bezier(.12,.8,.2,1) forwards}
+#fnafJumpscare .bear-head{position:absolute;left:10%;top:13%;width:80%;height:75%;border-radius:47% 47% 42% 42%;background:radial-gradient(ellipse at 48% 25%,#62564a 0%,#302923 43%,#100e0d 75%);border:7px solid #080706;box-shadow:inset 0 0 30px #000,0 0 35px #5c0000}
+#fnafJumpscare .bear-ear{position:absolute;top:2%;width:27%;height:27%;border-radius:48%;background:radial-gradient(circle at 40% 35%,#55483b,#171311 75%);border:8px solid #090807}
+#fnafJumpscare .bear-ear.left{left:8%}#fnafJumpscare .bear-ear.right{right:8%}
+#fnafJumpscare .bear-eye{position:absolute;top:31%;width:19%;height:13%;border-radius:50%;background:#050403;box-shadow:0 0 8px #000}
+#fnafJumpscare .bear-eye.left{left:19%}#fnafJumpscare .bear-eye.right{right:19%}
+#fnafJumpscare .bear-eye:after{content:"";position:absolute;left:33%;top:20%;width:35%;height:60%;border-radius:50%;background:#ffefb0;box-shadow:0 0 12px 5px #ffcf63,0 0 30px #f20}
+#fnafJumpscare .bear-muzzle{position:absolute;left:25%;top:44%;width:50%;height:25%;border-radius:48%;background:radial-gradient(ellipse,#897968,#493c31 70%,#191513);box-shadow:inset 0 -8px 15px #120e0c}
+#fnafJumpscare .bear-nose{position:absolute;left:40%;top:42%;width:20%;height:10%;border-radius:48% 48% 55% 55%;background:linear-gradient(#171311,#050404);z-index:2}
+#fnafJumpscare .bear-jaw{position:absolute;left:22%;top:61%;width:56%;height:24%;border-radius:15% 15% 45% 45%;background:linear-gradient(#090707,#260c0b);border:4px solid #080606;overflow:hidden}
+#fnafJumpscare .bear-teeth{position:absolute;inset:0;display:flex;justify-content:space-evenly;align-items:flex-start}
+#fnafJumpscare .bear-teeth i{display:block;width:11%;height:38%;background:linear-gradient(#fff4d9,#aaa08c);clip-path:polygon(0 0,100% 0,80% 100%,20% 100%)}
+#fnafJumpscare .scare-caption{position:absolute;bottom:4%;font:900 clamp(22px,4vw,46px) Impact,sans-serif;letter-spacing:.18em;color:#ddd;text-shadow:3px 3px #700;opacity:0;animation:scareText 1.7s forwards}
+@keyframes scareLunge{0%{transform:scale(.06) rotate(-9deg);filter:brightness(.15) drop-shadow(0 0 0 #f00)}18%{transform:scale(.06);filter:brightness(.15)}30%{transform:scale(1.28) rotate(4deg);filter:brightness(1.8) drop-shadow(0 0 55px #f00)}42%{transform:scale(1.02) rotate(-2deg);filter:brightness(.8)}55%,100%{transform:scale(1.12);filter:brightness(1.2) drop-shadow(0 0 35px #a00)}}
+@keyframes scareFlicker{0%,12%,20%,27%,38%,45%{background:#fff}8%,17%,24%,33%,41%,100%{background:#030202}}
+@keyframes scareText{0%,50%{opacity:0}65%,100%{opacity:1}}
 
 </style>
 </head>
@@ -70,9 +83,9 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.35</div>
+<div class="footer">Matthew Clicker · v1.36</div>
 </div>
-<div id="fnafJumpscare" aria-hidden="true"><div class="scare-face">🐻</div><div class="scare-caption">IT’S ME</div></div>
+<div id="fnafJumpscare" aria-hidden="true"><div class="scare-face"><div class="bear-ear left"></div><div class="bear-ear right"></div><div class="bear-head"><div class="bear-eye left"></div><div class="bear-eye right"></div><div class="bear-muzzle"></div><div class="bear-nose"></div><div class="bear-jaw"><div class="bear-teeth"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div><div class="scare-caption">IT’S ME</div></div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
 <script>
@@ -181,24 +194,29 @@ function triggerFnafJumpscare(){
   const overlay=document.getElementById("fnafJumpscare");
   if(!overlay)return;
   overlay.classList.remove("active");
-  void overlay.offsetWidth;
-  overlay.classList.add("active");
+  // A brief silent beat makes the sudden hit more startling.
   if(fnafScareTimer)clearTimeout(fnafScareTimer);
-  fnafScareTimer=setTimeout(()=>overlay.classList.remove("active"),1350);
-  // Short, synthesized stinger; no external audio asset needed.
-  try{
-    if(soundContext&&soundContext.state!=="closed"){
-      const now=soundContext.currentTime,osc=soundContext.createOscillator(),gain=soundContext.createGain();
-      osc.type="sawtooth";
-      osc.frequency.setValueAtTime(180,now);
-      osc.frequency.exponentialRampToValueAtTime(1250,now+.22);
-      osc.frequency.exponentialRampToValueAtTime(95,now+.8);
-      gain.gain.setValueAtTime(.0001,now);
-      gain.gain.linearRampToValueAtTime(.22,now+.025);
-      gain.gain.exponentialRampToValueAtTime(.0001,now+.82);
-      osc.connect(gain);gain.connect(soundContext.destination);osc.start(now);osc.stop(now+.84);
-    }
-  }catch(e){}
+  overlay.style.display="none";
+  fnafScareTimer=setTimeout(()=>{
+    overlay.style.display="";
+    void overlay.offsetWidth;
+    overlay.classList.add("active");
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(AC){
+        soundContext=soundContext||new AC();
+        if(soundContext.state==="suspended")soundContext.resume();
+        const ctx=soundContext,now=ctx.currentTime;
+        // Layered metallic shriek, low impact and a short burst of filtered noise.
+        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.32,now+.018);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
+        const shriek=ctx.createOscillator(),sg=ctx.createGain();shriek.type="sawtooth";shriek.frequency.setValueAtTime(260,now);shriek.frequency.exponentialRampToValueAtTime(1550,now+.16);shriek.frequency.exponentialRampToValueAtTime(310,now+.68);sg.gain.setValueAtTime(.0001,now);sg.gain.linearRampToValueAtTime(.7,now+.025);sg.gain.exponentialRampToValueAtTime(.0001,now+.78);shriek.connect(sg);sg.connect(master);shriek.start(now);shriek.stop(now+.8);
+        const bass=ctx.createOscillator(),bg=ctx.createGain();bass.type="triangle";bass.frequency.setValueAtTime(95,now);bass.frequency.exponentialRampToValueAtTime(28,now+.45);bg.gain.setValueAtTime(.7,now);bg.gain.exponentialRampToValueAtTime(.0001,now+.5);bass.connect(bg);bg.connect(master);bass.start(now);bass.stop(now+.52);
+        const buffer=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.32),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
+        const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(1900,now);filter.Q.value=.7;ng.gain.setValueAtTime(.45,now);ng.gain.exponentialRampToValueAtTime(.0001,now+.32);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
+      }
+    }catch(e){}
+    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none"},1800);
+  },420);
 }
 function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name+(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse")?" — 🎤 "+soapLyrics:""):"Music is off"}
 function stopMusic(){if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}musicTick=null;if(musicGain){try{musicGain.gain.setTargetAtTime(0,soundContext.currentTime,.15)}catch(e){}musicGain=null}}
