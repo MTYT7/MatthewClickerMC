@@ -285,12 +285,12 @@ function startBearParticles(){
     }
     const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.76/ow,h*.86/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
     const targets=[];
-    for(let y=0;y<oh;y+=0.7)for(let x=0;x<ow;x+=0.7){
+    for(let y=0;y<oh;y+=1)for(let x=0;x<ow;x+=1){
       const k=(y*ow+x)*4;if(img.data[k+3]>100){
         // Keep the original artwork's colors instead of assigning random rainbow dots.
         const shade=.82+Math.random()*.32;
         const c="rgb("+Math.min(255,img.data[k]*shade|0)+","+Math.min(255,img.data[k+1]*shade|0)+","+Math.min(255,img.data[k+2]*shade|0)+")";
-        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:.7+Math.random()*.45,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
+        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:1.05+Math.random()*.35,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
       }
     }
     bearParticleDots=targets.map(t=>({...t,sx:Math.random()*w,sy:Math.random()*h,delay:Math.random()*.35}));
@@ -299,7 +299,7 @@ function startBearParticles(){
   window.addEventListener("resize",resize);
   const draw=now=>{
     const elapsed=(now-started)/1000;ctx.clearRect(0,0,w,h);
-    const assemble=Math.min(1,Math.max(0,(elapsed-.04)/.48));
+    const assemble=Math.min(1,Math.max(0,(elapsed-.02)/.34));
     for(const p of bearParticleDots){
       const ease=1-Math.pow(1-assemble,3);
       const jitter=elapsed>1?Math.sin(elapsed*5+p.phase)*.65:0;
@@ -309,7 +309,7 @@ function startBearParticles(){
       if(p.glow){ctx.globalAlpha=.2;ctx.fillStyle="#ff5b1b";ctx.beginPath();ctx.arc(x,y,p.r*2.8,0,Math.PI*2);ctx.fill()}
     }
     ctx.globalAlpha=1;
-    if(elapsed<1.78)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
+    if(elapsed<2.15)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
   };
   bearParticleFrame=requestAnimationFrame(draw);
 }
