@@ -339,14 +339,14 @@ function triggerFnafJumpscare(){
   overlay.classList.remove("active");stopBearParticles();
   if(fnafScareTimer)clearTimeout(fnafScareTimer);
   overlay.style.display="none";
-  fnafScareTimer=setTimeout(()=>{
+  fnafScareTimer=setTimeout(async()=>{
     overlay.style.display="";void overlay.offsetWidth;overlay.classList.add("active");startBearParticles();
     try{
       const AC=window.AudioContext||window.webkitAudioContext;
       if(AC){
-        soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();
+        soundContext=soundContext||new AC();if(soundContext.state==="suspended")await soundContext.resume();
         const ctx=soundContext,now=ctx.currentTime;
-        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.98,now+.012);master.gain.setValueAtTime(.82,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
+        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(1.0,now+.012);master.gain.setValueAtTime(.95,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.05);master.connect(ctx.destination);
         // Layered, harsh synthetic screech with a rapid pitch dive and rough distortion.
         const sh=ctx.createWaveShaper();const curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*3.8)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
         for(const spec of [{type:"sawtooth",start:480,peak:2100,end:190,dur:.88,gain:.42},{type:"square",start:760,peak:1650,end:240,dur:.63,gain:.17},{type:"triangle",start:130,peak:90,end:32,dur:.95,gain:.5}]){
