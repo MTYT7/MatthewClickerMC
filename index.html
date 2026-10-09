@@ -233,28 +233,56 @@ function startBearParticles(){
     canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     const off=document.createElement("canvas"),ow=220,oh=240;off.width=ow;off.height=oh;
     const g=off.getContext("2d");
-    // Draw a clearly readable, high-contrast animatronic bear before turning it into particles.
-    g.fillStyle="#171311";
-    g.beginPath();g.ellipse(48,42,24,30,-.2,0,Math.PI*2);g.ellipse(172,42,24,30,.2,0,Math.PI*2);g.fill();
-    g.fillStyle="#765039";g.beginPath();g.ellipse(110,126,82,94,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#a77a50";g.beginPath();g.ellipse(110,117,66,75,0,0,Math.PI*2);g.fill();
-    // Top hat and brim make the bear silhouette instantly recognizable.
-    g.fillStyle="#211914";g.fillRect(77,14,66,13);g.fillRect(88,0,44,23);
-    g.fillStyle="#b52c24";g.fillRect(88,17,44,5);
-    // Dark eye sockets, bright eyes, and eyebrows.
-    g.fillStyle="#211712";g.beginPath();g.ellipse(79,104,22,20,-.1,0,Math.PI*2);g.ellipse(141,104,22,20,.1,0,Math.PI*2);g.fill();
-    g.fillStyle="#f7c74e";g.shadowColor="#ff4018";g.shadowBlur=13;
-    g.beginPath();g.arc(81,105,9,0,Math.PI*2);g.arc(139,105,9,0,Math.PI*2);g.fill();g.shadowBlur=0;
-    g.fillStyle="#17100d";g.beginPath();g.arc(83,105,3.5,0,Math.PI*2);g.arc(141,105,3.5,0,Math.PI*2);g.fill();
-    g.fillStyle="#4b3022";g.beginPath();g.ellipse(110,139,49,34,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#d9b58a";g.beginPath();g.ellipse(110,141,35,23,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#211713";g.beginPath();g.ellipse(110,128,13,9,0,0,Math.PI*2);g.fill();
-    g.strokeStyle="#211713";g.lineWidth=5;g.beginPath();g.moveTo(110,135);g.lineTo(110,151);g.stroke();
-    // Open mechanical jaw and distinct teeth.
-    g.fillStyle="#120d0b";g.beginPath();g.roundRect(64,159,92,43,9);g.fill();
-    for(let i=0;i<7;i++){g.fillStyle=i%2?"#f4e8cf":"#d5c6a8";g.beginPath();g.moveTo(69+i*12,161);g.lineTo(78+i*12,161);g.lineTo(74+i*12,175+(i%3)*2);g.closePath();g.fill()}
-    g.fillStyle="#a9201c";g.fillRect(68,183,84,4);
-    for(let i=0;i<6;i++){g.fillStyle="#c6b18e";g.fillRect(72+i*13,188,7,9)}
+    // Build a more weathered, asymmetrical animatronic face with depth and mechanical detail.
+    g.clearRect(0,0,ow,oh);
+    // Ears with worn outer shells and dark inner cavities.
+    g.fillStyle="#17110e";g.beginPath();g.ellipse(45,43,27,32,-.24,0,Math.PI*2);g.ellipse(175,40,25,31,.25,0,Math.PI*2);g.fill();
+    g.fillStyle="#65452f";g.beginPath();g.ellipse(45,42,20,25,-.24,0,Math.PI*2);g.ellipse(175,39,19,24,.25,0,Math.PI*2);g.fill();
+    g.fillStyle="#211814";g.beginPath();g.ellipse(46,43,10,15,0,0,Math.PI*2);g.ellipse(175,40,9,14,0,0,Math.PI*2);g.fill();
+    // Head base, with directional gradients instead of flat emoji-like colour.
+    let head=g.createRadialGradient(83,76,8,112,121,108);
+    head.addColorStop(0,"#b18a5b");head.addColorStop(.48,"#755137");head.addColorStop(.82,"#493126");head.addColorStop(1,"#17110f");
+    g.fillStyle=head;g.beginPath();g.ellipse(110,125,82,96,-.025,0,Math.PI*2);g.fill();
+    // Scratched, uneven forehead plates.
+    g.fillStyle="#8d6745";g.beginPath();g.ellipse(109,83,61,43,-.08,Math.PI,Math.PI*2);g.fill();
+    g.fillStyle="#3b2920";g.fillRect(58,82,104,5);
+    g.fillStyle="#a77d51";g.fillRect(65,84,38,2);g.fillRect(119,84,34,2);
+    // Top hat, slightly battered and tilted.
+    g.save();g.translate(110,22);g.rotate(-.055);
+    g.fillStyle="#090909";g.beginPath();g.ellipse(0,19,43,8,0,0,Math.PI*2);g.fill();
+    g.fillStyle="#211b18";g.fillRect(-30,-7,60,27);
+    g.fillStyle="#080808";g.fillRect(-21,-31,42,28);
+    g.fillStyle="#8f201b";g.fillRect(-21,11,42,5);
+    g.fillStyle="#55453a";g.fillRect(-17,-28,3,25);g.fillRect(12,-25,2,20);g.restore();
+    // Deep eye cavities and heavy, mismatched brow ridges.
+    g.fillStyle="#211611";g.beginPath();g.ellipse(78,106,25,25,-.12,0,Math.PI*2);g.ellipse(143,103,23,27,.14,0,Math.PI*2);g.fill();
+    g.fillStyle="#493126";g.beginPath();g.moveTo(53,93);g.lineTo(101,85);g.lineTo(101,96);g.lineTo(57,103);g.closePath();g.fill();
+    g.beginPath();g.moveTo(121,91);g.lineTo(164,86);g.lineTo(166,97);g.lineTo(123,101);g.closePath();g.fill();
+    // Tiny hot eyes, pin pupils and restrained glow.
+    g.fillStyle="#ffb72e";g.shadowColor="#ff4a10";g.shadowBlur=10;
+    g.beginPath();g.ellipse(81,108,7,10,-.1,0,Math.PI*2);g.ellipse(140,105,6,9,.1,0,Math.PI*2);g.fill();g.shadowBlur=0;
+    g.fillStyle="#100b08";g.beginPath();g.arc(82,108,3,0,Math.PI*2);g.arc(141,105,2.5,0,Math.PI*2);g.fill();
+    g.fillStyle="#fff0b2";g.fillRect(79,104,2,3);g.fillRect(138,102,2,3);
+    // Exposed rivets and panel seams on the cheek plates.
+    g.strokeStyle="#281b15";g.lineWidth=3;g.beginPath();g.moveTo(54,118);g.lineTo(64,145);g.lineTo(57,160);g.moveTo(166,116);g.lineTo(157,143);g.lineTo(163,158);g.stroke();
+    g.fillStyle="#b08a61";for(const [x,y] of [[59,126],[62,148],[160,126],[158,148],[91,72],[132,72]]){g.beginPath();g.arc(x,y,2.3,0,Math.PI*2);g.fill();g.fillStyle="#38251a";g.beginPath();g.arc(x,y,1,0,Math.PI*2);g.fill();g.fillStyle="#b08a61";}
+    // Bulky muzzle pads, separated by a dark nose and mouth crease.
+    let muzzle=g.createLinearGradient(65,123,157,160);muzzle.addColorStop(0,"#c0a078");muzzle.addColorStop(.5,"#8e6947");muzzle.addColorStop(1,"#493126");
+    g.fillStyle=muzzle;g.beginPath();g.ellipse(87,143,29,23,-.12,0,Math.PI*2);g.ellipse(133,141,27,22,.1,0,Math.PI*2);g.fill();
+    g.fillStyle="#1b100d";g.beginPath();g.moveTo(96,127);g.lineTo(112,124);g.lineTo(123,132);g.lineTo(110,140);g.lineTo(97,136);g.closePath();g.fill();
+    g.fillStyle="#050403";g.beginPath();g.ellipse(110,136,5,3,0,0,Math.PI*2);g.fill();
+    g.strokeStyle="#302018";g.lineWidth=2;g.beginPath();g.moveTo(110,139);g.lineTo(110,154);g.stroke();
+    // Broken-open jaw, metal brackets and uneven teeth.
+    g.fillStyle="#080707";g.beginPath();g.moveTo(63,158);g.lineTo(85,164);g.lineTo(111,161);g.lineTo(155,157);g.lineTo(161,190);g.lineTo(146,207);g.lineTo(81,204);g.lineTo(66,190);g.closePath();g.fill();
+    g.strokeStyle="#8b6547";g.lineWidth=4;g.beginPath();g.moveTo(67,160);g.lineTo(86,166);g.lineTo(111,163);g.lineTo(156,160);g.stroke();
+    for(let i=0;i<7;i++){const x=70+i*12,ht=10+(i%3)*5;g.fillStyle=i%2?"#b9ad96":"#eee0c2";g.beginPath();g.moveTo(x,162);g.lineTo(x+9,163);g.lineTo(x+5,162+ht);g.closePath();g.fill();g.strokeStyle="#625444";g.lineWidth=1;g.stroke();}
+    g.fillStyle="#8c1715";g.fillRect(73,187,75,4);
+    for(let i=0;i<5;i++){g.fillStyle="#9a9a8a";g.fillRect(79+i*14,194,7,8);g.fillStyle="#33302b";g.fillRect(81+i*14,196,2,5);}
+    // Small scratches, chipped paint and grime break up the clean cartoon silhouette.
+    for(let i=0;i<46;i++){
+      const x=35+Math.random()*150,y=45+Math.random()*155;
+      if(Math.random()<.5){g.strokeStyle=Math.random()<.5?"rgba(20,12,9,.65)":"rgba(215,177,126,.42)";g.lineWidth=.6+Math.random();g.beginPath();g.moveTo(x,y);g.lineTo(x+2+Math.random()*7,y-1+Math.random()*3);g.stroke();}
+    }
     const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.76/ow,h*.86/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
     const targets=[];
     for(let y=0;y<oh;y+=0.7)for(let x=0;x<ow;x+=0.7){
