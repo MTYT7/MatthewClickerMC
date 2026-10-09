@@ -229,89 +229,102 @@ function startBearParticles(){
   const canvas=document.getElementById("bearParticleCanvas"),overlay=document.getElementById("fnafJumpscare");
   if(!canvas||!overlay)return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
-  let w=0,h=0,dpr=1,started=performance.now();
+  let w=0,h=0,dpr=1,started=performance.now(),art=null,artCtx=null;
   const resize=()=>{
-    dpr=Math.min(window.devicePixelRatio||1,1.7);w=window.innerWidth;h=window.innerHeight;
-    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
-    const off=document.createElement("canvas"),ow=220,oh=240;off.width=ow;off.height=oh;
-    const g=off.getContext("2d");
-    // Build a more weathered, asymmetrical animatronic face with depth and mechanical detail.
-    g.clearRect(0,0,ow,oh);
-    // Ears with worn outer shells and dark inner cavities.
-    g.fillStyle="#17110e";g.beginPath();g.ellipse(45,43,27,32,-.24,0,Math.PI*2);g.ellipse(175,40,25,31,.25,0,Math.PI*2);g.fill();
-    g.fillStyle="#65452f";g.beginPath();g.ellipse(45,42,20,25,-.24,0,Math.PI*2);g.ellipse(175,39,19,24,.25,0,Math.PI*2);g.fill();
-    g.fillStyle="#211814";g.beginPath();g.ellipse(46,43,10,15,0,0,Math.PI*2);g.ellipse(175,40,9,14,0,0,Math.PI*2);g.fill();
-    // Head base, with directional gradients instead of flat emoji-like colour.
-    let head=g.createRadialGradient(83,76,8,112,121,108);
-    head.addColorStop(0,"#b18a5b");head.addColorStop(.48,"#755137");head.addColorStop(.82,"#493126");head.addColorStop(1,"#17110f");
-    g.fillStyle=head;g.beginPath();g.ellipse(110,125,82,96,-.025,0,Math.PI*2);g.fill();
-    // Scratched, uneven forehead plates.
-    g.fillStyle="#8d6745";g.beginPath();g.ellipse(109,83,61,43,-.08,Math.PI,Math.PI*2);g.fill();
-    g.fillStyle="#3b2920";g.fillRect(58,82,104,5);
-    g.fillStyle="#a77d51";g.fillRect(65,84,38,2);g.fillRect(119,84,34,2);
-    // Top hat, slightly battered and tilted.
-    g.save();g.translate(110,22);g.rotate(-.055);
-    g.fillStyle="#090909";g.beginPath();g.ellipse(0,19,43,8,0,0,Math.PI*2);g.fill();
-    g.fillStyle="#211b18";g.fillRect(-30,-7,60,27);
-    g.fillStyle="#080808";g.fillRect(-21,-31,42,28);
-    g.fillStyle="#8f201b";g.fillRect(-21,11,42,5);
-    g.fillStyle="#55453a";g.fillRect(-17,-28,3,25);g.fillRect(12,-25,2,20);g.restore();
-    // Deep eye cavities and heavy, mismatched brow ridges.
-    g.fillStyle="#211611";g.beginPath();g.ellipse(78,106,25,25,-.12,0,Math.PI*2);g.ellipse(143,103,23,27,.14,0,Math.PI*2);g.fill();
-    g.fillStyle="#493126";g.beginPath();g.moveTo(53,93);g.lineTo(101,85);g.lineTo(101,96);g.lineTo(57,103);g.closePath();g.fill();
-    g.beginPath();g.moveTo(121,91);g.lineTo(164,86);g.lineTo(166,97);g.lineTo(123,101);g.closePath();g.fill();
-    // Tiny hot eyes, pin pupils and restrained glow.
-    g.fillStyle="#ffb72e";g.shadowColor="#ff4a10";g.shadowBlur=10;
-    g.beginPath();g.ellipse(81,108,7,10,-.1,0,Math.PI*2);g.ellipse(140,105,6,9,.1,0,Math.PI*2);g.fill();g.shadowBlur=0;
-    g.fillStyle="#100b08";g.beginPath();g.arc(82,108,3,0,Math.PI*2);g.arc(141,105,2.5,0,Math.PI*2);g.fill();
-    g.fillStyle="#fff0b2";g.fillRect(79,104,2,3);g.fillRect(138,102,2,3);
-    // Exposed rivets and panel seams on the cheek plates.
-    g.strokeStyle="#281b15";g.lineWidth=3;g.beginPath();g.moveTo(54,118);g.lineTo(64,145);g.lineTo(57,160);g.moveTo(166,116);g.lineTo(157,143);g.lineTo(163,158);g.stroke();
-    g.fillStyle="#b08a61";for(const [x,y] of [[59,126],[62,148],[160,126],[158,148],[91,72],[132,72]]){g.beginPath();g.arc(x,y,2.3,0,Math.PI*2);g.fill();g.fillStyle="#38251a";g.beginPath();g.arc(x,y,1,0,Math.PI*2);g.fill();g.fillStyle="#b08a61";}
-    // Bulky muzzle pads, separated by a dark nose and mouth crease.
-    let muzzle=g.createLinearGradient(65,123,157,160);muzzle.addColorStop(0,"#c0a078");muzzle.addColorStop(.5,"#8e6947");muzzle.addColorStop(1,"#493126");
-    g.fillStyle=muzzle;g.beginPath();g.ellipse(87,143,29,23,-.12,0,Math.PI*2);g.ellipse(133,141,27,22,.1,0,Math.PI*2);g.fill();
-    g.fillStyle="#1b100d";g.beginPath();g.moveTo(96,127);g.lineTo(112,124);g.lineTo(123,132);g.lineTo(110,140);g.lineTo(97,136);g.closePath();g.fill();
-    g.fillStyle="#050403";g.beginPath();g.ellipse(110,136,5,3,0,0,Math.PI*2);g.fill();
-    g.strokeStyle="#302018";g.lineWidth=2;g.beginPath();g.moveTo(110,139);g.lineTo(110,154);g.stroke();
-    // Broken-open jaw, metal brackets and uneven teeth.
-    g.fillStyle="#080707";g.beginPath();g.moveTo(63,158);g.lineTo(85,164);g.lineTo(111,161);g.lineTo(155,157);g.lineTo(161,190);g.lineTo(146,207);g.lineTo(81,204);g.lineTo(66,190);g.closePath();g.fill();
-    g.strokeStyle="#8b6547";g.lineWidth=4;g.beginPath();g.moveTo(67,160);g.lineTo(86,166);g.lineTo(111,163);g.lineTo(156,160);g.stroke();
-    for(let i=0;i<7;i++){const x=70+i*12,ht=10+(i%3)*5;g.fillStyle=i%2?"#b9ad96":"#eee0c2";g.beginPath();g.moveTo(x,162);g.lineTo(x+9,163);g.lineTo(x+5,162+ht);g.closePath();g.fill();g.strokeStyle="#625444";g.lineWidth=1;g.stroke();}
-    g.fillStyle="#8c1715";g.fillRect(73,187,75,4);
-    for(let i=0;i<5;i++){g.fillStyle="#9a9a8a";g.fillRect(79+i*14,194,7,8);g.fillStyle="#33302b";g.fillRect(81+i*14,196,2,5);}
-    // Small scratches, chipped paint and grime break up the clean cartoon silhouette.
-    for(let i=0;i<46;i++){
-      const x=35+Math.random()*150,y=45+Math.random()*155;
-      if(Math.random()<.5){g.strokeStyle=Math.random()<.5?"rgba(20,12,9,.65)":"rgba(215,177,126,.42)";g.lineWidth=.6+Math.random();g.beginPath();g.moveTo(x,y);g.lineTo(x+2+Math.random()*7,y-1+Math.random()*3);g.stroke();}
-    }
-    const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.76/ow,h*.86/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
-    const targets=[];
-    for(let y=0;y<oh;y+=1)for(let x=0;x<ow;x+=1){
-      const k=(y*ow+x)*4;if(img.data[k+3]>100){
-        // Keep the original artwork's colors instead of assigning random rainbow dots.
-        const shade=.82+Math.random()*.32;
-        const c="rgb("+Math.min(255,img.data[k]*shade|0)+","+Math.min(255,img.data[k+1]*shade|0)+","+Math.min(255,img.data[k+2]*shade|0)+")";
-        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:1.05+Math.random()*.35,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
-      }
-    }
-    bearParticleDots=targets.map(t=>({...t,sx:Math.random()*w,sy:Math.random()*h,delay:Math.random()*.35}));
+    dpr=Math.min(window.devicePixelRatio||1,1.6);w=window.innerWidth;h=window.innerHeight;
+    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    art=document.createElement("canvas");art.width=500;art.height=560;artCtx=art.getContext("2d");
+    const g=artCtx;
+    // Render a solid, cinematic animatronic bear head rather than a cloud of dots.
+    const ellipse=(x,y,rx,ry,fill,rot=0)=>{g.fillStyle=fill;g.beginPath();g.ellipse(x,y,rx,ry,rot,0,Math.PI*2);g.fill()};
+    const metal=(x,y,r1,r2)=>{const q=g.createRadialGradient(x-r1*.3,y-r2*.35,2,x,y,Math.max(r1,r2));q.addColorStop(0,"#a58b69");q.addColorStop(.35,"#594632");q.addColorStop(.72,"#211d19");q.addColorStop(1,"#080909");ellipse(x,y,r1,r2,q)};
+    // Shadow silhouette and torn, uneven ears.
+    ellipse(105,107,66,82,"#090909",-.2);ellipse(394,102,61,78,"#080808",.2);
+    ellipse(105,105,52,67,"#392a20",-.2);ellipse(394,101,48,63,"#35271e",.2);
+    ellipse(105,104,31,45,"#0d0d0c",-.2);ellipse(394,101,28,42,"#0b0b0b",.2);
+    // Scraped ear rims.
+    g.strokeStyle="#92704a";g.lineWidth=5;g.beginPath();g.ellipse(105,105,49,64,-.2,.4,4.9);g.ellipse(394,101,45,60,.2,4.1,5.8);g.stroke();
+    // Main heavy head shell with warm, dirty steel gradients.
+    let shell=g.createRadialGradient(170,190,15,260,290,270);
+    shell.addColorStop(0,"#9a7950");shell.addColorStop(.28,"#6d5438");shell.addColorStop(.52,"#473728");shell.addColorStop(.78,"#29231d");shell.addColorStop(1,"#080909");
+    ellipse(250,294,190,235,shell,-.025);
+    // Layered brow/forehead armour.
+    metal(250,143,146,72);
+    g.fillStyle="#1a1713";g.beginPath();g.moveTo(99,165);g.lineTo(208,142);g.lineTo(238,169);g.lineTo(129,191);g.closePath();g.fill();
+    g.beginPath();g.moveTo(267,166);g.lineTo(385,139);g.lineTo(401,168);g.lineTo(291,192);g.closePath();g.fill();
+    // battered black top hat, with dented crown and band.
+    g.save();g.translate(251,64);g.rotate(-.09);
+    ellipse(0,48,117,22,"#030303");g.fillStyle="#090a0a";g.beginPath();g.moveTo(-75,42);g.lineTo(-66,-43);g.quadraticCurveTo(-60,-57,-43,-57);g.lineTo(43,-57);g.quadraticCurveTo(63,-55,68,-40);g.lineTo(78,42);g.closePath();g.fill();
+    let hat=g.createLinearGradient(-60,-30,65,15);hat.addColorStop(0,"#050505");hat.addColorStop(.45,"#292522");hat.addColorStop(1,"#030303");g.fillStyle=hat;g.fill();
+    g.fillStyle="#591b17";g.fillRect(-72,19,145,13);g.strokeStyle="#6c5140";g.lineWidth=2;g.beginPath();g.moveTo(-52,-42);g.lineTo(-45,5);g.moveTo(39,-37);g.lineTo(49,7);g.stroke();g.restore();
+    // Deep eye sockets and brow shadows.
+    ellipse(176,255,57,63,"#100d0b",-.12);ellipse(322,250,55,65,"#0b0b0a",.13);
+    ellipse(176,259,38,42,"#030404");ellipse(322,254,36,44,"#030404");
+    // eye hardware and glowing pin pupils.
+    metal(177,263,25,29);metal(322,258,23,30);
+    ellipse(179,265,12,17,"#ff9c16");ellipse(321,260,11,18,"#ffb21c");
+    ellipse(180,265,5,12,"#080706");ellipse(322,260,4,12,"#080706");
+    ellipse(176,258,3,5,"#fff1b2");ellipse(318,253,3,5,"#fff1b2");
+    // cheek plates with seams, bolts and worn edges.
+    let cheek=g.createLinearGradient(90,300,420,375);cheek.addColorStop(0,"#38291d");cheek.addColorStop(.25,"#8a6a45");cheek.addColorStop(.6,"#58422d");cheek.addColorStop(1,"#171614");
+    ellipse(153,343,69,76,cheek,-.25);ellipse(347,339,69,74,cheek,.25);
+    g.strokeStyle="#171411";g.lineWidth=7;g.beginPath();g.moveTo(105,300);g.lineTo(124,352);g.lineTo(109,390);g.moveTo(396,293);g.lineTo(377,349);g.lineTo(392,386);g.stroke();
+    g.strokeStyle="#ad895a";g.lineWidth=2;g.beginPath();g.moveTo(109,305);g.lineTo(128,351);g.moveTo(391,301);g.lineTo(373,349);g.stroke();
+    for(const [x,y] of [[121,318],[128,357],[112,381],[379,315],[373,354],[389,378],[210,184],[290,181],[145,410],[360,408]]){metal(x,y,7,7);ellipse(x-2,y-2,2,2,"#d3b78b")}
+    // Snout: layered worn muzzle pads and black nose.
+    let muzzle=g.createRadialGradient(215,350,5,250,374,105);muzzle.addColorStop(0,"#b39a73");muzzle.addColorStop(.45,"#816644");muzzle.addColorStop(.8,"#4b3827");muzzle.addColorStop(1,"#1b1712");
+    ellipse(207,359,72,57,muzzle,-.12);ellipse(293,356,70,55,muzzle,.12);
+    g.strokeStyle="#c0a078";g.lineWidth=2;g.beginPath();g.ellipse(207,359,69,54,-.12,.2,2.6);g.ellipse(293,356,67,52,.12,.4,2.7);g.stroke();
+    g.fillStyle="#080808";g.beginPath();g.moveTo(219,325);g.lineTo(250,315);g.lineTo(282,326);g.lineTo(273,344);g.lineTo(250,351);g.lineTo(226,343);g.closePath();g.fill();
+    g.strokeStyle="#7c6b55";g.lineWidth=3;g.beginPath();g.moveTo(226,329);g.lineTo(250,322);g.lineTo(276,330);g.stroke();
+    // Mechanical open jaw, hinge rods, dark mouth cavity and individual crooked teeth.
+    g.fillStyle="#030303";g.beginPath();g.moveTo(124,395);g.lineTo(183,410);g.lineTo(250,405);g.lineTo(319,410);g.lineTo(377,393);g.lineTo(362,477);g.lineTo(325,514);g.lineTo(176,514);g.lineTo(139,477);g.closePath();g.fill();
+    g.strokeStyle="#9b7951";g.lineWidth=11;g.beginPath();g.moveTo(132,397);g.lineTo(190,412);g.lineTo(250,407);g.lineTo(314,411);g.lineTo(369,396);g.stroke();
+    g.strokeStyle="#181614";g.lineWidth=4;g.beginPath();g.moveTo(151,444);g.lineTo(349,444);g.stroke();
+    for(let i=0;i<9;i++){const x=143+i*26,ht=18+(i%3)*7;g.fillStyle=i%3===0?"#8f8b7d":"#d2c7ab";g.beginPath();g.moveTo(x,411);g.lineTo(x+21,412);g.lineTo(x+15,412+ht);g.lineTo(x+7,421);g.closePath();g.fill();g.strokeStyle="#41382b";g.lineWidth=2;g.stroke();}
+    for(let i=0;i<7;i++){const x=161+i*27;g.fillStyle="#a5a091";g.fillRect(x,474,15,17);g.fillStyle="#282622";g.fillRect(x+4,477,3,11);}
+    // Metal jaw side brackets and exposed rods.
+    for(const x of [126,374]){g.fillStyle="#242522";g.fillRect(x-8,405,17,67);g.strokeStyle="#a68b62";g.lineWidth=4;g.strokeRect(x-8,405,17,67);ellipse(x,416,5,5,"#c9b18b");ellipse(x,461,5,5,"#c9b18b")}
+    // Paint chips, scars, grime, scratches and dark cracks across the shell.
+    for(let i=0;i<180;i++){const x=65+Math.random()*370,y=115+Math.random()*380;if(Math.random()<.58){g.strokeStyle=Math.random()<.7?"rgba(10,8,7,.72)":"rgba(226,192,140,.55)";g.lineWidth=.5+Math.random()*2;g.beginPath();g.moveTo(x,y);g.lineTo(x+2+Math.random()*13,y-2+Math.random()*6);g.stroke()}else{ellipse(x,y,1+Math.random()*2,1+Math.random()*2,"rgba(15,10,7,.65)")}}
+    // Fine scratches and grease streaks.
+    for(let i=0;i<18;i++){const x=90+Math.random()*320,y=180+Math.random()*245;g.strokeStyle="rgba(12,9,7,.6)";g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x-5-Math.random()*15,y+8+Math.random()*16);g.stroke()}
   };
-  resize();bearParticleResize=resize;
-  window.addEventListener("resize",resize);
+  resize();bearParticleResize=resize;window.addEventListener("resize",resize);
   const draw=now=>{
-    const elapsed=(now-started)/1000;ctx.clearRect(0,0,w,h);
-    const assemble=Math.min(1,Math.max(0,(elapsed-.02)/.34));
-    for(const p of bearParticleDots){
-      const ease=1-Math.pow(1-assemble,3);
-      const jitter=elapsed>1?Math.sin(elapsed*5+p.phase)*.65:0;
-      const x=p.sx+(p.x-p.sx)*ease+jitter,y=p.sy+(p.y-p.sy)*ease+jitter;
-      const twinkle=.88+.12*Math.sin(elapsed*7+p.phase);
-      ctx.globalAlpha=twinkle;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fill();
-      if(p.glow){ctx.globalAlpha=.2;ctx.fillStyle="#ff5b1b";ctx.beginPath();ctx.arc(x,y,p.r*2.8,0,Math.PI*2);ctx.fill()}
+    const t=(now-started)/1000;ctx.clearRect(0,0,w,h);
+    const progress=Math.min(1,t/1.7);
+    // A sudden forward lunge, recoil, then a final twitching stare.
+    let lunge=t<.16?1+(.16-t)*.3:t<.42?1.04+(t-.16)*.9:t<.65?1.27-(t-.42)*.65:1.12+Math.sin(t*27)*.018;
+    const shake=t<1.35?(Math.random()-.5)*(t<.7?24:12):Math.sin(t*31)*2;
+    const bob=Math.sin(t*16)* (t<1.1?8:2);
+    const scale=Math.min(w/500,h/560)*.96*lunge;
+    const cx=w/2+shake,cy=h/2+bob+18;
+    ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);
+    // Vignette and backlight behind the bear.
+    const glow=ctx.createRadialGradient(0,-20,20,0,0,350);glow.addColorStop(0,"rgba(130,20,12,.42)");glow.addColorStop(.55,"rgba(70,10,8,.18)");glow.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,350,0,Math.PI*2);ctx.fill();
+    // Animate head tilt and jaw drop using clipped artwork plus jaw movement.
+    ctx.save();ctx.rotate(Math.sin(t*11)*.035+(t<.45?-.06:0));
+    ctx.drawImage(art,-250,-280,500,560);
+    if(t<1.5){
+      const jawOpen=Math.max(0,Math.sin(t*19))*(t<.65?28:13);
+      ctx.globalCompositeOperation="source-over";
+      ctx.fillStyle="#030303";ctx.beginPath();ctx.ellipse(0,181+jawOpen*.5,94,42+jawOpen,0,0,Math.PI*2);ctx.fill();
+      // Re-draw a snapping lower jaw as a moving plate with teeth.
+      ctx.save();ctx.translate(0,jawOpen);ctx.fillStyle="#5c4630";ctx.beginPath();ctx.moveTo(-119,164);ctx.lineTo(-67,184);ctx.lineTo(0,179);ctx.lineTo(67,184);ctx.lineTo(119,163);ctx.lineTo(90,222);ctx.lineTo(-89,222);ctx.closePath();ctx.fill();
+      ctx.strokeStyle="#b49a70";ctx.lineWidth=5;ctx.stroke();
+      for(let i=0;i<7;i++){const x=-82+i*27;ctx.fillStyle="#cfc3a8";ctx.fillRect(x,183,15,10)}
+      ctx.restore();
     }
-    ctx.globalAlpha=1;
-    if(elapsed<2.15)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
+    // Eye glow pulses and flashes as the face rushes toward the viewer.
+    const eyePulse=.55+.45*Math.sin(t*31);
+    for(const ex of [-73,72]){ctx.save();ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.45+eyePulse*.45;ctx.fillStyle="#ff2a00";ctx.shadowColor="#ff2400";ctx.shadowBlur=18+eyePulse*30;ctx.beginPath();ctx.ellipse(ex,-17,7,11,0,0,Math.PI*2);ctx.fill();ctx.restore()}
+    ctx.restore();ctx.restore();
+    // brief full-frame exposure pop timed to the lunge
+    if(t>.27&&t<.34){ctx.fillStyle="rgba(255,255,255,.28)";ctx.fillRect(0,0,w,h)}
+    if(t<1.9)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
   };
   bearParticleFrame=requestAnimationFrame(draw);
 }
