@@ -70,8 +70,8 @@ small{color:#d7c6e8}.close{float:right}
 
 /* Animated multicolour particle portrait */
 #fnafJumpscare{background:#020203;filter:brightness(1);transition:filter .25s ease}\n#fnafJumpscare.active{animation:oldTvFlicker 5.8s steps(1,end) forwards,scareShake 5.8s linear forwards}\n#fnafJumpscare:after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 18%,rgba(0,0,0,.92) 100%),repeating-linear-gradient(0deg,rgba(255,190,110,.05) 0 2px,transparent 2px 5px);animation:oldTvLights 5.8s steps(1,end) forwards}\n@keyframes oldTvLights{0%,7%,12%,23%,29%,38%,43%,57%,61%,73%,78%,87%{opacity:.92;background-color:rgba(255,180,92,.15)}4%,9%,19%,26%,34%,40%,52%,59%,68%,75%,83%,91%{opacity:.1;background-color:rgba(0,0,0,.7)}96%,100%{opacity:1;background-color:rgba(0,0,0,.84)}}\n@keyframes oldTvFlicker{0%,7%,12%,23%,29%,38%,43%,57%,61%,73%,78%,87%{filter:brightness(1.5) sepia(.18)}4%,9%,19%,26%,34%,40%,52%,59%,68%,75%,83%,91%{filter:brightness(.16)}96%,100%{filter:brightness(.22)}}
-#bearParticleCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-#fnafJumpscare.active{animation:particleScareFlash 1.7s steps(2,end) forwards}
+#bearParticleCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:2}
+#fnafJumpscare.active{animation:scareFlicker 5.8s steps(2,end) forwards,scareShake 5.8s linear forwards}
 @keyframes particleScareFlash{0%,14%,22%,29%,39%{background:#eee}7%,18%,26%,34%,100%{background:#020203}}
 
 </style>
