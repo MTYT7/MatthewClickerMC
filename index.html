@@ -207,6 +207,7 @@ function checkQuest(){if(s.quest<s.goal)return;let r=Math.max(s.goal*power()*bon
 function chest(){let now=Date.now()/1000;if(now-s.lastChest<86400){let left=Math.ceil((86400-(now-s.lastChest))/3600);alert("Your daily chest is cooling down! Come back in about "+left+" hour(s).");return}let r=Math.max(auto()*300,power()*bonus()*500,1000);add(r);s.lastChest=now;playSound("reward");setStatus("DAILY CHEST OPENED!","#ffd700");alert("You found "+fmt(r)+" Matthew Points!");refresh()}
 function spin(){let now=Date.now()/1000;if(now-s.lastSpin<180){let left=Math.floor(180-now+s.lastSpin)+1;alert("Wait "+Math.floor(left/60)+"m "+(left%60)+"s to spin again!");return}s.lastSpin=now;let a=[["Small prize",Math.max(100,power()*9),24],["Big prize",Math.max(1000,power()*90),24],["Amazing prize",Math.max(10000,auto()*27),24],["Jackpot!",Math.max(50000,auto()*90),24],["Matthew Crystal","crystal",4]],roll=Math.random()*100,x=a.find(prize=>(roll-=(prize[2]))<0)||["Small prize",Math.max(100,power()*9),24];if(x[1]==="crystal"){s.crystals++;playSound("reward");alert("You won a Matthew Crystal!");setStatus("LUCKY SPIN: MATTHEW CRYSTAL!","#00ffcc")}else{add(x[1]);alert(x[0]+"\n\nYou won "+fmt(x[1])+" Matthew Points!");setStatus("LUCKY SPIN! +"+fmt(x[1])+" points!","#00ffcc")}refresh()}
 const profileAccessories=[
+ {id:"mask",name:"Mystery Mask",emoji:"🥷",cost:7,desc:"A ninja face instead of a smiley.",zone:"face"},
  {id:"glasses",name:"Cool Shades",emoji:"🕶️",cost:2,desc:"Classic cool-player look.",zone:"face"},
  {id:"cap",name:"Street Cap",emoji:"🧢",cost:3,desc:"For serious clicking sessions.",zone:"head"},
  {id:"crown",name:"Golden Crown",emoji:"👑",cost:5,desc:"Royal Matthew status.",zone:"head"},
@@ -217,7 +218,6 @@ const profileAccessories=[
  {id:"diamond",name:"Diamond Badge",emoji:"💎",cost:6,desc:"A crystal collector's flex.",zone:"badge"},
  {id:"necklace",name:"Golden Necklace",emoji:"📿",cost:8,desc:"A shiny necklace for your avatar.",zone:"necklace"},
  {id:"headphones",name:"Neon Headphones",emoji:"🎧",cost:5,desc:"Listen to the sounds of clicking.",zone:"head"},
- {id:"mask",name:"Mystery Mask",emoji:"🥷",cost:7,desc:"A ninja face instead of a smiley.",zone:"face"},
 
  {id:"comet",name:"Comet Trail",emoji:"☄️",cost:9,desc:"A cosmic trail around your avatar.",zone:"aura"},
  {id:"medal",name:"Champion Medal",emoji:"🏅",cost:10,desc:"Show off your clicking achievements.",zone:"badge"},
