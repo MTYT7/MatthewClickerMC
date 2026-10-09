@@ -310,103 +310,48 @@ function startBearParticles(){
   const canvas=document.getElementById("bearParticleCanvas"),overlay=document.getElementById("fnafJumpscare");
   if(!canvas||!overlay)return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
-  let w=0,h=0,dpr=1,started=performance.now(),art=null,artCtx=null;
+  let w=0,h=0,dpr=1,started=performance.now();
   const resize=()=>{
     dpr=Math.min(window.devicePixelRatio||1,1.6);w=window.innerWidth;h=window.innerHeight;
     canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    art=document.createElement("canvas");art.width=500;art.height=560;artCtx=art.getContext("2d");
-    const g=artCtx;
-    // Render a solid, cinematic animatronic bear head rather than a cloud of dots.
-    const ellipse=(x,y,rx,ry,fill,rot=0)=>{g.fillStyle=fill;g.beginPath();g.ellipse(x,y,rx,ry,rot,0,Math.PI*2);g.fill()};
-    const metal=(x,y,r1,r2)=>{const q=g.createRadialGradient(x-r1*.3,y-r2*.35,2,x,y,Math.max(r1,r2));q.addColorStop(0,"#a58b69");q.addColorStop(.35,"#594632");q.addColorStop(.72,"#211d19");q.addColorStop(1,"#080909");ellipse(x,y,r1,r2,q)};
-    // Shadow silhouette and torn, uneven ears.
-    ellipse(105,107,66,82,"#090909",-.2);ellipse(394,102,61,78,"#080808",.2);
-    ellipse(105,105,52,67,"#392a20",-.2);ellipse(394,101,48,63,"#35271e",.2);
-    ellipse(105,104,31,45,"#0d0d0c",-.2);ellipse(394,101,28,42,"#0b0b0b",.2);
-    // Scraped ear rims.
-    g.strokeStyle="#92704a";g.lineWidth=5;g.beginPath();g.ellipse(105,105,49,64,-.2,.4,4.9);g.ellipse(394,101,45,60,.2,4.1,5.8);g.stroke();
-    // Main heavy head shell with warm, dirty steel gradients.
-    let shell=g.createRadialGradient(170,190,15,260,290,270);
-    shell.addColorStop(0,"#9a7950");shell.addColorStop(.28,"#6d5438");shell.addColorStop(.52,"#473728");shell.addColorStop(.78,"#29231d");shell.addColorStop(1,"#080909");
-    ellipse(250,294,190,235,shell,-.025);
-    // Layered brow/forehead armour.
-    metal(250,143,146,72);
-    g.fillStyle="#1a1713";g.beginPath();g.moveTo(99,165);g.lineTo(208,142);g.lineTo(238,169);g.lineTo(129,191);g.closePath();g.fill();
-    g.beginPath();g.moveTo(267,166);g.lineTo(385,139);g.lineTo(401,168);g.lineTo(291,192);g.closePath();g.fill();
-    // battered black top hat, with dented crown and band.
-    g.save();g.translate(251,64);g.rotate(-.09);
-    ellipse(0,48,117,22,"#030303");g.fillStyle="#090a0a";g.beginPath();g.moveTo(-75,42);g.lineTo(-66,-43);g.quadraticCurveTo(-60,-57,-43,-57);g.lineTo(43,-57);g.quadraticCurveTo(63,-55,68,-40);g.lineTo(78,42);g.closePath();g.fill();
-    let hat=g.createLinearGradient(-60,-30,65,15);hat.addColorStop(0,"#050505");hat.addColorStop(.45,"#292522");hat.addColorStop(1,"#030303");g.fillStyle=hat;g.fill();
-    g.fillStyle="#591b17";g.fillRect(-72,19,145,13);g.strokeStyle="#6c5140";g.lineWidth=2;g.beginPath();g.moveTo(-52,-42);g.lineTo(-45,5);g.moveTo(39,-37);g.lineTo(49,7);g.stroke();g.restore();
-    // Deep eye sockets and brow shadows.
-    ellipse(176,255,57,63,"#100d0b",-.12);ellipse(322,250,55,65,"#0b0b0a",.13);
-    ellipse(176,259,38,42,"#030404");ellipse(322,254,36,44,"#030404");
-    // eye hardware and glowing pin pupils.
-    metal(177,263,25,29);metal(322,258,23,30);
-    ellipse(179,265,12,17,"#b96b19");ellipse(321,260,11,18,"#c17b20");
-    ellipse(180,265,5,12,"#080706");ellipse(322,260,4,12,"#080706");
-    ellipse(176,258,2,3,"#d6b77a");ellipse(318,253,2,3,"#d6b77a");
-    // cheek plates with seams, bolts and worn edges.
-    let cheek=g.createLinearGradient(90,300,420,375);cheek.addColorStop(0,"#38291d");cheek.addColorStop(.25,"#8a6a45");cheek.addColorStop(.6,"#58422d");cheek.addColorStop(1,"#171614");
-    ellipse(153,343,69,76,cheek,-.25);ellipse(347,339,69,74,cheek,.25);
-    g.strokeStyle="#171411";g.lineWidth=7;g.beginPath();g.moveTo(105,300);g.lineTo(124,352);g.lineTo(109,390);g.moveTo(396,293);g.lineTo(377,349);g.lineTo(392,386);g.stroke();
-    g.strokeStyle="#ad895a";g.lineWidth=2;g.beginPath();g.moveTo(109,305);g.lineTo(128,351);g.moveTo(391,301);g.lineTo(373,349);g.stroke();
-    for(const [x,y] of [[121,318],[128,357],[112,381],[379,315],[373,354],[389,378],[210,184],[290,181],[145,410],[360,408]]){metal(x,y,7,7);ellipse(x-2,y-2,2,2,"#d3b78b")}
-    // Snout: layered worn muzzle pads and black nose.
-    let muzzle=g.createRadialGradient(215,350,5,250,374,105);muzzle.addColorStop(0,"#b39a73");muzzle.addColorStop(.45,"#816644");muzzle.addColorStop(.8,"#4b3827");muzzle.addColorStop(1,"#1b1712");
-    ellipse(207,359,72,57,muzzle,-.12);ellipse(293,356,70,55,muzzle,.12);
-    g.strokeStyle="#c0a078";g.lineWidth=2;g.beginPath();g.ellipse(207,359,69,54,-.12,.2,2.6);g.ellipse(293,356,67,52,.12,.4,2.7);g.stroke();
-    g.fillStyle="#080808";g.beginPath();g.moveTo(219,325);g.lineTo(250,315);g.lineTo(282,326);g.lineTo(273,344);g.lineTo(250,351);g.lineTo(226,343);g.closePath();g.fill();
-    g.strokeStyle="#7c6b55";g.lineWidth=3;g.beginPath();g.moveTo(226,329);g.lineTo(250,322);g.lineTo(276,330);g.stroke();
-    // Mechanical open jaw, hinge rods, dark mouth cavity and individual crooked teeth.
-    g.fillStyle="#030303";g.beginPath();g.moveTo(124,395);g.lineTo(183,410);g.lineTo(250,405);g.lineTo(319,410);g.lineTo(377,393);g.lineTo(362,477);g.lineTo(325,514);g.lineTo(176,514);g.lineTo(139,477);g.closePath();g.fill();
-    g.strokeStyle="#9b7951";g.lineWidth=11;g.beginPath();g.moveTo(132,397);g.lineTo(190,412);g.lineTo(250,407);g.lineTo(314,411);g.lineTo(369,396);g.stroke();
-    g.strokeStyle="#181614";g.lineWidth=4;g.beginPath();g.moveTo(151,444);g.lineTo(349,444);g.stroke();
-    for(let i=0;i<9;i++){const x=143+i*26,ht=18+(i%3)*7;g.fillStyle=i%3===0?"#8f8b7d":"#d2c7ab";g.beginPath();g.moveTo(x,411);g.lineTo(x+21,412);g.lineTo(x+15,412+ht);g.lineTo(x+7,421);g.closePath();g.fill();g.strokeStyle="#41382b";g.lineWidth=2;g.stroke();}
-    for(let i=0;i<7;i++){const x=161+i*27;g.fillStyle="#a5a091";g.fillRect(x,474,15,17);g.fillStyle="#282622";g.fillRect(x+4,477,3,11);}
-    // Metal jaw side brackets and exposed rods.
-    for(const x of [126,374]){g.fillStyle="#242522";g.fillRect(x-8,405,17,67);g.strokeStyle="#a68b62";g.lineWidth=4;g.strokeRect(x-8,405,17,67);ellipse(x,416,5,5,"#c9b18b");ellipse(x,461,5,5,"#c9b18b")}
-    // Paint chips, scars, grime, scratches and dark cracks across the shell.
-    for(let i=0;i<180;i++){const x=65+Math.random()*370,y=115+Math.random()*380;if(Math.random()<.58){g.strokeStyle=Math.random()<.7?"rgba(10,8,7,.72)":"rgba(226,192,140,.55)";g.lineWidth=.5+Math.random()*2;g.beginPath();g.moveTo(x,y);g.lineTo(x+2+Math.random()*13,y-2+Math.random()*6);g.stroke()}else{ellipse(x,y,1+Math.random()*2,1+Math.random()*2,"rgba(15,10,7,.65)")}}
-    // Fine scratches and grease streaks.
-    for(let i=0;i<18;i++){const x=90+Math.random()*320,y=180+Math.random()*245;g.strokeStyle="rgba(12,9,7,.6)";g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x-5-Math.random()*15,y+8+Math.random()*16);g.stroke()}
   };
   resize();bearParticleResize=resize;window.addEventListener("resize",resize);
+  // A Rickroll made entirely from glowing dots: a dancing silhouette plus the giveaway message.
   const draw=now=>{
     const t=(now-started)/1000;ctx.clearRect(0,0,w,h);
-    // Flickering lights first; reveal the bear for the last second, then keep it moving until the scare ends.
-    if(t<.78){bearParticleFrame=requestAnimationFrame(draw);return;}
-    // Freddy appears almost immediately when the lights cut out.
-    const scareT=t-.78;
-    let lunge=1.08+Math.max(0,Math.sin(scareT*20))*.13+Math.sin(scareT*43)*.025;
-    const shake=(Math.random()-.5)*(scareT<.35?36:18)+Math.sin(scareT*57)*4;
-    const bob=Math.sin(scareT*24)*7+Math.sin(scareT*49)*2;
-    const scale=Math.min(w/500,h/560)*.96*lunge;
-    const cx=w/2+shake,cy=h/2+bob+18;
+    const shake=(Math.random()-.5)*(t<.45?12:3),pulse=1+Math.sin(t*7)*.025;
+    const scale=Math.min(w/560,h/620)*pulse,cx=w/2+shake,cy=h/2+Math.sin(t*5)*5;
     ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);
-    // Vignette and backlight behind the bear.
-    const glow=ctx.createRadialGradient(0,-20,20,0,0,350);glow.addColorStop(0,"rgba(130,20,12,.42)");glow.addColorStop(.55,"rgba(70,10,8,.18)");glow.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,350,0,Math.PI*2);ctx.fill();
-    // Animate head tilt and jaw drop using clipped artwork plus jaw movement.
-    ctx.save();ctx.rotate(Math.sin(scareT*16)*.06+Math.sin(scareT*31)*.018);
-    ctx.filter="brightness(.30) contrast(1.32) saturate(.72)";ctx.drawImage(art,-250,-280,500,560);ctx.filter="none";
-    if(scareT<1.0){
-      const jawOpen=Math.max(0,Math.sin(scareT*19))*(scareT<.65?28:13);
-      ctx.globalCompositeOperation="source-over";
-      ctx.fillStyle="#030303";ctx.beginPath();ctx.ellipse(0,181+jawOpen*.5,94,42+jawOpen,0,0,Math.PI*2);ctx.fill();
-      // Re-draw a snapping lower jaw as a moving plate with teeth.
-      ctx.save();ctx.translate(0,jawOpen);ctx.fillStyle="#5c4630";ctx.beginPath();ctx.moveTo(-119,164);ctx.lineTo(-67,184);ctx.lineTo(0,179);ctx.lineTo(67,184);ctx.lineTo(119,163);ctx.lineTo(90,222);ctx.lineTo(-89,222);ctx.closePath();ctx.fill();
-      ctx.strokeStyle="#b49a70";ctx.lineWidth=5;ctx.stroke();
-      for(let i=0;i<7;i++){const x=-82+i*27;ctx.fillStyle="#cfc3a8";ctx.fillRect(x,183,15,10)}
-      ctx.restore();
+    const glow=ctx.createRadialGradient(0,0,20,0,0,360);
+    glow.addColorStop(0,"rgba(255,30,90,.28)");glow.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,360,0,Math.PI*2);ctx.fill();
+    // Dot-matrix dancing person, with the iconic swooped hair and suit.
+    const dot=(x,y,r,color)=>{ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=7;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0};
+    const gold="#ffd166",pink="#ff477e",white="#f5f7ff",blue="#58c7ff",skin="#ffbf9a";
+    const bob=Math.sin(t*8)*5,arm=Math.sin(t*8)*.22;
+    // Hair/head dots
+    for(let yy=0;yy<7;yy++)for(let xx=0;xx<7;xx++){
+      if((xx+yy<8)&&(yy<4||xx>1))dot(-25+xx*8, -190+yy*8+bob,3.2,yy<3?gold:skin);
     }
-    // Eye glow pulses and flashes as the face rushes toward the viewer.
-    const eyePulse=.35+.65*Math.sin(scareT*38);
-    for(const ex of [-73,72]){ctx.save();ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.45+eyePulse*.45;ctx.fillStyle="#ff2a00";ctx.shadowColor="#ff2400";ctx.shadowBlur=18+eyePulse*30;ctx.beginPath();ctx.ellipse(ex,-17,7,11,0,0,Math.PI*2);ctx.fill();ctx.restore()}
-    ctx.restore();ctx.restore();
-    // brief full-frame exposure pop timed to the lunge
-    if(scareT>.27&&scareT<.34){ctx.fillStyle="rgba(255,255,255,.28)";ctx.fillRect(0,0,w,h)}
+    // Rick's swept-back hair
+    for(let i=0;i<12;i++)dot(-24+i*7,-198-Math.sin(i/11*Math.PI)*15+bob,3.5,gold);
+    // Neck and body in a suit
+    for(let yy=0;yy<15;yy++)for(let xx=0;xx<11;xx++){
+      if(Math.abs(xx-5)<=(yy<4?2:5))dot(-40+xx*8,-126+yy*8+bob,3.1,(xx===5&&yy<7)?white:blue);
+    }
+    for(let yy=0;yy<7;yy++)for(let xx=0;xx<5;xx++)dot(-16+xx*8,-119+yy*8+bob,2.3,white);
+    // Legs stepping side to side
+    for(let i=0;i<9;i++){dot(-23+i*5,-4+Math.sin(t*8+i*.35)*3,3.1,blue);dot(-26+i*5,10+Math.sin(t*8+i*.35)*3,3.1,white)}
+    // Arms waving in opposite directions
+    for(let i=0;i<10;i++){dot(-40-i*7,-112-i*4+Math.sin(t*8)*5,3.2,blue);dot(40+i*7,-112-i*4+Math.sin(t*8+Math.PI)*5,3.2,blue)}
+    // Orbiting confetti dots
+    for(let i=0;i<64;i++){const a=i*2.399+t*1.2,r=155+(i%5)*12;dot(Math.cos(a)*r,Math.sin(a)*r*.8,1.5+(i%3)*.5,i%3===0?gold:i%3===1?pink:white)}
+    ctx.textAlign="center";ctx.shadowColor=pink;ctx.shadowBlur=18;
+    ctx.font="bold 29px system-ui, sans-serif";ctx.fillStyle=white;ctx.fillText("NEVER GONNA GIVE YOU UP",0,100);
+    ctx.font="bold 21px system-ui, sans-serif";ctx.fillStyle=gold;ctx.fillText("YOU JUST GOT RICKROLLED",0,137);
+    ctx.shadowBlur=0;ctx.font="16px system-ui, sans-serif";ctx.fillStyle="#ffffffb8";ctx.fillText("1 IN 10,000",0,171);
+    ctx.restore();
     if(t<5.8)bearParticleFrame=requestAnimationFrame(draw);else stopBearParticles();
   };
   bearParticleFrame=requestAnimationFrame(draw);
@@ -450,8 +395,7 @@ function triggerFnafJumpscare(){
   overlay.classList.remove("active");stopBearParticles();
   if(fnafScareTimer)clearTimeout(fnafScareTimer);
   overlay.style.display="none";
-  // Start audio immediately so browser autoplay protection does not block the sound.
-  playFnafScareSound();
+  // No Freddy sound for the Rickroll version; let the dot animation do the reveal.
   fnafScareTimer=setTimeout(()=>{
     overlay.style.display="";void overlay.offsetWidth;overlay.classList.add("active");startBearParticles();
     fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},2900);
