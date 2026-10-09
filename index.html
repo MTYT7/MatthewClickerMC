@@ -79,10 +79,11 @@ small{color:#d7c6e8}.close{float:right}
 @keyframes particleScareFlash{0%,5%,11%,17%,23%,29%{background:#ffd34e}3%,8%,14%,20%,26%,32%,100%{background:#020203}}
 
 
-#localClock{display:inline-flex;align-items:center;gap:8px;margin:10px auto 14px;padding:9px 14px;border:1px solid rgba(0,255,204,.45);border-radius:12px;background:rgba(0,255,204,.08);color:#00ffcc;font-weight:800;font-variant-numeric:tabular-nums;box-shadow:0 0 14px rgba(0,255,204,.08)}
-#localClock .clock-label{font-size:10px;letter-spacing:1.2px;opacity:.75}
+#localClock{position:fixed!important;top:12px!important;right:12px!important;z-index:999999!important;display:flex!important;align-items:center;gap:8px;margin:0!important;padding:10px 14px;border:2px solid #00ffcc;border-radius:12px;background:#171021!important;color:#00ffcc!important;font-weight:800;font-variant-numeric:tabular-nums;box-shadow:0 0 18px rgba(0,255,204,.5);visibility:visible!important;opacity:1!important}
+#localClock .clock-label{font-size:10px;letter-spacing:1.2px;opacity:1}
 #localClock .clock-time{font-size:19px}
-#localClock .clock-date{font-size:11px;color:#fff8e7;opacity:.8;font-weight:600}
+#localClock .clock-date{font-size:11px;color:#fff8e7;opacity:1;font-weight:600}
+@media(max-width:600px){#localClock{top:8px!important;right:8px!important;padding:6px 9px;font-size:11px}#localClock .clock-time{font-size:15px}#localClock .clock-label{font-size:8px}}
 </style>
 </head>
 <body>
