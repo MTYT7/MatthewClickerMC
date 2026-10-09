@@ -670,8 +670,8 @@ document.getElementById("profileShopMenuButton")?.addEventListener("click",safeO
 window.addEventListener("error",event=>{if(event?.message)showRuntimeError("JavaScript error",event.message)});
 clickBtn.onclick=clickGame;rebirthBtn.onclick=rebirth;checkHalloweenZombieUnlock();load();buildControls();applyTheme();renderUpgrades();refresh();
 let uiRefreshElapsed=0;
-setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);uiRefreshElapsed+=dt;if(uiRefreshElapsed>=.25){uiRefreshElapsed=0;refresh()}},250);
-setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");if(document.body.style.background!==s.bg)document.body.style.background=s.bg}},500);
+setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);uiRefreshElapsed+=dt;if(uiRefreshElapsed>=.25){uiRefreshElapsed=0;refresh()}},100);
+setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");if(document.body.style.background!==s.bg)document.body.style.background=s.bg}},100);
 setTimeout(spawnGolden,30000);setInterval(()=>setTimeout(spawnGolden,Math.random()*25000+35000),35000);
 setTimeout(startRush,45000);setInterval(()=>setTimeout(startRush,Math.random()*40000+60000),60000);
 window.addEventListener("beforeunload",()=>{save()});document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){save()}});
