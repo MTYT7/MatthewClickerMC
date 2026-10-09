@@ -84,14 +84,47 @@ small{color:#d7c6e8}.close{float:right}
 #localClock .clock-time{font-size:19px}
 #localClock .clock-date{font-size:11px;color:#fff8e7;opacity:1;font-weight:600}
 @media(max-width:600px){#localClock{padding:6px 9px;font-size:11px}#localClock .clock-time{font-size:15px}#localClock .clock-label{font-size:8px}}
+
+#gameMenuOverlay{position:fixed;inset:0;z-index:1000;background:rgba(15,8,25,.96);display:none;overflow:auto;padding:20px;color:#fff8e7}
+#gameMenuOverlay .gm-card{max-width:650px;margin:4vh auto;background:#2c1a3b;border:2px solid #a855f7;border-radius:18px;padding:22px;text-align:center;box-shadow:0 0 28px #9333ea55}
+#gameMenuOverlay h2{color:#ffb703;margin:5px 0 14px}
+#gameMenuOverlay button{border:0;border-radius:10px;padding:11px 16px;margin:6px;background:#7c3aed;color:white;font-weight:800;cursor:pointer}
+#gameMenuOverlay button:hover{filter:brightness(1.15)}
+#gameMenuOverlay .gm-secondary{background:#51415f}
+#tetrisBoard{display:grid;grid-template-columns:repeat(10, minmax(0,1fr));gap:2px;width:min(80vw,300px);margin:12px auto;background:#100a18;padding:4px;border:2px solid #a78bfa;border-radius:6px;touch-action:manipulation}
+.tetris-cell{aspect-ratio:1;background:#251b30;border-radius:2px}
+.tetris-cell.filled{background:#22d3ee;box-shadow:inset 0 0 0 2px #ffffff33}
+#tetrisControls{display:flex;justify-content:center;flex-wrap:wrap;gap:3px}
+#tetrisControls button{min-width:54px}
+
 </style>
 </head>
 <body>
+<div id="gameMenuOverlay" role="dialog" aria-modal="true" aria-label="Game menu">
+  <div class="gm-card" id="gameMenuHome">
+    <h2>🎮 GAME MENU</h2><p>Choose what you want to play.</p>
+    <button onclick="closeGameMenu()">🖱️ Matthew Clicker</button>
+    <button onclick="startTetris()">🧱 Play Tetris</button>
+    <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
+    <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
+  </div>
+  <div class="gm-card" id="tetrisScreen" style="display:none">
+    <h2>🧱 TETRIS</h2>
+    <div>Score: <strong id="tetrisScore">0</strong> · Lines: <strong id="tetrisLines">0</strong></div>
+    <div id="tetrisBoard" aria-label="Tetris game board"></div>
+    <div id="tetrisControls">
+      <button onclick="tetrisMove(-1)">⬅️</button><button onclick="tetrisRotate()">🔄 Rotate</button><button onclick="tetrisMove(1)">➡️</button><button onclick="tetrisDrop()">⬇️ Drop</button>
+    </div>
+    <p id="tetrisMessage" aria-live="polite">Use arrow keys or buttons to play!</p>
+    <button onclick="startTetris()">🔁 Restart</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button>
+  </div>
+</div>
 <div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 SCORE</strong><small id="saveBestValue">BEST: 0</small></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
 <div class="sub" style="font-size:11px;opacity:.7">VERSION 1.39</div>
 <div class="sub">Click your way to Matthew greatness!</div>
+<div style="text-align:center;margin:12px 0"><button type="button" onclick="openGameMenu()" style="background:#7c3aed;border:2px solid #c4b5fd;color:white;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer">🎮 GAME MENU</button></div>
 
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: BRIGHTER COLOUR GLOWS + SOUND SETTINGS</div>
 <div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">🙂<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile & Accessories</button></div>
@@ -621,5 +654,29 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
 })();
 </script>
 
+
+<script>
+(function(){
+ const overlay=document.getElementById("gameMenuOverlay"),home=document.getElementById("gameMenuHome"),screen=document.getElementById("tetrisScreen"),boardEl=document.getElementById("tetrisBoard");
+ const W=10,H=20,shapes=[
+  [[1,1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,1],[1,1]],[[0,1,1],[1,1,0]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]]
+ ];
+ let board,piece,px,py,score,lines,timer,over=false,active=false;
+ function blank(){return Array.from({length:H},()=>Array(W).fill(0))}
+ function randomPiece(){return shapes[Math.floor(Math.random()*shapes.length)].map(r=>r.slice())}
+ function collides(shape,x,y){for(let r=0;r<shape.length;r++)for(let c=0;c<shape[r].length;c++)if(shape[r][c]&&(x+c<0||x+c>=W||y+r>=H||(y+r>=0&&board[y+r][x+c])))return true;return false}
+ function spawn(){piece=randomPiece();px=Math.floor((W-piece[0].length)/2);py=0;if(collides(piece,px,py)){over=true;active=false;document.getElementById("tetrisMessage").textContent="Game over! Press Restart to play again.";clearInterval(timer)}draw()}
+ function draw(){let cells=board.map(row=>row.slice());if(piece)piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0&&py+dy<H&&px+dx>=0&&px+dx<W)cells[py+dy][px+dx]=1}));boardEl.innerHTML=cells.flatMap((row,y)=>row.map((v,x)=>'<div class="tetris-cell'+(v?' filled':'')+'" data-x="'+x+'" data-y="'+y+'"></div>')).join("");document.getElementById("tetrisScore").textContent=score;document.getElementById("tetrisLines").textContent=lines}
+ function lock(){piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0)board[py+dy][px+dx]=1}));let kept=board.filter(row=>row.some(v=>!v));let cleared=H-kept.length;if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||cleared*200;board=Array.from({length:cleared},()=>Array(W).fill(0)).concat(kept)}spawn()}
+ window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";active=false;clearInterval(timer)};
+ window.closeGameMenu=function(){overlay.style.display="none";active=false;clearInterval(timer)};
+ window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none"};
+ window.startTetris=function(){clearInterval(timer);home.style.display="none";screen.style.display="block";board=blank();score=0;lines=0;over=false;active=true;document.getElementById("tetrisMessage").textContent="Use arrow keys or buttons to play!";spawn();timer=setInterval(()=>{if(active&&!over){if(!collides(piece,px,py+1))py++;else lock();draw()}},650)};
+ window.tetrisMove=function(dx){if(active&&!over&&!collides(piece,px+dx,py)){px+=dx;draw()}};
+ window.tetrisRotate=function(){if(!active||over)return;let rotated=piece[0].map((_,i)=>piece.map(row=>row[i]).reverse());if(!collides(rotated,px,py)){piece=rotated;draw()}};
+ window.tetrisDrop=function(){if(!active||over)return;while(!collides(piece,px,py+1))py++;lock();draw()};
+ document.addEventListener("keydown",e=>{if(!active||overlay.style.display!=="block")return;if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp"," "].includes(e.key))e.preventDefault();if(e.key==="ArrowLeft")tetrisMove(-1);else if(e.key==="ArrowRight")tetrisMove(1);else if(e.key==="ArrowUp")tetrisRotate();else if(e.key==="ArrowDown"){if(!collides(piece,px,py+1))py++;else lock();draw()}else if(e.key===" ")tetrisDrop()});
+})();
+</script>
 </body>
 </html>
