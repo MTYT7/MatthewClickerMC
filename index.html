@@ -121,6 +121,7 @@ small{color:#d7c6e8}.close{float:right}
     <button onclick="startTetris()">🧱 Play Tetris</button>
     <button onclick="startBlockBlast()">💥 Play Block Blast</button>
     <button onclick="startSnake()">🐍 Play Snake</button>
+    <button onclick="startMatthewRPG()">⚔️ Matthew RPG</button>
     <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
     <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
   </div>
@@ -135,6 +136,17 @@ small{color:#d7c6e8}.close{float:right}
     <p id="bbReward" style="color:#ffb703;font-weight:800"></p>
     <button onclick="startBlockBlast()">🔁 New game</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button>
   </div>
+<div class="gm-card" id="matthewRpgScreen" style="display:none;text-align:left">
+<h2 style="text-align:center;color:#a5f3fc">⚔️ MATTHEW RPG: THE FALLEN LIGHT</h2>
+<div id="rpgScene" style="background:#100b18;border:2px solid #6d5a91;border-radius:12px;padding:16px;min-height:155px;box-shadow:inset 0 0 22px #0008">
+<div id="rpgLocation" style="color:#a5f3fc;font-size:12px;letter-spacing:2px;margin-bottom:10px">THE QUIET KINGDOM</div>
+<div id="rpgDialogue" style="font-size:17px;line-height:1.6;white-space:pre-line">god leo has given up on us....</div>
+</div>
+<div id="rpgStats" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0;color:#fde68a"><span>❤️ HP: <b id="rpgHP">24 / 24</b></span><span>✦ SOUL: <b id="rpgSoul">0</b></span><span>☠️ Foes: <b id="rpgBoss">None</b></span></div>
+<div id="rpgChoices" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0"></div>
+<p id="rpgHint" style="color:#c4b5fd;font-size:12px;min-height:18px">A strange journey is about to begin.</p>
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><button class="gm-secondary" onclick="rpgRestart()">↻ Restart story</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button></div>
+</div>
 <div class="gm-card" id="snakeScreen" style="display:none">
 <h2>🐍 SNAKE</h2><p>Eat apples, grow longer, and avoid the walls and yourself!</p>
 <div>Score: <strong id="snakeScore">0</strong> · Best: <strong id="snakeBest">0</strong></div>
@@ -660,9 +672,9 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  function spawn(){piece=randomPiece();px=Math.floor((W-piece[0].length)/2);py=0;if(collides(piece,px,py)){over=true;active=false;document.getElementById("tetrisMessage").textContent="Game over! Press Restart to play again.";clearInterval(timer)}draw()}
  function draw(){let cells=board.map(row=>row.slice());if(piece)piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0&&py+dy<H&&px+dx>=0&&px+dx<W)cells[py+dy][px+dx]=1}));boardEl.innerHTML=cells.flatMap((row,y)=>row.map((v,x)=>'<div class="tetris-cell'+(v?' filled':'')+'" data-x="'+x+'" data-y="'+y+'"></div>')).join("");document.getElementById("tetrisScore").textContent=score;document.getElementById("tetrisLines").textContent=lines}
  function lock(){piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0)board[py+dy][px+dx]=1}));let kept=board.filter(row=>row.some(v=>!v));let cleared=H-kept.length;if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||cleared*200;board=Array.from({length:cleared},()=>Array(W).fill(0)).concat(kept)}spawn()}
- window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";active=false;clearInterval(timer);if(window.stopSnake)stopSnake()};
+ window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("matthewRpgScreen").style.display="none";active=false;clearInterval(timer);if(window.stopSnake)stopSnake()};
  window.closeGameMenu=function(){overlay.style.display="none";active=false;clearInterval(timer)};
- window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";if(window.stopSnake)stopSnake()};
+ window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("matthewRpgScreen").style.display="none";if(window.stopSnake)stopSnake()};
  window.startTetris=function(){clearInterval(timer);home.style.display="none";screen.style.display="block";board=blank();score=0;lines=0;over=false;active=true;document.getElementById("tetrisMessage").textContent="Use arrow keys or buttons to play!";spawn();timer=setInterval(()=>{if(active&&!over){if(!collides(piece,px,py+1))py++;else lock();draw()}},650)};
  window.tetrisMove=function(dx){if(active&&!over&&!collides(piece,px+dx,py)){px+=dx;draw()}};
  window.tetrisRotate=function(){if(!active||over)return;let rotated=piece[0].map((_,i)=>piece.map(row=>row[i]).reverse());if(!collides(rotated,px,py)){piece=rotated;draw()}};
@@ -710,6 +722,39 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
 // Delay each one briefly so the game has time to initialize before the surprise starts.
 if(Math.random()<1/10000){setTimeout(()=>triggerFnafJumpscare(),1200)}
 if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
+</script>
+
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const screen=$("matthewRpgScreen"),home=$("gameMenuHome"),tetris=$("tetrisScreen"),bb=$("blockBlastScreen"),snake=$("snakeScreen");
+ let hp=24,maxHp=24,soul=0,chapter=0,foe=null,turn=0,guard=false,finished=false,spared=[];
+ const chapters=[
+  {loc:"THE QUIET KINGDOM",lines:["god leo has given up on us....","The words hang in the air. The village bells have gone silent.","A small, hooded traveller approaches. Their name is AIDEN.","AIDEN: If Leo has abandoned this place, someone has to find out why. Will you come with me?"],next:"The road ahead is dark. Aiden hands you a wooden sword."},
+  {loc:"THE WHISPERING WOODS",lines:["The trees lean in as you pass. Something is following you.","A shadow drops from the branches — THE MOURNER.","MOURNER: TURN BACK. THE LIGHT DOES NOT WANT YOU HERE."],boss:{name:"THE MOURNER",hp:18,atk:4,desc:"A lonely guardian who thinks fear will keep everyone safe."}},
+  {loc:"THE BROKEN SHRINE",lines:["Beyond the woods, a shrine lies split in two.","A golden mask floats above the altar. THE HOLLOW KNIGHT awakens.","HOLLOW KNIGHT: FAITH IS A CHAIN. I WILL BREAK YOURS."],boss:{name:"THE HOLLOW KNIGHT",hp:28,atk:5,desc:"A knight whose vows outlived the god he served."}},
+  {loc:"THE LAST LIGHT",lines:["A stairway spirals into a sky with no stars.","At the summit, a familiar figure waits: GOD LEO.","GOD LEO: I did not give up on you. I gave up believing I could save you all alone.","GOD LEO: Show me what you have learned. Let this be our final battle."],boss:{name:"GOD LEO",hp:38,atk:6,desc:"The fallen light. Fight, listen, or choose mercy."}}
+ ];
+ function say(text,loc){$("rpgDialogue").textContent=text;$("rpgLocation").textContent=loc||"THE QUIET KINGDOM"}
+ function choices(arr){$("rpgChoices").innerHTML=arr.map((x,i)=>'<button style="background:'+(x.color||"#43305b")+';color:white;border:1px solid #a78bfa;padding:13px 8px" onclick="rpgChoose(\''+x.id+'\')">'+x.label+'</button>').join("")}
+ function stats(){ $("rpgHP").textContent=hp+" / "+maxHp;$("rpgSoul").textContent=soul;$("rpgBoss").textContent=foe?foe.name:"None" }
+ function hint(t){$("rpgHint").textContent=t}
+ function intro(){chapter=0;hp=maxHp=24;soul=0;foe=null;turn=0;guard=false;finished=false;spared=[];say("god leo has given up on us....\n\nThe kingdom has forgotten the sound of hope. Aiden looks toward the sealed road.\n\nAIDEN: If that's true... why is the old shrine still glowing?","THE QUIET KINGDOM");hint("Your choices shape the journey.");choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"},{id:"listen",label:"♡ Listen to the silence"}]);stats()}
+ function beginChapter(){chapter=1;chapterDialogue(0)}
+ function chapterDialogue(index){const c=chapters[chapter];say(c.lines[index],c.loc);if(index<c.lines.length-1)choices([{id:"nextline",label:"▼ Continue",color:"#0e7490"}]);else if(c.boss){foe={...c.boss,maxHp:c.boss.hp,stage:0};hint(foe.desc);stats();choices([{id:"fight",label:"⚔️ Face "+foe.name,color:"#991b1b"},{id:"talk",label:"♡ Talk first"},{id:"inspect",label:"◉ Inspect foe"},{id:"run",label:"↩ Try to flee"}])}else{choices([{id:"begin",label:"▶ Set out",color:"#0e7490"}])}}
+ function attack(){if(!foe)return;let dmg=5+Math.floor(Math.random()*5);if(chapter===3)dmg=Math.max(2,dmg-1);foe.hp-=dmg;say("You step forward and strike.\n\n"+foe.name+" loses "+dmg+" HP.");if(foe.hp<=0){victory(false);return}enemyTurn()}
+ function talk(){if(!foe)return;foe.stage++;soul++;let lines={
+ "THE MOURNER":"You ask who the MOURNER was before the woods grew dark.\n\nMOURNER: ...I was the one who kept the lanterns lit. Nobody came back.",
+ "THE HOLLOW KNIGHT":"You ask the knight who they were protecting.\n\nHOLLOW KNIGHT: The people. Even after they stopped praying.",
+ "GOD LEO":"You tell Leo that everyone was scared, not faithless.\n\nGOD LEO: ...I know. I was scared too."
+ };say(lines[foe.name]||"You choose your words carefully. The enemy hesitates.");hint("SOUL +1. Mercy grows stronger when you listen.");if((foe.name==="THE MOURNER"&&foe.stage>=2)||(foe.name==="THE HOLLOW KNIGHT"&&foe.stage>=2)||(foe.name==="GOD LEO"&&foe.stage>=3)){choices([{id:"spare",label:"♡ Offer mercy",color:"#047857"},{id:"attack",label:"⚔️ Attack anyway",color:"#991b1b"}]);}else choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Keep talking"},{id:"defend",label:"▣ Defend"}]);stats()}
+ function defend(){guard=true;say("You steady your breathing and guard.\n\nFor a moment, your SOUL shines brighter.");hint("The next hit will be reduced.");enemyTurn()}
+ function enemyTurn(){if(!foe)return;let damage=foe.atk+Math.floor(Math.random()*3);if(guard){damage=Math.max(1,Math.floor(damage/3));guard=false}hp-=damage;if(hp<=0){hp=1;say("Your knees buckle — but Aiden pulls you back.\n\nAIDEN: Not yet. We haven't heard the whole story.");hint("Aiden helps you stand. Keep going.");hp=Math.max(1,hp); }else{say(foe.name+" attacks! You take "+damage+" damage.\n\nWhat will you do?")}stats();choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Talk"},{id:"defend",label:"▣ Defend"},{id:"heal",label:"✚ Eat a starfruit"}])}
+ function victory(mercy){const name=foe.name;if(mercy)spared.push(name);foe=null;soul+=mercy?3:1;hp=Math.min(maxHp,hp+8);stats();say(mercy?"You lower your weapon. The enemy's shape softens, then fades into warm light.\n\nAiden: That's what strength looks like.":"The foe falls, leaving a small star of light behind.\n\nAiden: I hope they can rest now.");hint("HP restored. SOUL gained. The road continues.");if(chapter===1){choices([{id:"shrine",label:"▶ Travel to the Broken Shrine",color:"#0e7490"}])}else if(chapter===2){choices([{id:"summit",label:"▶ Climb to the Last Light",color:"#0e7490"}])}else{finished=true;say("GOD LEO: You came all this way to meet me with a sword... and still chose to listen.\n\nThe sky brightens. The kingdom's bells begin to ring.\n\nAIDEN: Leo didn't save us. We saved each other.\n\nTHE END — for now.\n"+(spared.length?"Mercy shown: "+spared.join(", "):"You walked a harder road, but you made it."),"THE LAST LIGHT");hint("Chapter complete! Restart to try different choices.");choices([{id:"restart",label:"↻ Play again",color:"#0e7490"},{id:"menu",label:"↩ Game menu"}])}}
+ window.rpgChoose=function(id){if(id==="begin"){if(chapter===0)beginChapter();else if(chapter===1)chapterDialogue(0)}else if(id==="listen"){say("Only wind answers. Then, far away, a bell rings once.\n\nAIDEN: See? The story isn't over yet.","THE QUIET KINGDOM");choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"}])}else if(id==="nextline"){let c=chapters[chapter];let text=$("rpgDialogue").textContent;let idx=c.lines.indexOf(text);chapterDialogue(Math.min(c.lines.length-1,idx+1))}else if(id==="fight"){say(foe.name+" blocks the path. Choose your action.","BATTLE");choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Talk"},{id:"defend",label:"▣ Defend"},{id:"inspect",label:"◉ Inspect"}])}else if(id==="attack")attack();else if(id==="talk")talk();else if(id==="defend")defend();else if(id==="inspect"){hint(foe.name+" — "+foe.desc+" HP "+foe.hp+"/"+foe.maxHp);choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Talk"},{id:"defend",label:"▣ Defend"}])}else if(id==="run"){say("You turn to leave. The road behind you has disappeared.\n\nAiden: Looks like we're seeing this through together.");choices([{id:"attack",label:"⚔️ Face the foe",color:"#991b1b"},{id:"talk",label:"♡ Talk first"}])}else if(id==="spare")victory(true);else if(id==="heal"){hp=Math.min(maxHp,hp+9);say("You eat a starfruit. HP restored.");stats();enemyTurn()}else if(id==="shrine"){chapter=2;chapterDialogue(0)}else if(id==="summit"){chapter=3;chapterDialogue(0)}else if(id==="restart")intro();else if(id==="menu")backToGameMenu()};
+ window.rpgRestart=intro;
+ window.startMatthewRPG=function(){if(window.stopSnake)window.stopSnake();clearInterval(window.rpgTimer);screen.style.display="block";home.style.display="none";tetris.style.display="none";bb.style.display="none";snake.style.display="none";overlay.style.display="block";intro()};
+})();
 </script>
 </body>
 </html>
