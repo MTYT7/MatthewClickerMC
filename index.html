@@ -70,7 +70,7 @@ small{color:#d7c6e8}.close{float:right}
 
 
 /* Animated multicolour particle portrait */
-#fnafJumpscare{background:#020203}
+#fnafJumpscare{background:#020203;filter:brightness(1);transition:filter .25s ease}\n#fnafJumpscare.active{animation:oldTvFlicker 5.8s steps(1,end) forwards,scareShake 5.8s linear forwards}\n#fnafJumpscare:after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 18%,rgba(0,0,0,.92) 100%),repeating-linear-gradient(0deg,rgba(255,190,110,.05) 0 2px,transparent 2px 5px);animation:oldTvLights 5.8s steps(1,end) forwards}\n@keyframes oldTvLights{0%,7%,12%,23%,29%,38%,43%,57%,61%,73%,78%,87%{opacity:.92;background-color:rgba(255,180,92,.15)}4%,9%,19%,26%,34%,40%,52%,59%,68%,75%,83%,91%{opacity:.1;background-color:rgba(0,0,0,.7)}96%,100%{opacity:1;background-color:rgba(0,0,0,.84)}}\n@keyframes oldTvFlicker{0%,7%,12%,23%,29%,38%,43%,57%,61%,73%,78%,87%{filter:brightness(1.5) sepia(.18)}4%,9%,19%,26%,34%,40%,52%,59%,68%,75%,83%,91%{filter:brightness(.16)}96%,100%{filter:brightness(.22)}}
 #bearParticleCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fnafJumpscare.active{animation:particleScareFlash 1.7s steps(2,end) forwards}
 @keyframes particleScareFlash{0%,14%,22%,29%,39%{background:#eee}7%,18%,26%,34%,100%{background:#020203}}
@@ -306,7 +306,7 @@ function startBearParticles(){
     const glow=ctx.createRadialGradient(0,-20,20,0,0,350);glow.addColorStop(0,"rgba(130,20,12,.42)");glow.addColorStop(.55,"rgba(70,10,8,.18)");glow.addColorStop(1,"rgba(0,0,0,0)");
     ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,350,0,Math.PI*2);ctx.fill();
     // Animate head tilt and jaw drop using clipped artwork plus jaw movement.
-    ctx.save();ctx.rotate(Math.sin(t*11)*.035+(t<.45?-.06:0));
+    ctx.save();ctx.rotate(Math.sin(scareT*16)*.06+Math.sin(scareT*31)*.018);
     ctx.drawImage(art,-250,-280,500,560);
     if(t<1.5){
       const jawOpen=Math.max(0,Math.sin(t*19))*(t<.65?28:13);
@@ -319,7 +319,7 @@ function startBearParticles(){
       ctx.restore();
     }
     // Eye glow pulses and flashes as the face rushes toward the viewer.
-    const eyePulse=.55+.45*Math.sin(t*31);
+    const eyePulse=.35+.65*Math.sin(scareT*38);
     for(const ex of [-73,72]){ctx.save();ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.45+eyePulse*.45;ctx.fillStyle="#ff2a00";ctx.shadowColor="#ff2400";ctx.shadowBlur=18+eyePulse*30;ctx.beginPath();ctx.ellipse(ex,-17,7,11,0,0,Math.PI*2);ctx.fill();ctx.restore()}
     ctx.restore();ctx.restore();
     // brief full-frame exposure pop timed to the lunge
@@ -341,7 +341,7 @@ function triggerFnafJumpscare(){
       if(AC){
         soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();
         const ctx=soundContext,now=ctx.currentTime;
-        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.62,now+.012);master.gain.setValueAtTime(.42,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.35);master.connect(ctx.destination);
+        const master=ctx.createGain();master.gain.setValueAtTime(.0001,now);master.gain.linearRampToValueAtTime(.68,now+.012);master.gain.setValueAtTime(.46,now+.11);master.gain.exponentialRampToValueAtTime(.0001,now+1.35);master.connect(ctx.destination);
         // Layered, harsh synthetic screech with a rapid pitch dive and rough distortion.
         const sh=ctx.createWaveShaper();const curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*3.8)}sh.curve=curve;sh.oversample="2x";sh.connect(master);
         for(const spec of [{type:"sawtooth",start:480,peak:2100,end:190,dur:.88,gain:.42},{type:"square",start:760,peak:1650,end:240,dur:.63,gain:.17},{type:"triangle",start:130,peak:90,end:32,dur:.95,gain:.5}]){
@@ -352,7 +352,7 @@ function triggerFnafJumpscare(){
         const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),ng=ctx.createGain();noise.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(2600,now);filter.frequency.exponentialRampToValueAtTime(650,now+.45);filter.Q.value=.8;ng.gain.setValueAtTime(.0001,now);ng.gain.linearRampToValueAtTime(.32,now+.008);ng.gain.exponentialRampToValueAtTime(.0001,now+.72);noise.connect(filter);filter.connect(ng);ng.connect(master);noise.start(now);
       }
     }catch(e){}
-    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},1800);
+    fnafScareTimer=setTimeout(()=>{overlay.classList.remove("active");overlay.style.display="none";stopBearParticles()},6200);
   },420);
 }
 function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name+(musicSongs[musicSongIndex].name.startsWith("Soap in My Arse")?" — 🎤 "+soapLyrics:""):"Music is off"}
