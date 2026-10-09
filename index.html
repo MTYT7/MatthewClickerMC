@@ -141,11 +141,11 @@ function importSaveFile(input){let file=input.files?.[0];if(!file)return;let rea
 function setStatus(t,c="#ffb703"){statusEl.textContent=t;statusEl.style.color=c}
 let soundContext=null;let musicTimer=null,musicStep=0,musicSongIndex=0,musicGain=null,musicTick=null;
 const musicSongs=[
-{name:"Midnight Drive",tempo:250,wave:"sawtooth",volume:.075,notes:[220,0,261.63,329.63,0,293.66,261.63,0,196,0,246.94,293.66,0,261.63,220,0]},
-{name:"Neon Underground",tempo:180,wave:"square",volume:.045,notes:[146.83,0,220,0,174.61,0,261.63,220,146.83,0,196,0,246.94,0,220,174.61]},
-{name:"After Hours",tempo:280,wave:"triangle",volume:.085,notes:[164.81,196,246.94,0,220,196,164.81,0,146.83,174.61,220,0,196,174.61,146.83,0]},
-{name:"Circuit Breaker",tempo:150,wave:"sawtooth",volume:.04,notes:[110,0,164.81,220,0,196,164.81,0,123.47,0,185,246.94,0,220,185,0]},
-{name:"Last Checkpoint",tempo:210,wave:"triangle",volume:.075,notes:[196,246.94,293.66,0,261.63,220,196,0,174.61,220,261.63,0,246.94,220,174.61,0]}
+{name:"Midnight Drive",tempo:250,wave:"sawtooth",volume:.075,notes:[220,0,261.63,329.63,0,293.66,261.63,0,196,0,246.94,293.66,0,261.63,220,0,220,261.63,329.63,392,329.63,261.63,220,0,196,246.94,293.66,329.63,293.66,246.94,220,0,164.81,196,246.94,0,220,261.63,293.66,0,196,220,261.63,0,246.94,220,196,0]},
+{name:"Neon Underground",tempo:180,wave:"square",volume:.045,notes:[146.83,0,220,0,174.61,0,261.63,220,146.83,0,196,0,246.94,0,220,174.61,146.83,174.61,220,261.63,220,174.61,146.83,0,123.47,0,185,220,246.94,220,185,0,146.83,0,220,261.63,293.66,0,261.63,220,174.61,0,196,246.94,220,196,174.61,0]},
+{name:"After Hours",tempo:280,wave:"triangle",volume:.085,notes:[164.81,196,246.94,0,220,196,164.81,0,146.83,174.61,220,0,196,174.61,146.83,0,164.81,196,246.94,293.66,246.94,196,164.81,0,146.83,174.61,220,261.63,220,174.61,146.83,0,130.81,164.81,196,0,174.61,220,246.94,0,196,220,261.63,0,246.94,220,174.61,0]},
+{name:"Circuit Breaker",tempo:150,wave:"sawtooth",volume:.04,notes:[110,0,164.81,220,0,196,164.81,0,123.47,0,185,246.94,0,220,185,0,110,164.81,220,261.63,220,164.81,110,0,123.47,185,246.94,293.66,246.94,185,123.47,0,98,0,146.83,196,0,174.61,146.83,0,110,164.81,220,0,196,164.81,123.47,0]},
+{name:"Last Checkpoint",tempo:210,wave:"triangle",volume:.075,notes:[196,246.94,293.66,0,261.63,220,196,0,174.61,220,261.63,0,246.94,220,174.61,0,196,246.94,293.66,392,329.63,293.66,246.94,0,174.61,220,261.63,329.63,261.63,220,174.61,0,164.81,196,246.94,0,220,261.63,293.66,0,246.94,220,196,0,174.61,196,220,0]}
 ];
 function updateMusicLabel(){const el=document.getElementById("musicTrack");if(el)el.textContent=s.music?"Now playing: "+musicSongs[musicSongIndex].name:"Music is off"}
 function stopMusic(){if(musicTimer!==null){clearTimeout(musicTimer);musicTimer=null}musicTick=null;if(musicGain){try{musicGain.gain.setTargetAtTime(0,soundContext.currentTime,.15)}catch(e){}musicGain=null}}
