@@ -832,7 +832,8 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  function talk(){if(!foe)return;foe.stage++;soul++;let lines={
  "THE MOURNER":"You ask who the MOURNER was before the woods grew dark.\n\nMOURNER: ...I was the one who kept the lanterns lit. Nobody came back.",
  "THE HOLLOW KNIGHT":"You ask the knight who they were protecting.\n\nHOLLOW KNIGHT: The people. Even after they stopped praying.",
- "GOD LEO":"You tell Leo that everyone was scared, not faithless.\n\nGOD LEO: ...I know. I was scared too.",\n "INFINITE KYE":"You ask the stranger what it wants. For a long time, it says nothing.\n\nSTRANGER: I wanted someone to notice that I was still here.\n\nIts outline flickers. For a heartbeat, you see a tired face — then forget its features."
+ "GOD LEO":"You tell Leo that everyone was scared, not faithless.\n\nGOD LEO: ...I know. I was scared too.",
+ "INFINITE KYE":"You ask the stranger what it wants. For a long time, it says nothing.\n\nSTRANGER: I wanted someone to notice that I was still here.\n\nIts outline flickers. For a heartbeat, you see a tired face — then forget its features."
  };say(lines[foe.name]||"You choose your words carefully. The enemy hesitates.");hint("SOUL +1. Mercy grows stronger when you listen.");if((foe.name==="THE MOURNER"&&foe.stage>=2)||(foe.name==="THE HOLLOW KNIGHT"&&foe.stage>=2)||(foe.name==="GOD LEO"&&foe.stage>=3)||(foe.name==="INFINITE KYE"&&foe.stage>=2)){choices([{id:"spare",label:foe.name==="INFINITE KYE"?"♡ Let the stranger go":"♡ Offer mercy",color:"#047857"},{id:"attack",label:"⚔️ Attack anyway",color:"#991b1b"}]);}else choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Keep talking"},{id:"defend",label:"▣ Defend"}]);stats()}
  function defend(){if(!foe||battleActive)return;guard=true;say("You brace yourself. A silver shield flashes around your SOUL.","BATTLE");hint("Block active: the next dodge hit will deal reduced damage.");startDodge()}
  function enemyTurn(){if(!foe||battleActive)return;startDodge()}
@@ -840,7 +841,18 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  const name=foe.name;
  if(name==="INFINITE KYE"){
   foe=null;finished=true;try{localStorage.setItem("matthewRpgKyeEnding","1")}catch(e){}soul+=5;hp=maxHp;
-  say((mercy?"You lower your weapon. The stranger studies you, as if mercy is a language it has not heard in a very long time.":"Your final strike cuts through the stranger’s outline. It does not scream; it simply becomes less certain, like a memory fading at sunrise.")+"\n\nThe figure disappears. No explosion. No grand farewell. Just a few motes of light drifting into the dark.\n\nWhere it stood lies a folded note, addressed to no one.\n\n‘To whoever finally found me,\n\nI watched the road because I was afraid that if nobody remembered it, everything would vanish. I made myself a shadow so I could stay after everyone else had gone.\n\nLeo was never the only light worth saving. I know that now.\n\nThank you for looking back.\n\n— K’\n\nThe ink at the bottom is smudged, as if the writer changed their name before leaving. Far away, Leo’s bell rings again. The path home is open.","THE NOTE");
+  const note=[
+   mercy?"You lower your weapon. The stranger studies you, as if mercy is a language it has not heard in a very long time.":"Your final strike cuts through the stranger’s outline. It does not scream; it simply becomes less certain, like a memory fading at sunrise.",
+   "The figure disappears. No explosion. No grand farewell. Just a few motes of light drifting into the dark.",
+   "Where it stood lies a folded note, addressed to no one.",
+   "‘To whoever finally found me,",
+   "I watched the road because I was afraid that if nobody remembered it, everything would vanish. I made myself a shadow so I could stay after everyone else had gone.",
+   "Leo was never the only light worth saving. I know that now.",
+   "Thank you for looking back.",
+   "— K’",
+   "The ink at the bottom is smudged, as if the writer changed their name before leaving. Far away, Leo’s bell rings again. The path home is open."
+  ].join("\\n\\n");
+  say(note,"THE NOTE");
   hint("A hidden ending discovered. The stranger is gone; the note remains.");
   choices([{id:"restart",label:"↻ Return to the beginning",color:"#0e7490"},{id:"menu",label:"↩ Game menu"}]);stats();return
  }
