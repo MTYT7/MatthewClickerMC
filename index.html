@@ -29,7 +29,7 @@ small{color:#d7c6e8}.close{float:right}
 <body>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.17 · PROFILE SHOP + SAVE ERROR DIAGNOSTICS</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.18 · PROFILE SHOP HELPER FIX</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: NAMED SAVE SLOTS + CRYSTAL ACCESSORY SHOP BELOW</div>
 <div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">😎<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile & Accessories</button></div>
@@ -59,11 +59,13 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.17</div>
+<div class="footer">Matthew Clicker · v1.18</div>
 </div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
 <script>
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+
 const scoreEl=document.getElementById("score");
 const rateEl=document.getElementById("rate");
 const statusEl=document.getElementById("status");
@@ -230,7 +232,6 @@ async function refreshLeaderboard(){
   }catch(e){console.warn("Leaderboard load failed",e);lbSetStatus("Could not connect: "+e.message);rows.innerHTML='<p class="leaderboard-note">Check that Firebase Authentication (Anonymous) and Cloud Firestore are enabled and the database rules are installed.</p>'}
 }
 function buildControls(){controlsEl.innerHTML=`<button onclick="showUpgrades()">Upgrades</button><button onclick="stats()">Statistics</button><button onclick="settings()">Settings</button><button onclick="save()">Save</button><button onclick="safeOpenSaveManager()">Save Manager</button><button onclick="reset()">Reset</button><button onclick="chest()">Daily Chest</button><button onclick="spin()">Lucky Spin</button><button onclick="crystalShop()">Crystal Shop</button><button id="profileShopMenuButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile Shop</button><button onclick="codes()">Redeem Codes</button><button onclick="window.close()">Quit</button>`}
-function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
 function showRuntimeError(where,err){console.error(where,err);try{modalContentEl.innerHTML="<h2>Game Error</h2><p>"+escapeHtml(where+": "+(err?.message||String(err)))+"</p><p>Send this exact error text to ChatGPT.</p>";modalEl.classList.remove("hidden")}catch(displayErr){alert(where+": "+(err?.message||String(err)))}}
 function safeOpenProfileShop(){try{profileShop()}catch(err){showRuntimeError("Profile shop failed",err)}}
 function safeOpenSaveManager(){try{saveManager()}catch(err){showRuntimeError("Save Manager failed",err)}}
