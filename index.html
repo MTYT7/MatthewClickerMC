@@ -120,7 +120,6 @@ small{color:#d7c6e8}.close{float:right}
     <button onclick="startTetris()">🧱 Play Tetris</button>
     <button onclick="startBlockBlast()">💥 Play Block Blast</button>
     <button onclick="startSnake()">🐍 Play Snake</button>
-    <button onclick="openBrowserPanel()">🌐 Internet Browser</button>
     <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
     <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
   </div>
@@ -135,29 +134,6 @@ small{color:#d7c6e8}.close{float:right}
     <p id="bbReward" style="color:#ffb703;font-weight:800"></p>
     <button onclick="startBlockBlast()">🔁 New game</button><button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button>
   </div>
-  <div class="gm-card" id="browserScreen" style="display:none">
-<h2>🌐 INTERNET BROWSER</h2>
-<p>Search the web or enter a website address.</p>
-<form onsubmit="browserGo(event)" style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center">
-<input id="browserAddress" type="text" placeholder="Search or enter a website (e.g. wikipedia.org)" style="flex:1;min-width:220px;padding:12px;border-radius:9px;border:2px solid #a78bfa;background:#180e21;color:white;font-size:15px" autocomplete="url">
-<button type="submit">🔎 Go</button>
-</form>
-<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0">
-<button onclick="browserQuick('https://www.google.com')">Google</button>
-<button onclick="browserQuick('https://www.wikipedia.org')">Wikipedia</button>
-<button onclick="browserQuick('https://www.youtube.com')">YouTube</button>
-<button onclick="browserQuick('https://www.bing.com')">Bing</button>
-</div>
-<p id="browserHint" style="font-size:12px;opacity:.85">Some sites block embedded viewing. If the page won't load, use “Open in new tab”.</p>
-<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0">
-<button onclick="browserBack()">← Back</button>
-<button onclick="browserForward()">Forward →</button>
-<button onclick="browserOpenTab()">↗ Open in new tab</button>
-<button class="gm-secondary" onclick="browserReload()">⟳ Reload page</button>
-</div>
-<iframe id="browserFrame" title="Website preview" src="about:blank" referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" style="width:100%;height:min(52vh,520px);border:2px solid #8062a0;border-radius:10px;background:white"></iframe>
-<button class="gm-secondary" onclick="backToGameMenu()">↩ Game menu</button>
-</div>
 <div class="gm-card" id="snakeScreen" style="display:none">
 <h2>🐍 SNAKE</h2><p>Eat apples, grow longer, and avoid the walls and yourself!</p>
 <div>Score: <strong id="snakeScore">0</strong> · Best: <strong id="snakeBest">0</strong></div>
@@ -728,7 +704,7 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  function spawn(){piece=randomPiece();px=Math.floor((W-piece[0].length)/2);py=0;if(collides(piece,px,py)){over=true;active=false;document.getElementById("tetrisMessage").textContent="Game over! Press Restart to play again.";clearInterval(timer)}draw()}
  function draw(){let cells=board.map(row=>row.slice());if(piece)piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0&&py+dy<H&&px+dx>=0&&px+dx<W)cells[py+dy][px+dx]=1}));boardEl.innerHTML=cells.flatMap((row,y)=>row.map((v,x)=>'<div class="tetris-cell'+(v?' filled':'')+'" data-x="'+x+'" data-y="'+y+'"></div>')).join("");document.getElementById("tetrisScore").textContent=score;document.getElementById("tetrisLines").textContent=lines}
  function lock(){piece.forEach((r,dy)=>r.forEach((v,dx)=>{if(v&&py+dy>=0)board[py+dy][px+dx]=1}));let kept=board.filter(row=>row.some(v=>!v));let cleared=H-kept.length;if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]||cleared*200;board=Array.from({length:cleared},()=>Array(W).fill(0)).concat(kept)}spawn()}
- window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("browserScreen").style.display="none";active=false;clearInterval(timer);if(window.stopSnake)stopSnake()};
+ window.openGameMenu=function(){overlay.style.display="block";home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";active=false;clearInterval(timer);if(window.stopSnake)stopSnake()};
  window.closeGameMenu=function(){overlay.style.display="none";active=false;clearInterval(timer)};
  window.backToGameMenu=function(){clearInterval(timer);active=false;home.style.display="block";screen.style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("browserScreen").style.display="none";if(window.stopSnake)stopSnake()};
  window.startTetris=function(){clearInterval(timer);home.style.display="none";screen.style.display="block";board=blank();score=0;lines=0;over=false;active=true;document.getElementById("tetrisMessage").textContent="Use arrow keys or buttons to play!";spawn();timer=setInterval(()=>{if(active&&!over){if(!collides(piece,px,py+1))py++;else lock();draw()}},650)};
@@ -773,20 +749,6 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  window.snakeTurn=function(x,y){if(!alive)return;if(x===-dir.x&&y===-dir.y)return;dir={x,y};paused=false};
  window.snakePause=function(){if(!alive)return;paused=!paused;document.getElementById("snakeMessage").textContent=paused?"Paused — press a direction or pause to resume.":"Back in action!"};
  document.addEventListener("keydown",e=>{if(document.getElementById("snakeScreen").style.display!=="block")return;const k=e.key;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(k))e.preventDefault();if(k==="ArrowLeft"||k.toLowerCase()==="a")snakeTurn(-1,0);else if(k==="ArrowRight"||k.toLowerCase()==="d")snakeTurn(1,0);else if(k==="ArrowUp"||k.toLowerCase()==="w")snakeTurn(0,-1);else if(k==="ArrowDown"||k.toLowerCase()==="s")snakeTurn(0,1);else if(k===" "||k==="Escape")snakePause()});
-})();
-</script>
-<script>
-(function(){
- let currentUrl="",browserHistory=[],browserHistoryIndex=-1;
- function normalize(value){let v=(value||"").trim();if(!v)return "";if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)){if(v.includes(".")&&!v.includes(" "))v="https://"+v;else v="https://www.google.com/search?q="+encodeURIComponent(v)}try{const u=new URL(v);if(u.protocol!=="http:"&&u.protocol!=="https:")return "";return u.href}catch(e){return ""}}
- window.openBrowserPanel=function(){document.getElementById("gameMenuHome").style.display="none";document.getElementById("tetrisScreen").style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("browserScreen").style.display="block";if(window.stopSnake)stopSnake();};
- function browserLoad(url,addHistory){if(!url)return;currentUrl=url;if(addHistory){browserHistory=browserHistory.slice(0,browserHistoryIndex+1);browserHistory.push(url);browserHistoryIndex=browserHistory.length-1}document.getElementById("browserAddress").value=url;document.getElementById("browserFrame").src=url;document.getElementById("browserHint").textContent="Loading "+url+". If this site blocks embedding, use Open in new tab.";}
- window.browserGo=function(e){if(e)e.preventDefault();const url=normalize(document.getElementById("browserAddress").value);if(!url){document.getElementById("browserHint").textContent="Enter a valid website address or search term.";return}browserLoad(url,true);};
- window.browserBack=function(){if(browserHistoryIndex>0){browserHistoryIndex--;browserLoad(browserHistory[browserHistoryIndex],false)}};
- window.browserForward=function(){if(browserHistoryIndex<browserHistory.length-1){browserHistoryIndex++;browserLoad(browserHistory[browserHistoryIndex],false)}};
- window.browserQuick=function(url){browserLoad(normalize(url),true);};
- window.browserOpenTab=function(){if(!currentUrl){browserGo();if(!currentUrl)return}if(currentUrl)window.open(currentUrl,"_blank","noopener,noreferrer");};
- window.browserReload=function(){const f=document.getElementById("browserFrame");if(currentUrl)f.src=currentUrl};
 })();
 </script>
 </body>
