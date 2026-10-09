@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Matthew Clicker v1.29</title>
+<title>Matthew Clicker v1.30</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
-#app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}
+#app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}.save-score-badge{position:fixed;top:12px;right:12px;z-index:10;background:#180e21;border:1px solid #ffb703;border-radius:10px;padding:9px 12px;text-align:right;box-shadow:0 3px 12px #0006;max-width:calc(100vw - 24px);font-size:12px}.save-score-badge strong{display:block;color:#ffb703;font-size:15px;margin-top:3px}.save-score-badge small{display:block;color:#d7c6e8}@media(max-width:600px){.save-score-badge{position:absolute;top:8px;right:8px;padding:6px 8px;font-size:10px}.save-score-badge strong{font-size:12px}.title{padding-top:42px}}
 .sub{text-align:center;color:#d7c6e8}.top-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:14px;margin-top:16px}
 .panel{background:#38234a;border:1px solid #59366e;border-radius:12px;padding:14px;box-shadow:0 5px 18px #0004}.click-panel{text-align:center;min-height:330px}.button-panel{min-height:330px}
 .panel-title{font-size:20px;font-weight:800;color:#ffb703;margin-bottom:10px}.score{font-size:28px;font-weight:800;margin-top:10px}.rate{color:#d7c6e8;font-size:13px}.status{color:#ffb703;font-weight:700;min-height:20px;margin:5px}
@@ -28,9 +28,10 @@ small{color:#d7c6e8}.close{float:right}
 </style>
 </head>
 <body>
+<div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 POINTS</strong></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.29</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.30</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: BRIGHTER COLOUR GLOWS + SOUND SETTINGS</div>
 <div class="profile-strip" id="profileStrip"><div class="profile-avatar" id="profileAvatar">🙂<span id="profileAccessory" class="profile-accessory"></span></div><div class="profile-details"><strong id="profileName">My Matthew</strong><small>Profile · <span id="profileCrystals">0</span> 💎 crystals</small></div><button id="profileShopButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile & Accessories</button></div>
@@ -60,7 +61,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.29</div>
+<div class="footer">Matthew Clicker · v1.30</div>
 </div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
@@ -68,6 +69,8 @@ small{color:#d7c6e8}.close{float:right}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
 
 const scoreEl=document.getElementById("score");
+const saveScoreNameEl=document.getElementById("saveScoreName");
+const saveScoreValueEl=document.getElementById("saveScoreValue");
 const rateEl=document.getElementById("rate");
 const statusEl=document.getElementById("status");
 const clickBtn=document.getElementById("click");
@@ -155,7 +158,7 @@ function startMusic(){stopMusic();if(!s.music){updateMusicLabel();return}try{con
 function playSound(type){if(!s.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;soundContext=soundContext||new AC();if(soundContext.state==="suspended")soundContext.resume();const t=soundContext.currentTime;const ns=type==="buy"?[660,880]:type==="reward"?[523,659,784]:type==="toggle"?[740]:type==="rebirth"?[392,523,784]:[420,560];ns.forEach((f,i)=>{const o=soundContext.createOscillator(),g=soundContext.createGain(),at=t+i*.055;o.type=type==="click"?"triangle":"sine";o.frequency.setValueAtTime(f,at);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(type==="click"?.055:.07,at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+.11);o.connect(g);g.connect(soundContext.destination);o.start(at);o.stop(at+.12)})}catch(e){console.debug("Sound unavailable",e)}}
 function clickGame(){playSound("click");let now=Date.now()/1000;combo=now-lastClick<.65?Math.min(combo+1,50):1;lastClick=now;let cb=1+combo*.02,rb=now<rushEnd?5:1,n=power()*bonus()*cb*rb;if(Math.random()<.1){n*=5;setStatus("CRITICAL CLICK! x5!","#ff4d6d")}else if(rb>1)setStatus("⚡ MATTHEW RUSH! x5! ⚡","#00ffcc");else setStatus(`Combo: ${combo} | Bonus x${cb.toFixed(2)}`);add(n,true);s.quest++;float("+"+fmt(n));checkQuest();refresh()}
 function float(t){let e=document.createElement("div");e.className="float";e.textContent=t;e.style.left=(Math.random()*170+40)+"%";e.style.top=(Math.random()*70+25)+"%";floatboxEl.appendChild(e);setTimeout(()=>e.remove(),750)}
-function refresh(){checkAchievementAccessoryRewards();scoreEl.textContent=fmt(s.clicks)+" Matthew Points";rateEl.textContent=`${fmt(power()*bonus())} per click | ${fmt(auto())} per second | Rebirth x${bonus().toFixed(2)}`;let r=req(),target=Math.min(100,s.clicks/r*100);displayed+=(target-displayed)*.08;if(Math.abs(target-displayed)<.05)displayed=target;barEl.style.width=displayed+"%";meterTextEl.textContent=`${fmt(s.clicks)} / ${fmt(r)} for Rebirth ${s.rebirths+1}`;rebirthBtn.disabled=s.clicks<r;document.querySelectorAll(".upgrade").forEach((b)=>{const match=b.getAttribute("onclick")?.match(/buy\((\d+)\)/);if(match){const u=upgrades[Number(match[1])];if(u)b.disabled=s.clicks<u.cost;}});achievementEl.textContent=`${achievementText()} | Quest: ${s.quest}/${s.goal} clicks | Crystals: ${s.crystals}`;refreshProfile()}
+function refresh(){checkAchievementAccessoryRewards();scoreEl.textContent=fmt(s.clicks)+" Matthew Points";if(saveScoreNameEl)saveScoreNameEl.textContent=(saveSlots[activeSlot]?.name||("Save "+activeSlot)).toUpperCase()+" · SLOT "+activeSlot;if(saveScoreValueEl)saveScoreValueEl.textContent=fmt(s.clicks)+" POINTS";rateEl.textContent=`${fmt(power()*bonus())} per click | ${fmt(auto())} per second | Rebirth x${bonus().toFixed(2)}`;let r=req(),target=Math.min(100,s.clicks/r*100);displayed+=(target-displayed)*.08;if(Math.abs(target-displayed)<.05)displayed=target;barEl.style.width=displayed+"%";meterTextEl.textContent=`${fmt(s.clicks)} / ${fmt(r)} for Rebirth ${s.rebirths+1}`;rebirthBtn.disabled=s.clicks<r;document.querySelectorAll(".upgrade").forEach((b)=>{const match=b.getAttribute("onclick")?.match(/buy\((\d+)\)/);if(match){const u=upgrades[Number(match[1])];if(u)b.disabled=s.clicks<u.cost;}});achievementEl.textContent=`${achievementText()} | Quest: ${s.quest}/${s.goal} clicks | Crystals: ${s.crystals}`;refreshProfile()}
 const achievementAccessoryRewards=[
  {id:"total_10000_cosmetic2",test:()=>s.total>=10000,accessory:"pixel_visor",label:"10,000 total points"},
  {id:"total_1m_cosmetic2",test:()=>s.total>=1000000,accessory:"million_crown",label:"1 million total points"},
