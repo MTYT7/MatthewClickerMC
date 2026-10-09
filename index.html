@@ -103,7 +103,7 @@ function setBuyAmount(value){buyAmount=value;}
 
 function fmt(n){return Math.floor(n).toLocaleString("en-US")}
 function power(){return 1+upgrades.filter(u=>u.kind==="click").reduce((a,u)=>a+u.level*u.power,0)}
-function bonus(){return (1+s.rebirths*.25+s.crystalClick*.05)*(1+s.crystalClick2*.10)}
+function bonus(){return (1+s.rebirths*.30+s.crystalClick*.05)*(1+s.crystalClick2*.10)}
 function auto(){return upgrades.filter(u=>u.kind==="auto").reduce((a,u)=>a+u.level*u.power,0)*bonus()*(1+s.crystalAuto*.05)*(1+s.crystalAuto2*.10)}
 function req(){return 1000000*Math.pow(10,s.rebirths)}
 function add(n,manual=false){s.clicks+=n;s.total+=n;if(manual)s.manual+=n;else s.auto+=n}
@@ -164,10 +164,10 @@ function renderUpgrades(){
   upgradeGridEl.innerHTML=makeList("auto","⚙️ Per Second / Auto",0)+makeList("click","👆 Per Tap",1);
   [...upgradeGridEl.querySelectorAll(".upgrade-column")].forEach((el,i)=>{el.scrollTop=previousScroll[i]||0;});
 }
-function rebirth(){if(s.clicks<req())return;if(!confirm("This removes your clicks and normal upgrades.\n\nYou gain 1 Crystal and a permanent +25% bonus.\n\nRebirth now?"))return;s.rebirths++;s.crystals++;s.clicks=0;combo=0;upgrades.forEach(u=>{u.level=0;u.cost=u.base});refresh();alert(`Rebirth ${s.rebirths} complete!\nYou earned 1 Matthew Crystal.\nPermanent multiplier: x${bonus().toFixed(2)}`)}
+function rebirth(){if(s.clicks<req())return;if(!confirm("This removes your clicks and normal upgrades.\n\nYou gain 1 Crystal and a permanent +30% bonus.\n\nRebirth now?"))return;s.rebirths++;s.crystals++;s.clicks=0;combo=0;upgrades.forEach(u=>{u.level=0;u.cost=u.base});refresh();alert(`Rebirth ${s.rebirths} complete!\nYou earned 1 Matthew Crystal.\nPermanent multiplier: x${bonus().toFixed(2)}`)}
 function checkQuest(){if(s.quest<s.goal)return;let r=Math.max(s.goal*power()*bonus(),1000);add(r);alert(`You clicked ${s.goal} times!\n\nReward: ${fmt(r)} Matthew Points!`);s.quest=0;s.goal=Math.floor(s.goal*1.5)}
 function chest(){let now=Date.now()/1000;if(now-s.lastChest<86400){let left=Math.ceil((86400-(now-s.lastChest))/3600);alert("Your daily chest is cooling down! Come back in about "+left+" hour(s).");return}let r=Math.max(auto()*300,power()*bonus()*500,1000);add(r);s.lastChest=now;setStatus("DAILY CHEST OPENED!","#ffd700");alert("You found "+fmt(r)+" Matthew Points!");refresh()}
-function spin(){let now=Date.now()/1000;if(now-s.lastSpin<60){alert("Wait "+(Math.floor(60-now+s.lastSpin)+1)+" seconds to spin again!");return}s.lastSpin=now;let a=[["Small prize",Math.max(100,power()*10)],["Big prize",Math.max(1000,power()*100)],["Amazing prize",Math.max(10000,auto()*30)],["Jackpot!",Math.max(50000,auto()*100)],["Matthew Crystal","crystal"]],x=a[Math.floor(Math.random()*a.length)];if(x[1]==="crystal"){s.crystals++;alert("You won a Matthew Crystal!");setStatus("LUCKY SPIN: MATTHEW CRYSTAL!","#00ffcc")}else{add(x[1]);alert(x[0]+"\n\nYou won "+fmt(x[1])+" Matthew Points!");setStatus("LUCKY SPIN! +"+fmt(x[1])+" points!","#00ffcc")}refresh()}
+function spin(){let now=Date.now()/1000;if(now-s.lastSpin<180){let left=Math.floor(180-now+s.lastSpin)+1;alert("Wait "+Math.floor(left/60)+"m "+(left%60)+"s to spin again!");return}s.lastSpin=now;let a=[["Small prize",Math.max(100,power()*9)],["Big prize",Math.max(1000,power()*90)],["Amazing prize",Math.max(10000,auto()*27)],["Jackpot!",Math.max(50000,auto()*90)],["Matthew Crystal","crystal"]],x=a[Math.floor(Math.random()*a.length)];if(x[1]==="crystal"){s.crystals++;alert("You won a Matthew Crystal!");setStatus("LUCKY SPIN: MATTHEW CRYSTAL!","#00ffcc")}else{add(x[1]);alert(x[0]+"\n\nYou won "+fmt(x[1])+" Matthew Points!");setStatus("LUCKY SPIN! +"+fmt(x[1])+" points!","#00ffcc")}refresh()}
 const profileAccessories=[
  {id:"glasses",name:"Cool Shades",emoji:"🕶️",cost:2,desc:"Classic cool-player look.",zone:"face"},
  {id:"cap",name:"Street Cap",emoji:"🧢",cost:3,desc:"For serious clicking sessions.",zone:"head"},
