@@ -47,6 +47,25 @@ small{color:#d7c6e8}.close{float:right}
 @keyframes scareFlicker{0%,12%,20%,27%,38%,45%{background:#fff}8%,17%,24%,33%,41%,100%{background:#030202}}
 @keyframes scareText{0%,50%{opacity:0}65%,100%{opacity:1}}
 
+/* More cinematic, worn animatronic finish */
+#fnafJumpscare .scare-face{width:min(96vw,850px);height:min(96vh,820px);perspective:900px}
+#fnafJumpscare .bear-head{background:radial-gradient(ellipse at 50% 24%,#827463 0%,#51463a 18%,#302820 47%,#171311 72%,#050505 100%);border:10px solid #090807;box-shadow:inset 0 0 26px 9px #090706,inset 0 -28px 30px #000,0 0 45px #510000;overflow:hidden}
+#fnafJumpscare .bear-head:before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:.28;background:repeating-linear-gradient(105deg,transparent 0 9px,#0b0807 10px,#a99a8440 11px,transparent 13px),repeating-linear-gradient(12deg,transparent 0 19px,#000 20px,transparent 22px);mix-blend-mode:multiply}
+#fnafJumpscare .bear-head:after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 65px #000}
+#fnafJumpscare .bear-ear{background:radial-gradient(circle at 40% 35%,#71604c 0%,#3a3027 35%,#0b0908 78%);border:10px solid #090807;box-shadow:inset 0 0 17px #000}
+#fnafJumpscare .bear-eye{top:30%;width:21%;height:15%;background:#000;box-shadow:inset 0 0 12px #000,0 0 5px #b7a077}
+#fnafJumpscare .bear-eye:after{left:30%;top:13%;width:40%;height:73%;background:radial-gradient(ellipse,#fff9cf 0%,#ffdc65 25%,#fa8d20 48%,#a10d00 72%,#210000 100%);box-shadow:0 0 8px 4px #ff8b25,0 0 24px 8px #e21b08;animation:deadEyeFlicker .13s infinite alternate}
+#fnafJumpscare .bear-muzzle{background:radial-gradient(ellipse at 50% 20%,#a2917a 0%,#776653 28%,#4b3d31 65%,#17110e 100%);box-shadow:inset 0 9px 15px #b5a18a55,inset 0 -12px 18px #0b0807}
+#fnafJumpscare .bear-nose{background:linear-gradient(145deg,#494039,#100d0c 55%,#020202);box-shadow:inset 0 3px 4px #9d8c78,0 5px 7px #000}
+#fnafJumpscare .bear-jaw{top:59%;height:27%;border:6px solid #080605;background:linear-gradient(#260f0e,#050404 70%);box-shadow:inset 0 0 20px #000,0 0 9px #000;animation:jawRattle .09s infinite alternate}
+#fnafJumpscare .bear-teeth{padding:0 3%;filter:drop-shadow(0 2px 1px #000)}
+#fnafJumpscare .bear-teeth i{width:10%;height:44%;background:linear-gradient(90deg,#6f6655,#f0e2c1 35%,#a99d87 80%,#393126);clip-path:polygon(0 0,100% 0,83% 100%,60% 80%,38% 100%,16% 75%);border-radius:0 0 3px 3px}
+#fnafJumpscare .bear-teeth i:nth-child(2n){height:34%;transform:translateY(4px) rotate(2deg)}
+#fnafJumpscare .bear-teeth i:nth-child(3n){height:48%;transform:translateY(-2px) rotate(-3deg)}
+@keyframes deadEyeFlicker{from{opacity:.72}to{opacity:1}}
+@keyframes jawRattle{from{transform:translateY(-1px) rotate(-.3deg)}to{transform:translateY(2px) rotate(.4deg)}}
+@media(prefers-reduced-motion:reduce){#fnafJumpscare.active,#fnafJumpscare .scare-face,#fnafJumpscare .bear-eye:after,#fnafJumpscare .bear-jaw{animation-duration:.01ms;animation-iteration-count:1}}
+
 </style>
 </head>
 <body>
@@ -83,9 +102,9 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.36</div>
+<div class="footer">Matthew Clicker · v1.37</div>
 </div>
-<div id="fnafJumpscare" aria-hidden="true"><div class="scare-face"><div class="bear-ear left"></div><div class="bear-ear right"></div><div class="bear-head"><div class="bear-eye left"></div><div class="bear-eye right"></div><div class="bear-muzzle"></div><div class="bear-nose"></div><div class="bear-jaw"><div class="bear-teeth"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div><div class="scare-caption">IT’S ME</div></div>
+<div id="fnafJumpscare" aria-hidden="true"><div class="scare-face"><div class="bear-ear left"></div><div class="bear-ear right"></div><div class="bear-head"><div class="bear-eye left"></div><div class="bear-eye right"></div><div class="bear-muzzle"></div><div class="bear-nose"></div><div class="bear-jaw"><div class="bear-teeth"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div></div>
 <div id="floatbox"></div>
 <div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
 <script>
