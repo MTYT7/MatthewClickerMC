@@ -257,12 +257,12 @@ function startBearParticles(){
     for(let i=0;i<6;i++){g.fillStyle="#c6b18e";g.fillRect(72+i*13,188,7,9)}
     const img=g.getImageData(0,0,ow,oh),scale=Math.min(w*.76/ow,h*.86/oh),ox=(w-ow*scale)/2,oy=(h-oh*scale)/2;
     const targets=[];
-    for(let y=0;y<oh;y+=2)for(let x=0;x<ow;x+=2){
+    for(let y=0;y<oh;y+=4)for(let x=0;x<ow;x+=4){
       const k=(y*ow+x)*4;if(img.data[k+3]>100){
         // Keep the original artwork's colors instead of assigning random rainbow dots.
         const shade=.82+Math.random()*.32;
         const c="rgb("+Math.min(255,img.data[k]*shade|0)+","+Math.min(255,img.data[k+1]*shade|0)+","+Math.min(255,img.data[k+2]*shade|0)+")";
-        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:1.25+Math.random()*1.1,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
+        targets.push({x:ox+x*scale,y:oy+y*scale,c,r:2.1+Math.random()*1.25,phase:Math.random()*6.28,glow:img.data[k]>220&&img.data[k+1]>130});
       }
     }
     bearParticleDots=targets.map(t=>({...t,sx:Math.random()*w,sy:Math.random()*h,delay:Math.random()*.35}));
