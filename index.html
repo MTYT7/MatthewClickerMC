@@ -140,6 +140,7 @@ small{color:#d7c6e8}.close{float:right}
 <h2 style="text-align:center;color:#a5f3fc">⚔️ MATTHEW RPG: THE FALLEN LIGHT</h2>
 <div id="rpgScene" style="background:#100b18;border:2px solid #6d5a91;border-radius:12px;padding:16px;min-height:155px;box-shadow:inset 0 0 22px #0008">
 <div id="rpgLocation" style="color:#a5f3fc;font-size:12px;letter-spacing:2px;margin-bottom:10px">THE QUIET KINGDOM</div>
+<div id="rpgArt" aria-label="Pixel art scene" style="display:grid;grid-template-columns:repeat(12,12px);gap:2px;justify-content:center;margin:0 auto 14px"></div>
 <div id="rpgDialogue" style="font-size:17px;line-height:1.6;white-space:pre-line">god leo has given up on us....</div>
 </div>
 <div id="rpgStats" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0;color:#fde68a"><span>❤️ HP: <b id="rpgHP">24 / 24</b></span><span>✦ SOUL: <b id="rpgSoul">0</b></span><span>☠️ Foes: <b id="rpgBoss">None</b></span></div>
@@ -735,11 +736,19 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
   {loc:"THE BROKEN SHRINE",lines:["Beyond the woods, a shrine lies split in two.","A golden mask floats above the altar. THE HOLLOW KNIGHT awakens.","HOLLOW KNIGHT: FAITH IS A CHAIN. I WILL BREAK YOURS."],boss:{name:"THE HOLLOW KNIGHT",hp:28,atk:5,desc:"A knight whose vows outlived the god he served."}},
   {loc:"THE LAST LIGHT",lines:["A stairway spirals into a sky with no stars.","At the summit, a familiar figure waits: GOD LEO.","GOD LEO: I did not give up on you. I gave up believing I could save you all alone.","GOD LEO: Show me what you have learned. Let this be our final battle."],boss:{name:"GOD LEO",hp:38,atk:6,desc:"The fallen light. Fight, listen, or choose mercy."}}
  ];
- function say(text,loc){$("rpgDialogue").textContent=text;$("rpgLocation").textContent=loc||"THE QUIET KINGDOM"}
+ function drawArt(loc,text){const el=$("rpgArt");if(!el)return;const key=((loc||"")+" "+(text||"")).toLowerCase();let rows;
+  if(key.includes("mourn")||key.includes("woods"))rows=["....GGGG....","...GWWG.....","..GWWWWG....","...BBBB.....","..BBOOBB....",".BBBBBBBB...",".BB.BB.BB....","....BB......","...B..B.....","..B....B...."];
+  else if(key.includes("knight")||key.includes("shrine"))rows=["....YYYY....","...YKKKY....","...YKKKY....","....YYYY....","..RRYYYYRR..","..RRYYYYRR..","...RRRRRR...","....R..R....","...R....R...","..R......R.."];
+  else if(key.includes("leo")||key.includes("light"))rows=["....YYYY....","...YWWWWY...","..YWWWWWWY..","..YWWYYWWY..","...YWWWWY...","....YYYY....","..PPYYYYPP..","..PPYYYYPP..","...PP..PP...","..PP....PP.."];
+  else rows=["....GGGG....","...G....G...","..G..YY..G..","..G.YYYY.G..","...G.YY.G...","....GGGG....","..BBBBBBBB..","..B.BB.BB.B..","....BB......","...B..B....."];
+  const palette={G:"#34d399",W:"#f8fafc",B:"#64748b",O:"#fb923c",Y:"#facc15",K:"#27272a",R:"#ef4444",P:"#a78bfa"};
+  el.innerHTML=rows.join("").split("").map(ch=>ch==="."?'<span style="width:12px;height:12px"></span>':'<span style="width:12px;height:12px;border-radius:50%;display:block;background:'+palette[ch]+';box-shadow:0 0 5px '+palette[ch]+'66"></span>').join("");
+}
+ function say(text,loc){$("rpgDialogue").textContent=text;$("rpgLocation").textContent=loc||"THE QUIET KINGDOM";drawArt(loc,text)}
  function choices(arr){$("rpgChoices").innerHTML=arr.map((x,i)=>'<button style="background:'+(x.color||"#43305b")+';color:white;border:1px solid #a78bfa;padding:13px 8px" onclick="rpgChoose(\''+x.id+'\')">'+x.label+'</button>').join("")}
  function stats(){ $("rpgHP").textContent=hp+" / "+maxHp;$("rpgSoul").textContent=soul;$("rpgBoss").textContent=foe?foe.name:"None" }
  function hint(t){$("rpgHint").textContent=t}
- function intro(){chapter=0;hp=maxHp=24;soul=0;foe=null;turn=0;guard=false;finished=false;spared=[];say("god leo has given up on us....\n\nThe kingdom has forgotten the sound of hope. Aiden looks toward the sealed road.\n\nAIDEN: If that's true... why is the old shrine still glowing?","THE QUIET KINGDOM");hint("Your choices shape the journey.");choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"},{id:"listen",label:"♡ Listen to the silence"}]);stats()}
+ function intro(){chapter=0;hp=maxHp=24;soul=0;foe=null;turn=0;guard=false;finished=false;spared=[];window.rpgAttackBonus=0;window.rpgHealBonus=0;say("god leo has given up on us....\n\nThe kingdom has forgotten the sound of hope. Aiden looks toward the sealed road.\n\nAIDEN: If that's true... why is the old shrine still glowing?","THE QUIET KINGDOM");hint("Explore, make friends, and upgrade with Matthew Points before bosses.");choices([{id:"begin",label:"▶ Begin the journey",color:"#0e7490"},{id:"explore",label:"🧭 Explore the village"},{id:"upgrade",label:"⬆ Upgrade with Matthew Points"},{id:"listen",label:"♡ Listen to the silence"}]);stats()}
  function beginChapter(){chapter=1;chapterDialogue(0)}
  function chapterDialogue(index){const c=chapters[chapter];say(c.lines[index],c.loc);if(index<c.lines.length-1)choices([{id:"nextline",label:"▼ Continue",color:"#0e7490"}]);else if(c.boss){foe={...c.boss,maxHp:c.boss.hp,stage:0};hint(foe.desc);stats();choices([{id:"fight",label:"⚔️ Face "+foe.name,color:"#991b1b"},{id:"talk",label:"♡ Talk first"},{id:"inspect",label:"◉ Inspect foe"},{id:"run",label:"↩ Try to flee"}])}else{choices([{id:"begin",label:"▶ Set out",color:"#0e7490"}])}}
  function attack(){if(!foe)return;let dmg=5+Math.floor(Math.random()*5);if(chapter===3)dmg=Math.max(2,dmg-1);foe.hp-=dmg;say("You step forward and strike.\n\n"+foe.name+" loses "+dmg+" HP.");if(foe.hp<=0){victory(false);return}enemyTurn()}
