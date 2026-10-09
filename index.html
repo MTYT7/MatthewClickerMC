@@ -150,6 +150,8 @@ small{color:#d7c6e8}.close{float:right}
 </div>
 <p id="browserHint" style="font-size:12px;opacity:.85">Some sites block embedded viewing. If the page won't load, use “Open in new tab”.</p>
 <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0">
+<button onclick="browserBack()">← Back</button>
+<button onclick="browserForward()">Forward →</button>
 <button onclick="browserOpenTab()">↗ Open in new tab</button>
 <button class="gm-secondary" onclick="browserReload()">⟳ Reload page</button>
 </div>
@@ -746,8 +748,8 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
  function randShape(){return shapes[Math.floor(Math.random()*shapes.length)].map(r=>r.slice())}
  function spawnPieces(){shapesNow=[randShape(),randShape(),randShape()];selected=shapesNow.findIndex(Boolean);drawPieces()}
  function fits(shape,x,y){for(let r=0;r<shape.length;r++)for(let c=0;c<shape[r].length;c++)if(shape[r][c]&&(x+c>=N||y+r>=N||grid[y+r][x+c]))return false;return true}
- function drawPieces(){piecesEl.innerHTML=shapesNow.map((sh,i)=>sh?'<button class="bb-piece'+(selected===i?' selected':'')+'" onclick="bbSelect('+i+')">Shape '+(i+1)+'<div class="bb-mini">'+sh.flatMap(row=>row.map(v=>'<span class="bb-mini-cell'+(v?' filled':'')+'"></span>')).join("")+'</div></button>':'<div class="bb-piece" style="opacity:.25">Used</div>').join("")}
- function draw(){boardEl.innerHTML=grid.flatMap((row,y)=>row.map((v,x)=>{let preview="",invalid=false;if(hoverCell&&selected>=0&&shapesNow[selected]){const sh=shapesNow[selected],dx=x-hoverCell.x,dy=y-hoverCell.y;if(dx>=0&&dy>=0&&dy<sh.length&&dx<sh[dy].length&&sh[dy][dx]){preview=" preview";invalid=!fits(sh,hoverCell.x,hoverCell.y)}}return '<div class="bb-cell'+(v?' filled':'')+preview+(invalid?' preview-invalid':'')+'" onclick="bbPlace('+x+','+y+')" onmouseenter="bbHover('+x+','+y+')" ontouchstart="bbHover('+x+','+y+')" data-x="'+x+'" data-y="'+y+'"></div>'})).join("");document.getElementById("bbScore").textContent=score;document.getElementById("bbBest").textContent=best}
+ function drawPieces(){piecesEl.innerHTML=shapesNow.map((sh,i)=>sh?'<button draggable="true" ondragstart="bbSelect('+i+')" class="bb-piece'+(selected===i?' selected':'')+'" onclick="bbSelect('+i+')">Shape '+(i+1)+'<div class="bb-mini">'+sh.flatMap(row=>row.map(v=>'<span class="bb-mini-cell'+(v?' filled':'')+'"></span>')).join("")+'</div></button>':'<div class="bb-piece" style="opacity:.25">Used</div>').join("")}
+ function draw(){boardEl.innerHTML=grid.flatMap((row,y)=>row.map((v,x)=>{let preview="",invalid=false;if(hoverCell&&selected>=0&&shapesNow[selected]){const sh=shapesNow[selected],dx=x-hoverCell.x,dy=y-hoverCell.y;if(dx>=0&&dy>=0&&dy<sh.length&&dx<sh[dy].length&&sh[dy][dx]){preview=" preview";invalid=!fits(sh,hoverCell.x,hoverCell.y)}}return '<div class="bb-cell'+(v?' filled':'')+preview+(invalid?' preview-invalid':'')+'" ondragover="event.preventDefault()" ondrop="event.preventDefault();bbPlace('+x+','+y+')" onclick="bbPlace('+x+','+y+')" onmouseenter="bbHover('+x+','+y+')"  ontouchstart="bbHover('+x+','+y+')" data-x="'+x+'" data-y="'+y+'"></div>'})).join("");document.getElementById("bbScore").textContent=score;document.getElementById("bbBest").textContent=best}
  function finish(){ended=true;claimed=true;const reward=Math.floor(score/10);const crystals=Math.floor(score/500);try{if(typeof s!=="undefined"){s.clicks+=reward;s.total+=reward;s.bestScore=Math.max(s.bestScore||0,s.total);s.crystals=(s.crystals||0)+crystals;save();refresh()}}catch(e){console.warn("Reward could not be saved",e)}document.getElementById("bbReward").textContent="🏆 Reward: +"+reward.toLocaleString()+" Matthew Points"+(crystals?" and +"+crystals+" 💎 crystals":"")+"!";document.getElementById("bbMessage").textContent="No available placements. Start a new game to play again."}
  function checkMoves(){for(const sh of shapesNow)if(sh)for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(fits(sh,x,y))return true;return false}
  window.startBlockBlast=function(){home.style.display="none";tetris.style.display="none";document.getElementById("snakeScreen").style.display="none";screen.style.display="block";grid=fresh();hoverCell=null;score=0;ended=false;claimed=false;document.getElementById("bbReward").textContent="";document.getElementById("bbMessage").textContent="Select a shape, then tap a board position.";spawnPieces();draw()};
@@ -775,11 +777,14 @@ window.addEventListener("beforeunload",()=>{save()});document.addEventListener("
 </script>
 <script>
 (function(){
- let currentUrl="";
+ let currentUrl="",browserHistory=[],browserHistoryIndex=-1;
  function normalize(value){let v=(value||"").trim();if(!v)return "";if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)){if(v.includes(".")&&!v.includes(" "))v="https://"+v;else v="https://www.google.com/search?q="+encodeURIComponent(v)}try{const u=new URL(v);if(u.protocol!=="http:"&&u.protocol!=="https:")return "";return u.href}catch(e){return ""}}
  window.openBrowserPanel=function(){document.getElementById("gameMenuHome").style.display="none";document.getElementById("tetrisScreen").style.display="none";document.getElementById("blockBlastScreen").style.display="none";document.getElementById("snakeScreen").style.display="none";document.getElementById("browserScreen").style.display="block";if(window.stopSnake)stopSnake();};
- window.browserGo=function(e){if(e)e.preventDefault();const value=document.getElementById("browserAddress").value;const url=normalize(value);if(!url){document.getElementById("browserHint").textContent="Enter a valid website address or search term.";return}currentUrl=url;document.getElementById("browserAddress").value=url;document.getElementById("browserFrame").src=url;document.getElementById("browserHint").textContent="Trying to load "+url+" — some websites block embedded viewing, so open a new tab if needed.";};
- window.browserQuick=function(url){document.getElementById("browserAddress").value=url;browserGo();};
+ function browserLoad(url,addHistory){if(!url)return;currentUrl=url;if(addHistory){browserHistory=browserHistory.slice(0,browserHistoryIndex+1);browserHistory.push(url);browserHistoryIndex=browserHistory.length-1}document.getElementById("browserAddress").value=url;document.getElementById("browserFrame").src=url;document.getElementById("browserHint").textContent="Loading "+url+". If this site blocks embedding, use Open in new tab.";}
+ window.browserGo=function(e){if(e)e.preventDefault();const url=normalize(document.getElementById("browserAddress").value);if(!url){document.getElementById("browserHint").textContent="Enter a valid website address or search term.";return}browserLoad(url,true);};
+ window.browserBack=function(){if(browserHistoryIndex>0){browserHistoryIndex--;browserLoad(browserHistory[browserHistoryIndex],false)}};
+ window.browserForward=function(){if(browserHistoryIndex<browserHistory.length-1){browserHistoryIndex++;browserLoad(browserHistory[browserHistoryIndex],false)}};
+ window.browserQuick=function(url){browserLoad(normalize(url),true);};
  window.browserOpenTab=function(){if(!currentUrl){browserGo();if(!currentUrl)return}if(currentUrl)window.open(currentUrl,"_blank","noopener,noreferrer");};
  window.browserReload=function(){const f=document.getElementById("browserFrame");if(currentUrl)f.src=currentUrl};
 })();
