@@ -618,6 +618,38 @@ function startRush(){if(rush)return;rush=true;rushEnd=Date.now()/1000+12;setStat
 function lbConfigured(){return !!(FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId&&FIREBASE_CONFIG.databaseURL&&!FIREBASE_CONFIG.apiKey.startsWith("PASTE_")&&!FIREBASE_CONFIG.projectId.startsWith("PASTE_")&&!FIREBASE_CONFIG.databaseURL.startsWith("PASTE_"))}
 function lbName(){return localStorage.getItem(LB_NAME_KEY)||""}
 function leaderboard(){const name=lbName();openModal(`<h2>🏆 Matthew Clicker Global Leaderboard</h2><p class="leaderboard-note">Worldwide rankings · Total Matthew Points earned · Live updates when scores change.</p><div id="lbStatus" class="leaderboard-status">Connecting to leaderboard…</div><div id="lbRows"><p>Loading rankings…</p></div><p><label for="lbNameInput">Your leaderboard username</label><input id="lbNameInput" class="leaderboard-input" maxlength="20" value="${escapeHtml(name)}" placeholder="Enter a player name"><button onclick="saveLeaderboardName()">Save Name & Submit Score</button> <button onclick="refreshLeaderboard()">Reconnect</button></p><p class="leaderboard-note">Registration reward: +1,000 Matthew Points once per account. Each save submits separately using its current total score, not an all-time personal best. You can delete your own submissions here. Rank rewards: #1 x5, #2 x3, #3 x1.5, everyone else x1. Your username and scores are public. Use a nickname, not private information. Scores are browser-submitted and can be cheated.</p>`);refreshLeaderboard()}
+function openSuggestions(){
+ openModal('<h2>💡 Community Suggestions</h2><p class="leaderboard-note">Share ideas for new features, upgrades, games, or improvements. Published suggestions are visible to everyone, so don’t include private information.</p><div id="suggestionStatus" class="leaderboard-status">Loading community suggestions…</div><label for="suggestionTitle">Suggestion title</label><input id="suggestionTitle" class="leaderboard-input" maxlength="70" placeholder="e.g. Add a trading system"><label for="suggestionBody">Details (optional)</label><textarea id="suggestionBody" class="leaderboard-input" maxlength="500" rows="3" placeholder="Explain how it would work…"></textarea><label for="suggestionAuthor">Display name</label><input id="suggestionAuthor" class="leaderboard-input" maxlength="20" value="'+escapeHtml(lbName()||"Matthew Player")+'" placeholder="Nickname"><button onclick="publishSuggestion()">📣 Publish Suggestion</button> <button onclick="loadSuggestions()">🔄 Refresh</button><div id="suggestionRows"></div>');
+ loadSuggestions();
+}
+function suggestionStatus(message){const el=document.getElementById("suggestionStatus");if(el)el.textContent=message}
+async function loadSuggestions(){
+ const rows=document.getElementById("suggestionRows");if(!rows)return;
+ if(!lbConfigured()){suggestionStatus("Community publishing needs the Firebase connection.");rows.innerHTML="";return}
+ try{
+  const token=await lbGetToken();
+  const response=await fetch(lbEndpoint("suggestions",token));
+  if(!response.ok)throw Error("Could not read suggestions (HTTP "+response.status+").");
+  const data=await response.json();const list=Object.entries(data||{}).map(([id,v])=>({id,...v})).filter(v=>v&&typeof v.title==="string").sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+  suggestionStatus(list.length+" published suggestion"+(list.length===1?"":"s")+" · newest first");
+  rows.innerHTML='<h3>📬 Published by players</h3>'+(list.length?list.map(v=>'<article class="save-slot-card"><strong>'+escapeHtml(v.title)+'</strong><p>'+escapeHtml(v.body||"")+'</p><small>By '+escapeHtml(v.author||"Matthew Player")+' · '+escapeHtml(new Date(Number(v.createdAt)||0).toLocaleDateString())+'</small></article>').join(""):'<p class="leaderboard-note">No suggestions yet. Be the first to publish one!</p>');
+ }catch(e){suggestionStatus("Could not load suggestions: "+e.message);if(rows)rows.innerHTML='<p class="leaderboard-note">If Firebase says permission denied, the database rules need to allow signed-in players to read the suggestions list.</p>'}
+}
+async function publishSuggestion(){
+ const titleEl=document.getElementById("suggestionTitle"),bodyEl=document.getElementById("suggestionBody"),authorEl=document.getElementById("suggestionAuthor");
+ if(!titleEl||!bodyEl||!authorEl)return;
+ const title=titleEl.value.trim().replace(/\s+/g," ").slice(0,70),body=bodyEl.value.trim().slice(0,500),author=authorEl.value.trim().replace(/\s+/g," ").slice(0,20)||"Matthew Player";
+ if(title.length<4){suggestionStatus("Give your suggestion a title with at least 4 characters.");return}
+ if(!lbConfigured()){suggestionStatus("Firebase is not configured, so this suggestion cannot be published.");return}
+ const button=[...modalContentEl.querySelectorAll("button")].find(b=>b.textContent.includes("Publish Suggestion"));if(button)button.disabled=true;
+ try{
+  const token=await lbGetToken();
+  const response=await fetch(lbEndpoint("suggestions",token),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title,body,author,createdAt:Date.now(),uid:lbAuth.localId})});
+  if(!response.ok){let detail="HTTP "+response.status;try{detail=(await response.json()).error||detail}catch{}throw Error(detail)}
+  titleEl.value="";bodyEl.value="";suggestionStatus("🎉 Suggestion published!");await loadSuggestions();
+ }catch(e){suggestionStatus("Could not publish: "+e.message);const rows=document.getElementById("suggestionRows");if(rows)rows.insertAdjacentHTML("afterbegin",'<p class="leaderboard-note">If the error is PERMISSION_DENIED, Firebase Realtime Database rules must allow authenticated users to read and create entries under <code>suggestions</code>.</p>')}
+ finally{if(button)button.disabled=false}
+}
 function saveLeaderboardName(){const el=document.getElementById("lbNameInput");if(!el)return;const name=el.value.trim().replace(/\s+/g," ").slice(0,20);if(name.length<2){alert("Please choose a name with at least 2 characters.");return}localStorage.setItem(LB_NAME_KEY,name);submitLeaderboard(true).then(()=>refreshLeaderboard())}
 function lbSetStatus(msg){const el=document.getElementById("lbStatus");if(el)el.textContent=msg}
 function lbEndpoint(path,token){return FIREBASE_CONFIG.databaseURL.replace(/\/$/,"")+"/"+path+".json?auth="+encodeURIComponent(token)}
@@ -706,7 +738,7 @@ function duelFinish(won,message){
 }
 document.addEventListener("keydown",function(e){if((e.code==="Space"||e.code==="Enter")&&duelState&&duelState.phase!=="done"&&!modalEl.classList.contains("hidden")&&!["INPUT","TEXTAREA","SELECT"].includes(e.target&&e.target.tagName)){e.preventDefault();duelPullTrigger()}});
 
-function buildControls(){controlsEl.innerHTML=`<button onclick="showUpgrades()">Upgrades</button><button onclick="openAchievements()">Achievements</button><button onclick="leaderboard()">🏆 Global Leaderboard</button><button onclick="stats()">Statistics</button><button onclick="settings()">Settings</button><button onclick="save()">Save</button><button onclick="safeOpenSaveManager()">Save Manager</button><button onclick="reset()">Reset</button><button onclick="chest()">Daily Chest</button><button onclick="spin()">Lucky Spin</button><button onclick="crystalShop()">Crystal Shop</button><button id="profileShopMenuButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile Shop</button><button onclick="codes()">Redeem Codes</button><button onclick="window.close()">Quit</button>`}
+function buildControls(){controlsEl.innerHTML=`<button onclick="showUpgrades()">Upgrades</button><button onclick="openAchievements()">Achievements</button><button onclick="leaderboard()">🏆 Global Leaderboard</button><button onclick="openSuggestions()">💡 Community Suggestions</button><button onclick="stats()">Statistics</button><button onclick="settings()">Settings</button><button onclick="save()">Save</button><button onclick="safeOpenSaveManager()">Save Manager</button><button onclick="reset()">Reset</button><button onclick="chest()">Daily Chest</button><button onclick="spin()">Lucky Spin</button><button onclick="crystalShop()">Crystal Shop</button><button id="profileShopMenuButton" type="button" onclick="safeOpenProfileShop()">🎨 Profile Shop</button><button onclick="codes()">Redeem Codes</button><button onclick="window.close()">Quit</button>`}
 function showRuntimeError(where,err){console.error(where,err);try{modalContentEl.innerHTML="<h2>Game Error</h2><p>"+escapeHtml(where+": "+(err?.message||String(err)))+"</p><p>Send this exact error text to ChatGPT.</p>";modalEl.classList.remove("hidden")}catch(displayErr){alert(where+": "+(err?.message||String(err)))}}
 function safeOpenProfileShop(){try{profileShop()}catch(err){showRuntimeError("Profile shop failed",err)}}
 function safeOpenSaveManager(){try{saveManager()}catch(err){showRuntimeError("Save Manager failed",err)}}
