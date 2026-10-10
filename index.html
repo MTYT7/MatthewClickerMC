@@ -657,25 +657,32 @@ let duelState=null;
 window.startWildWestDuel=function(){window.closeGameMenu();openQuickDraw()};
 function openQuickDraw(){
  duelStop();
- openModal('<div class="duel-stage"><div class="duel-title">🤠 HIGH NOON 🤠</div><p>The Wild West Double-or-Nothing</p><div class="duel-scene"><div><div class="duel-cowboy">🤠</div><b>YOU</b></div><div class="duel-vs">VS</div><div><div class="duel-cowboy">💀</div><b>OUTLAW</b></div></div><div id="duelStatus" class="duel-status">Put your points on the line, partner.</div><label for="duelBet" style="display:block;text-align:left;margin:12px 0 5px">Your wager (Matthew Points)</label><input id="duelBet" type="number" min="1" step="1" value="1000" style="box-sizing:border-box;width:100%;padding:12px;border-radius:7px;border:1px solid #c8954d;background:#180e21;color:#fff8e7;font-size:18px"><div style="display:flex;gap:7px;flex-wrap:wrap;margin:8px 0"><button onclick="duelSetBet(0.25)">25%</button><button onclick="duelSetBet(0.5)">50%</button><button onclick="duelSetBet(1)">ALL IN</button></div><button id="duelStartButton" class="duel-draw" onclick="duelStart()">🤠 PLACE BET & START</button><button id="duelDrawButton" class="duel-draw hidden" onclick="duelPullTrigger()">🔫 DRAW!</button><p class="duel-tiny">Wait for DRAW! then click or press SPACE. Jump the gun or react too slowly and your whole wager is gone.</p><div id="duelResult" class="duel-tiny">Win: get 2× your wager back. Lose: wager gone.</div><button onclick="openQuickDraw()">🔁 Rematch</button></div>');
- duelState={phase:"betting",timer:null,started:0,bet:0};
+ openModal('<div class="duel-stage"><div class="duel-title">🤠 HIGH NOON 🤠</div><p>The Wild West Double-or-Nothing</p><div class="duel-scene"><div><div class="duel-cowboy">🤠</div><b>YOU</b></div><div class="duel-vs">VS</div><div><div class="duel-cowboy">💀</div><b>OUTLAW</b></div></div><div id="duelStatus" class="duel-status">Put your points on the line, partner.</div><label for="duelCurrency" style="display:block;text-align:left;margin:12px 0 5px">Choose what to wager</label><select id="duelCurrency" onchange="duelSetCurrency(this.value)" style="width:100%;padding:11px;background:#180e21;color:#fff8e7"><option value="points">💰 Matthew Points</option><option value="crystals">💎 Matthew Crystals</option></select><label id="duelBetLabel" for="duelBet" style="display:block;text-align:left;margin:12px 0 5px">Your wager (Matthew Points)</label><input id="duelBet" type="number" min="1" step="1" value="1000" oninput="duelSyncSlider(this.value)" style="box-sizing:border-box;width:100%;padding:12px;background:#180e21;color:#fff8e7;font-size:18px"><input id="duelBetSlider" type="range" min="1" max="1000" step="1" value="1000" oninput="duelSyncInput(this.value)" style="width:100%;margin:10px 0;accent-color:#ffb703"><div id="duelBalance" class="duel-tiny">Available: 0 points</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin:8px 0"><button onclick="duelSetBet(0.25)">25%</button><button onclick="duelSetBet(0.5)">50%</button><button onclick="duelSetBet(1)">ALL IN</button></div><button id="duelStartButton" class="duel-draw" onclick="duelStart()">🤠 PLACE BET & START</button><button id="duelDrawButton" class="duel-draw hidden" onclick="duelPullTrigger()">🔫 DRAW!</button><p class="duel-tiny">Wait for DRAW! then click or press SPACE. Jump the gun or react too slowly and your whole wager is gone.</p><div id="duelResult" class="duel-tiny">Win: get 2× your wager back. Lose: wager gone.</div><button onclick="openQuickDraw()">🔁 Rematch</button></div>');
+ duelState={phase:"betting",timer:null,started:0,bet:0,currency:"points"};duelRefreshBetUI();
 }
-function duelSetBet(fraction){const input=document.getElementById("duelBet");if(input)input.value=Math.max(1,Math.floor(s.clicks*fraction))}
+function duelBalance(){return duelState&&duelState.currency==="crystals"?(Number(s.crystals)||0):(Number(s.clicks)||0)}
+function duelCurrencyName(){return duelState&&duelState.currency==="crystals"?"Matthew Crystals":"Matthew Points"}
+function duelRefreshBetUI(){const b=duelBalance(),i=document.getElementById("duelBet"),r=document.getElementById("duelBetSlider"),l=document.getElementById("duelBetLabel"),a=document.getElementById("duelBalance");if(i){i.max=Math.max(1,b);if(!i.value||Number(i.value)>b)i.value=Math.max(1,b)}if(r){r.max=Math.max(1,b);r.value=Math.min(Number(i&&i.value)||1,Math.max(1,b))}if(l)l.textContent="Your wager ("+duelCurrencyName()+")";if(a)a.textContent="Available: "+fmt(b)+(duelState.currency==="crystals"?" crystals":" points")}
+function duelSetCurrency(c){if(!duelState||duelState.phase!=="betting")return;duelState.currency=c==="crystals"?"crystals":"points";const i=document.getElementById("duelBet");if(i)i.value=Math.max(1,duelBalance());duelRefreshBetUI()}
+function duelSyncSlider(v){const r=document.getElementById("duelBetSlider");if(r)r.value=Math.min(Number(v)||1,Number(r.max)||1)}
+function duelSyncInput(v){const i=document.getElementById("duelBet");if(i)i.value=v}
+function duelSetBet(f){const i=document.getElementById("duelBet");if(i)i.value=Math.max(1,Math.floor(duelBalance()*f));duelRefreshBetUI()}
+
 function duelStart(){
  if(!duelState||duelState.phase!=="betting")return;
- const input=document.getElementById("duelBet");
- const bet=Number(input&&input.value);
- if(!Number.isSafeInteger(bet)||bet<1){alert("Enter a whole-number wager of at least 1 point, partner.");return}
- if(bet>s.clicks){alert("You don't have enough Matthew Points for that wager!");return}
+ const input=document.getElementById("duelBet"),bet=Number(input&&input.value),currency=duelState.currency;
+ if(!Number.isSafeInteger(bet)||bet<1){alert("Enter a whole-number wager of at least 1, partner.");return}
+ if(bet>duelBalance()){alert("You don't have enough "+duelCurrencyName()+" for that wager!");return}
  duelState.bet=bet;duelState.phase="waiting";
- s.clicks-=bet;refresh();save();
+ if(currency==="crystals")s.crystals-=bet;else s.clicks-=bet;refresh();refreshProfile();save();
  const st=document.getElementById("duelStatus"),start=document.getElementById("duelStartButton"),btn=document.getElementById("duelDrawButton"),r=document.getElementById("duelResult");
- if(st)st.textContent="BET LOCKED: "+fmt(bet)+" points. Keep your hand steady...";
+ if(st)st.textContent="BET LOCKED: "+fmt(bet)+(currency==="crystals"?" crystals":" points")+". Keep your hand steady...";
  if(start)start.classList.add("hidden");
  if(input)input.disabled=true;
+ const cs=document.getElementById("duelCurrency"),sl=document.getElementById("duelBetSlider");if(cs)cs.disabled=true;if(sl)sl.disabled=true;
  document.querySelectorAll(".duel-stage button[onclick^='duelSetBet']").forEach(b=>b.disabled=true);
  if(btn)btn.classList.remove("hidden");
- if(r)r.textContent="Your wager is locked in. Win to receive "+fmt(bet*2)+" points; lose and it's gone.";
+ if(r)r.textContent="Your wager is locked in. Win to receive "+fmt(bet*2)+(currency==="crystals"?" crystals":" points")+"; lose and it is gone.";
  duelState.timer=setTimeout(()=>{if(!duelState||duelState.phase!=="waiting")return;duelState.phase="ready";const status=document.getElementById("duelStatus"),draw=document.getElementById("duelDrawButton");if(status)status.textContent="DRAW!";if(draw){draw.textContent="🔫 DRAW!";draw.classList.add("ready")}duelState.started=performance.now();duelState.timer=setTimeout(()=>{if(duelState&&duelState.phase==="ready")duelFinish(false,"Too slow! The outlaw got you.")},1600)},1000+Math.random()*2500);
 }
 function duelStop(){if(duelState&&duelState.timer)clearTimeout(duelState.timer);duelState=null}
@@ -693,9 +700,9 @@ function duelFinish(won,message){
  const st=document.getElementById("duelStatus"),btn=document.getElementById("duelDrawButton"),r=document.getElementById("duelResult");
  if(st){st.textContent=message;st.className="duel-status "+(won?"duel-perfect":"duel-miss")}
  if(btn){btn.textContent=won?"🏆 YOU WON 2×!":"💀 WAGER LOST";btn.disabled=true;btn.classList.remove("ready")}
- const bet=duelState.bet;
- if(won){const payout=bet*2;s.clicks+=payout;s.total+=payout;s.manual+=payout;refresh();save();playSound("buy");if(r)r.textContent="YOU WON! "+fmt(payout)+" points paid out — your wager doubled!"}
- else{refresh();save();if(r)r.textContent=fmt(bet)+" points gone. No refund, partner. Try again if you dare."}
+ const bet=duelState.bet,currency=duelState.currency,name=currency==="crystals"?"crystals":"points";
+ if(won){const payout=bet*2;if(currency==="crystals")s.crystals+=payout;else{s.clicks+=payout;s.total+=payout;s.manual+=payout}refresh();refreshProfile();save();playSound("buy");if(r)r.textContent="YOU WON! "+fmt(payout)+" "+name+" paid out — your wager doubled!"}
+ else{refresh();refreshProfile();save();if(r)r.textContent=fmt(bet)+" "+name+" gone. No refund, partner. Try again if you dare."}
 }
 document.addEventListener("keydown",function(e){if((e.code==="Space"||e.code==="Enter")&&duelState&&duelState.phase!=="done"&&!modalEl.classList.contains("hidden")&&!["INPUT","TEXTAREA","SELECT"].includes(e.target&&e.target.tagName)){e.preventDefault();duelPullTrigger()}});
 
