@@ -840,7 +840,7 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  "THE HOLLOW KNIGHT":"You ask the knight who they were protecting.\n\nHOLLOW KNIGHT: The people. Even after they stopped praying.",
  "GOD LEO":"You tell Leo that everyone was scared, not faithless.\n\nGOD LEO: ...I know. I was scared too.",
  "INFINITE KYE":"You ask the stranger what it wants. For a long time, it says nothing.\n\nSTRANGER: I wanted someone to notice that I was still here.\n\nIts outline flickers. For a heartbeat, you see a tired face — then forget its features."
- };say(lines[foe.name]||"You choose your words carefully. The enemy hesitates.");hint("SOUL +1. Mercy grows stronger when you listen.");if((foe.name==="THE MOURNER"&&foe.stage>=2)||(foe.name==="THE HOLLOW KNIGHT"&&foe.stage>=2)||(foe.name==="GOD LEO"&&foe.stage>=3)||(foe.name==="INFINITE KYE"&&foe.stage>=2)){choices([{id:"spare",label:foe.name==="INFINITE KYE"?"♡ Let the stranger go":"♡ Offer mercy",color:"#047857"},{id:"attack",label:"⚔️ Attack anyway",color:"#991b1b"}]);}else choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Keep talking"},{id:"defend",label:"▣ Defend"}]);stats()}
+ };say(lines[foe.name]||"You choose your words carefully. The enemy hesitates.");hint("SOUL +1. Mercy grows stronger when you listen.");if((foe.name==="THE MOURNER"&&foe.stage>=2)||(foe.name==="THE HOLLOW KNIGHT"&&foe.stage>=2)||(foe.name==="GOD LEO"&&foe.stage>=5)||(foe.name==="INFINITE KYE"&&foe.stage>=2)){choices([{id:"spare",label:foe.name==="INFINITE KYE"?"♡ Let the stranger go":"♡ Offer mercy",color:"#047857"},{id:"attack",label:"⚔️ Attack anyway",color:"#991b1b"}]);}else choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Keep talking"},{id:"defend",label:"▣ Defend"}]);stats()}
  function defend(){if(!foe||battleActive)return;guard=true;say("You brace yourself. A silver shield flashes around your SOUL.","BATTLE");hint("Block active: the next dodge hit will deal reduced damage.");startDodge()}
  function enemyTurn(){if(!foe||battleActive)return;startDodge()}
  function victory(mercy){
@@ -849,11 +849,11 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  let routeRecord={mercy:[],kills:[]};
  try{routeRecord=JSON.parse(localStorage.getItem(routeKey)||'{"mercy":[],"kills":[]}')}catch(e){}
  routeRecord.mercy=Array.isArray(routeRecord.mercy)?routeRecord.mercy:[];routeRecord.kills=Array.isArray(routeRecord.kills)?routeRecord.kills:[];
- const routeList=mercy?routeRecord.mercy:routeRecord.kills;
- if(!routeList.includes(name))routeList.push(name);
+ if(!(mercy&&name==="INFINITE KYE")){const routeList=mercy?routeRecord.mercy:routeRecord.kills;if(!routeList.includes(name))routeList.push(name)}
  try{localStorage.setItem(routeKey,JSON.stringify(routeRecord))}catch(e){}
+ const mercyFoes=["THE MOURNER","THE HOLLOW KNIGHT","GOD LEO"];
  const allFoes=["THE MOURNER","THE HOLLOW KNIGHT","GOD LEO","INFINITE KYE"];
- if(allFoes.every(n=>routeRecord.mercy.includes(n))){s.ownedAccessories=s.ownedAccessories||[];if(!s.ownedAccessories.includes("dove"))s.ownedAccessories.push("dove")}
+ if(mercyFoes.every(n=>routeRecord.mercy.includes(n))){s.ownedAccessories=s.ownedAccessories||[];if(!s.ownedAccessories.includes("dove"))s.ownedAccessories.push("dove")}
  if(allFoes.every(n=>routeRecord.kills.includes(n))){s.ownedAccessories=s.ownedAccessories||[];if(!s.ownedAccessories.includes("devil"))s.ownedAccessories.push("devil")}
  if(name==="INFINITE KYE"){
   foe=null;finished=true;try{localStorage.setItem("matthewRpgKyeEnding","1")}catch(e){}soul+=5;hp=maxHp;
@@ -909,7 +909,7 @@ if(Math.random()<1/10000){setTimeout(()=>triggerRickroll(),1200)}
  else if(id==="fight"){say(foe.name+" blocks the path. Choose your action.","BATTLE");choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Talk"},{id:"defend",label:"▣ Defend"},{id:"inspect",label:"◉ Inspect"}])}
  else if(id==="attack")attack();else if(id==="talk")talk();else if(id==="defend")defend();else if(id==="inspect"){hint(foe.name+" — "+foe.desc+" HP "+foe.hp+"/"+foe.maxHp);choices([{id:"attack",label:"⚔️ Attack",color:"#991b1b"},{id:"talk",label:"♡ Talk"},{id:"defend",label:"▣ Defend"}])}
  else if(id==="run"){say("You turn to leave. The road behind you has disappeared.\n\nAiden: Looks like we're seeing this through together.");choices([{id:"attack",label:"⚔️ Face the foe",color:"#991b1b"},{id:"talk",label:"♡ Talk first"},{id:"explore",label:"🧭 Look for another way"}])}
- else if(id==="spare")victory(true);else if(id==="heal"){if(!foe)return;const restored=Math.min(maxHp-hp,9+(window.rpgHealBonus||0));hp+=restored;say("You eat a starfruit. A golden glow surrounds you. Restored "+restored+" HP.","BATTLE");stats();startDodge()}
+ else if(id==="spare"){if(foe&&foe.name==="INFINITE KYE"){foe.stage=Math.max(foe.stage||0,3);const ambushDamage=Math.min(hp-1,8+Math.floor(Math.random()*5));hp=Math.max(1,hp-ambushDamage);say("You lower your guard and offer mercy. Kye\u2019s outline SPLITS INTO SHADOWS\u2014this was a trap!\n\nINFINITE KYE: You thought I would let you walk away that easily?\n\nA hidden strike tears through the air. You take "+ambushDamage+" damage. Kye will not accept mercy. You must face the truth with your own hands.","SURPRISE ATTACK");hint("AMBUSH! Kye cannot be spared and does not count toward Dove of Mercy. Fight or talk, but mercy is no longer an option.");stats();choices([{id:"attack",label:"⚔️ Fight Kye",color:"#991b1b"},{id:"talk",label:"♡ Keep talking"},{id:"defend",label:"▣ Defend next attack"},{id:"heal",label:"✚ Heal with starfruit"}]);}else victory(true);}else if(id==="heal"){if(!foe)return;const restored=Math.min(maxHp-hp,9+(window.rpgHealBonus||0));hp+=restored;say("You eat a starfruit. A golden glow surrounds you. Restored "+restored+" HP.","BATTLE");stats();startDodge()}
  else if(id==="shrine"){chapter=2;chapterDialogue(0)}else if(id==="summit"){chapter=3;chapterDialogue(0)}else if(id==="restart")intro();else if(id==="menu")backToGameMenu()
  }; window.rpgRestart=intro;
  window.startMatthewRPG=function(){if(window.stopSnake)window.stopSnake();clearInterval(window.rpgTimer);screen.style.display="block";home.style.display="none";tetris.style.display="none";bb.style.display="none";snake.style.display="none";$("gameMenuOverlay").style.display="block";intro()};
