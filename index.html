@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
-<title>Matthew Clicker v1.40</title>
+<title>Matthew Clicker v1.41</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
 #app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}.save-score-badge{position:fixed;top:12px;right:12px;z-index:10;background:#180e21;border:1px solid #ffb703;border-radius:10px;padding:9px 12px;text-align:right;box-shadow:0 3px 12px #0006;max-width:calc(100vw - 24px);font-size:12px}.save-score-badge strong{display:block;color:#ffb703;font-size:15px;margin-top:3px}.save-score-badge small{display:block;color:#d7c6e8}@media(max-width:600px){.save-score-badge{position:absolute;top:8px;right:8px;padding:6px 8px;font-size:10px}.save-score-badge strong{font-size:12px}.title{padding-top:42px}}
@@ -114,7 +114,7 @@ small{color:#d7c6e8}.close{float:right}
 
 /* Wild West quick-draw minigame */
 .duel-stage{background:radial-gradient(ellipse at top,#70451f,#21140e 72%);border:2px solid #c8954d;border-radius:12px;padding:18px;text-align:center;color:#fff0c2}.duel-title{font-size:25px;font-weight:900;letter-spacing:3px;color:#ffd166;text-shadow:2px 3px #4b2510}.duel-scene{display:flex;justify-content:space-around;align-items:center;gap:12px;margin:18px 0}.duel-cowboy{font-size:48px;filter:drop-shadow(0 4px 0 #21140e)}.duel-vs{font-weight:900;color:#ffcf70}.duel-status{font-size:18px;font-weight:900;min-height:30px;margin:12px 0;color:#fff}.duel-draw{width:100%;font-size:22px!important;font-weight:900;background:#facc15!important;color:#391d08!important;border:3px solid #fff0a5!important;padding:16px!important}.duel-draw.ready{background:#ef4444!important;color:white!important;box-shadow:0 0 24px #ff3333}.duel-tiny{font-size:12px;color:#e8cfa4}.duel-perfect{color:#86efac!important}.duel-miss{color:#fca5a5!important}
-</style>
+.skill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.skill-node{background:#180e21;border:1px solid #76518b;border-radius:10px;padding:12px;min-width:0}.skill-node h3{margin:0 0 6px;color:#c4b5fd}.skill-node p{font-size:13px;color:#d7c6e8;min-height:38px}.skill-node button{width:100%;margin:3px 0}.skill-level{color:#ffb703;font-weight:800}@media(max-width:560px){.skill-grid{grid-template-columns:1fr}}</style>
 </head>
 <body>
 <div id="gameMenuOverlay" role="dialog" aria-modal="true" aria-label="Game menu">
@@ -176,8 +176,9 @@ small{color:#d7c6e8}.close{float:right}
 <div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 SCORE</strong><small id="saveBestValue">BEST: 0</small></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.40</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.41</div>
 <div class="sub">Click your way to Matthew greatness!</div>
+<div style="text-align:center;margin:8px 0"><button type="button" onclick="openSkillTree()" style="background:#5b21b6;border:2px solid #c4b5fd;color:white;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer">🌳 PERMANENT SKILL TREE</button></div>
 <div style="text-align:center;margin:12px 0"><button type="button" onclick="openGameMenu()" style="background:#7c3aed;border:2px solid #c4b5fd;color:white;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer">🎮 GAME MENU</button></div>
 
 <div class="sub" style="margin-top:8px;color:#00ffcc;font-weight:800">NEW: BRIGHTER COLOUR GLOWS + SOUND SETTINGS</div>
@@ -209,7 +210,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.40</div>
+<div class="footer">Matthew Clicker · v1.41</div>
 </div>
 <div id="fnafJumpscare" aria-hidden="true"><canvas id="bearParticleCanvas"></canvas></div>
 <div id="floatbox"></div>
@@ -260,16 +261,47 @@ function setBuyAmount(value){buyAmount=value;}
 
 function fmt(n){return Math.floor(n).toLocaleString("en-US")}
 function power(){return 1+upgrades.filter(u=>u.kind==="click").reduce((a,u)=>a+u.level*u.power,0)}
-function bonus(){return (1+s.rebirths*.30+s.crystalClick*.05)*(1+s.crystalClick2*.10)}
+function bonus(){return (1+s.rebirths*(.30+skillLevel("rebirth")*.10)+s.crystalClick*.05)*(1+s.crystalClick2*.10)*(1+skillLevel("crystal")*.10)}
 function auto(){return upgrades.filter(u=>u.kind==="auto").reduce((a,u)=>a+u.level*u.power,0)*bonus()*(1+s.crystalAuto*.05)*(1+s.crystalAuto2*.10)}
 function req(){return 1000000*Math.pow(10,s.rebirths)}
-function add(n,manual=false){const earned=Math.max(0,Number(n)||0)*lbRankMultiplier;s.clicks+=earned;s.total+=earned;if(manual)s.manual+=earned;else s.auto+=earned;return earned}
+function add(n,manual=false){const skillMultiplier=skillGlobalMultiplier()*(1+(manual?skillLevel("might")*.25:skillLevel("engine")*.15));const earned=Math.max(0,Number(n)||0)*lbRankMultiplier*skillMultiplier;s.clicks+=earned;s.total+=earned;if(manual)s.manual+=earned;else s.auto+=earned;return earned}
 function snapshot(){return {...s,levels:upgrades.map(u=>u.level),costs:upgrades.map(u=>u.cost),saved:Date.now()}}
 function save(){try{const data=snapshot();saveSlots[activeSlot]=saveSlots[activeSlot]||{name:`Save ${activeSlot}`};saveSlots[activeSlot].data=data;localStorage.setItem(SLOTS_KEY,JSON.stringify(saveSlots));localStorage.setItem(ACTIVE_KEY,String(activeSlot));localStorage.setItem(SAVE,JSON.stringify(data));queueLeaderboardUpdate();return true}catch(e){console.error("Save failed",e);return false}}
-function applySave(d){if(!d)return;Object.assign(s,d);if(!s.profileAvatar||s.profileAvatar==="😎")s.profileAvatar="🙂";const levels=d.levels||[],costs=d.costs||[];const oldClickCount=15,oldAutoCount=18;upgrades.forEach((u,i)=>{let oldIndex=i;if(levels.length===oldClickCount+oldAutoCount&&i>=oldClickCount&&i<oldClickCount+50+oldAutoCount)oldIndex=i<oldClickCount+50?-1:i-50;u.level=oldIndex>=0?+(levels[oldIndex]||0):0;u.cost=oldIndex>=0?+(costs[oldIndex]||u.base):u.base})}
+function applySave(d){if(!d)return;Object.assign(s,d);if(!s.skillLevels||typeof s.skillLevels!=="object")s.skillLevels={};s.skillSpent=Math.max(0,Number(s.skillSpent)||0);if(!s.profileAvatar||s.profileAvatar==="😎")s.profileAvatar="🙂";const levels=d.levels||[],costs=d.costs||[];const oldClickCount=15,oldAutoCount=18;upgrades.forEach((u,i)=>{let oldIndex=i;if(levels.length===oldClickCount+oldAutoCount&&i>=oldClickCount&&i<oldClickCount+50+oldAutoCount)oldIndex=i<oldClickCount+50?-1:i-50;u.level=oldIndex>=0?+(levels[oldIndex]||0):0;u.cost=oldIndex>=0?+(costs[oldIndex]||u.base):u.base})}
 function load(){try{saveSlots=JSON.parse(localStorage.getItem(SLOTS_KEY)||"{}");let legacy=JSON.parse(localStorage.getItem(SAVE)||"null");if(!saveSlots[1]&&legacy){let legacyName=prompt("Name your existing Matthew Clicker save:","Main Save");legacyName=(legacyName===null?"Main Save":legacyName.trim().slice(0,32))||"Main Save";saveSlots[1]={name:legacyName,data:legacy};}if(!saveSlots[1]&&!legacy){let initialName="";while(!initialName){const answer=prompt("Welcome to Matthew Clicker! Choose a name for your first save:","My First Save");if(answer===null){alert("A save name is needed to start playing.");continue}initialName=answer.trim().slice(0,32);if(!initialName)alert("Please enter a save name.")}saveSlots[1]={name:initialName,data:{...freshState(),levels:upgrades.map(()=>0),costs:upgrades.map(u=>u.base),saved:Date.now()}}}if(!saveSlots[activeSlot])activeSlot=saveSlots[1]?1:1;if(saveSlots[activeSlot]?.data){let d=saveSlots[activeSlot].data;s=freshState();applySave(d);let away=Math.max(0,(Date.now()-(d.saved||Date.now()))/1000),earned=auto()*Math.min(away,86400);if(earned>0){add(earned);setTimeout(()=>alert("Welcome back! Matthew earned "+fmt(earned)+" points while you were away!"),300)}}save()}catch(e){console.error("Save could not be loaded",e)}}
-function freshState(){return {clicks:0,total:0,manual:0,auto:0,rebirths:0,crystals:0,crystalClick:0,crystalAuto:0,crystalClick2:0,crystalAuto2:0,lastChest:0,lastSpin:0,quest:0,goal:100,bg:"#24152f",rainbow:false,glow:true,sound:true,music:false,usedCodes:[],profileName:"My Matthew",profileAvatar:"🙂",ownedAccessories:[],equippedAccessory:""}}
+function freshState(){return {skillLevels:{},skillSpent:0,clicks:0,total:0,manual:0,auto:0,rebirths:0,crystals:0,crystalClick:0,crystalAuto:0,crystalClick2:0,crystalAuto2:0,lastChest:0,lastSpin:0,quest:0,goal:100,bg:"#24152f",rainbow:false,glow:true,sound:true,music:false,usedCodes:[],profileName:"My Matthew",profileAvatar:"🙂",ownedAccessories:[],equippedAccessory:""}}
 function resetUpgrades(){upgrades.forEach(u=>{u.level=0;u.cost=u.base})}
+const SKILL_NODES=[
+{id:"might",name:"Click Mastery",icon:"👊",desc:"+25% points from manual clicks per level.",cost:1,max:10},
+{id:"engine",name:"Idle Engine",icon:"⚙️",desc:"+15% passive income per level.",cost:1,max:10},
+{id:"legacy",name:"Rebirth Legacy",icon:"♾️",desc:"+5% global points per level.",cost:2,max:10},
+{id:"crystal",name:"Crystal Attunement",icon:"💎",desc:"+10% crystal bonus per level.",cost:2,max:10},
+{id:"combo",name:"Matthew Momentum",icon:"⚡",desc:"+2% global points per level.",cost:1,max:15},
+{id:"treasure",name:"Treasure Sense",icon:"🍀",desc:"Improves crystal rewards by 3% per level.",cost:2,max:10},
+{id:"rebirth",name:"Ascendant",icon:"🌟",desc:"+10% rebirth bonus per level.",cost:3,max:10},
+{id:"discount",name:"Clever Shopper",icon:"🛒",desc:"Upgrade costs reduced by 2% per level.",cost:2,max:10},
+{id:"mastery",name:"Grandmaster",icon:"👑",desc:"+10% global points per level. Requires 5 other skill levels.",cost:5,max:5}
+];
+function skillLevels(){if(!s.skillLevels||typeof s.skillLevels!=="object")s.skillLevels={};return s.skillLevels}
+function skillSpent(){return Math.max(0,Number(s.skillSpent)||0)}
+function skillPoints(){return Math.max(0,Math.floor(Number(s.rebirths)||0)-skillSpent())}
+function skillLevel(id){return Math.max(0,Number(skillLevels()[id])||0)}
+function skillGlobalMultiplier(){return 1+skillLevel("legacy")*.05+skillLevel("combo")*.02+skillLevel("mastery")*.10}
+function openSkillTree(){
+ const totalLevels=Object.values(skillLevels()).reduce((a,n)=>a+(Number(n)||0),0);
+ const cards=SKILL_NODES.map(n=>{const level=skillLevel(n.id),maxed=level>=n.max,locked=n.id==="mastery"&&totalLevels-level<5;return '<div class="skill-node"><h3>'+n.icon+' '+n.name+'</h3><p>'+n.desc+'</p><div class="skill-level">Level '+level+' / '+n.max+'</div><small>Cost: '+n.cost+' Skill Point'+(n.cost===1?"":"s")+'</small><button '+(maxed||locked||skillPoints()<n.cost?'disabled':'')+' onclick="buySkill(\''+n.id+'\')">'+(maxed?'MAXED':locked?'Requires 5 other skill levels':'Upgrade ('+n.cost+' SP)')+'</button></div>'}).join("");
+ openModal('<h2>🌳 Permanent Skill Tree</h2><p class="leaderboard-note">Earn 1 Skill Point per rebirth. Spend points on permanent upgrades that stay in this save even after rebirthing. Existing saves are supported.</p><div class="leaderboard-status">Available Skill Points: <strong>'+skillPoints()+'</strong> · Rebirths: '+(Number(s.rebirths)||0)+' · Spent: '+skillSpent()+'</div><div class="skill-grid">'+cards+'</div><p class="leaderboard-note">Plan your build carefully: spent points stay invested.</p><button onclick="openSkillTree()">🔄 Refresh Tree</button> <button onclick="save();closeModal()">Save & Close</button>');
+}
+function buySkill(id){
+ const node=SKILL_NODES.find(n=>n.id===id);if(!node)return;
+ const levels=skillLevels(),level=skillLevel(id);if(level>=node.max){alert("That skill is maxed.");return}
+ const totalLevels=Object.values(levels).reduce((a,n)=>a+(Number(n)||0),0);
+ if(id==="mastery"&&totalLevels-level<5){alert("Unlock at least 5 levels in other skills first.");return}
+ if(skillPoints()<node.cost){alert("You need "+node.cost+" available Skill Points. Earn them by rebirthing!");return}
+ levels[id]=level+1;s.skillSpent=skillSpent()+node.cost;
+ if(id==="discount"){upgrades.forEach(u=>{u.cost=Math.max(u.base,Math.floor(u.base*Math.pow(1-skillLevel("discount")*.02,u.level+1)))})}
+ save();render();openSkillTree();
+}
 function saveManager(){save();let cards="";for(let i=1;i<=5;i++){let slot=saveSlots[i],d=slot?.data;let summary=d?`${fmt(d.clicks||0)} points · ${d.rebirths||0} rebirths · ${d.crystals||0} crystals`:"Empty slot";cards+=`<div class="save-slot-card"><strong>Slot ${i}: ${escapeHtml(slot?.name||`Save ${i}`)}</strong><p>${summary}${i===activeSlot?" · <b>ACTIVE</b>":""}</p><button onclick="switchSave(${i})" ${d&&i===activeSlot?"disabled":""}>${d?(i===activeSlot?"Current Save":"Load Save"):"Create Save"}</button> <button onclick="renameSave(${i})">Rename</button> <button onclick="deleteSave(${i})" ${d?"":"disabled"}>Delete</button></div>`}openModal(`<h2>💾 Save Manager</h2><p>Each save has its own name, points, upgrades, crystals and profile accessories. Creating a save asks you to name it.</p>${cards}<p><button onclick="exportSave()">Export Active Save</button> <button onclick="document.getElementById('importSaveFile').click()">Import Save</button><input id="importSaveFile" type="file" accept="application/json,.json" style="display:none" onchange="importSaveFile(this)"></p>`)}
 function createNamedSave(i){openModal('<h2>💾 Name Save Slot '+i+'</h2><p>Choose a name for this save (up to 32 characters).</p><input id="newSaveName" maxlength="32" class="leaderboard-input" placeholder="e.g. Main Save" value="Save '+i+'"><button type="button" onclick="confirmCreateSave('+i+')">Create Save</button>');const input=document.getElementById("newSaveName");if(input)input.focus()}
 function confirmCreateSave(i){const input=document.getElementById("newSaveName");const name=(input?.value||"").trim().slice(0,32);if(!name){let note=document.getElementById("saveNameError");if(!note){note=document.createElement("p");note.id="saveNameError";note.style.color="#ff4d6d";note.textContent="Please enter a save name.";input?.insertAdjacentElement("afterend",note)}return}save();saveSlots[i]={name:name,data:{...freshState(),levels:upgrades.map(()=>0),costs:upgrades.map(u=>u.base),saved:Date.now()}};activeSlot=i;localStorage.setItem(ACTIVE_KEY,String(i));s=freshState();applySave(saveSlots[i].data);save();applyTheme();renderUpgrades();refresh();setStatus("Created save: "+name,"#00ffcc");saveManager()}
