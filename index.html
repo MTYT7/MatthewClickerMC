@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
-<title>Matthew Clicker v1.65</title>
+<title>Matthew Clicker v1.75</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
 #app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}.save-score-badge{position:fixed;top:12px;right:12px;z-index:10;background:#180e21;border:1px solid #ffb703;border-radius:10px;padding:9px 12px;text-align:right;box-shadow:0 3px 12px #0006;max-width:calc(100vw - 24px);font-size:12px}.save-score-badge strong{display:block;color:#ffb703;font-size:15px;margin-top:3px}.save-score-badge small{display:block;color:#d7c6e8}@media(max-width:600px){.save-score-badge{position:absolute;top:8px;right:8px;padding:6px 8px;font-size:10px}.save-score-badge strong{font-size:12px}.title{padding-top:42px}}
@@ -176,7 +176,7 @@ small{color:#d7c6e8}.close{float:right}
 <div id="saveScoreBadge" class="save-score-badge"><small id="saveScoreName">ACTIVE SAVE</small><strong id="saveScoreValue">0 SCORE</strong><small id="saveBestValue">BEST: 0</small></div>
 <div id="app">
 <div class="title">Matthew Clicker</div>
-<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.65</div>
+<div class="sub" style="font-size:11px;opacity:.7">VERSION 1.75</div>
 <div class="sub">Click your way to Matthew greatness!</div>
 <div style="text-align:center;margin:8px 0"><button type="button" onclick="openSkillTree()" style="background:#5b21b6;border:2px solid #c4b5fd;color:white;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer">🌳 PERMANENT SKILL TREE</button></div>
 <div style="text-align:center;margin:12px 0"><button type="button" onclick="openGameMenu()" style="background:#7c3aed;border:2px solid #c4b5fd;color:white;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer">🎮 GAME MENU</button></div>
@@ -210,7 +210,7 @@ small{color:#d7c6e8}.close{float:right}
   <div class="buy-mode"><label for="buyAmount">Purchase amount:</label><select id="buyAmount" onchange="setBuyAmount(this.value)"><option value="1">Buy 1</option><option value="10">Buy 10</option><option value="100">Buy 100</option><option value="max">Buy Max</option></select></div>
   <div id="upgradeGrid" class="upgrade-grid"></div>
 </section>
-<div class="footer">Matthew Clicker · v1.65</div>
+<div class="footer">Matthew Clicker · v1.75</div>
 </div>
 <div id="fnafJumpscare" aria-hidden="true"><canvas id="bearParticleCanvas"></canvas></div>
 <div id="floatbox"></div>
@@ -332,9 +332,12 @@ let soundContext=null;let musicTimer=null,musicStep=0,musicSongIndex=0,musicGain
 const musicSongs=[
 {name:"Neon Boss Rush",tempo:170,wave:"sawtooth",volume:.04,notes:[196,0,196,392,0,294,0,349,392,0,523,466,392,349,294,0,220,0,220,440,0,330,0,392,440,0,587,523,440,392,330,0]},
 {name:"Starlit Resolve",tempo:158,wave:"square",volume:.035,notes:[523,659,784,0,880,784,659,523,587,698,880,0,784,698,587,0,440,523,659,784,0,988,880,784,659,587,523,0,392,523,659,0]},
-{name:"Evil Aiden",tempo:135,wave:"triangle",volume:.042,notes:[110,110,0,110,220,0,196,220,233,0,262,233,220,0,147,175,196,0,294,262,233,220,175,0,117,117,0,175,233,262,294,0]},
+{name:"Evil Aiden: BLACKOUT PROTOCOL",tempo:108,wave:"sawtooth",volume:.032,notes:[55,0,55,82,0,110,0,104,0,55,0,55,82,0,123,110,0,0,58,0,58,87,0,116,0,110,0,58,0,58,87,0,130,116,0,0,55,55,0,82,110,0,155,0,146,0,110,82,0,0,52,0,52,78,0,104,0,98,0,52,0,78,117,0,156,0,0,55,82,110,0,164,0,155,123,0,110,0,82,0,55,0,0,49,73,0,98,0,147,0,139,0,98,73,0,0,55,0,82,0,110,0,220,207,0,164,0,110,82,0,55,0]},
 {name:"Starlit Resolve",tempo:158,wave:"square",volume:.038,notes:[220,0,330,440,0,392,330,0,220,0,330,494,440,392,0,330,294,0,440,523,0,494,440,392,0,294,330,392,0,523,494,0]},
-{name:"Last Heartbeat",tempo:166,wave:"triangle",volume:.034,notes:[392,523,659,0,784,659,523,0,440,587,698,0,880,698,587,0,349,440,523,659,0,784,659,523,0,392,494,587,0,698,587,0]}
+{name:"Last Heartbeat",tempo:166,wave:"triangle",volume:.034,notes:[392,523,659,0,784,659,523,0,440,587,698,0,880,698,587,0,349,440,523,659,0,784,659,523,0,392,494,587,0,698,587,0]},
+{name:"Hyperdrive Overclock",tempo:105,wave:"square",volume:.027,notes:[440,0,880,0,659,784,0,988,880,0,659,0,1175,0,988,880,0,784,659,0,523,659,784,0,1047,0,988,784,0,659,523,0]},
+{name:"Crystal Circuit",tempo:118,wave:"triangle",volume:.03,notes:[784,988,1175,0,988,784,659,0,880,1047,1319,0,1047,880,698,0,587,784,988,0,1175,988,784,659,0,698,880,1047,0,880,698,587]},
+{name:"Rage Engine",tempo:96,wave:"sawtooth",volume:.024,notes:[73,0,147,0,220,0,196,185,0,73,0,147,0,247,220,0,196,0,165,0,82,0,165,0,247,0,220,208,0,82,0,165,0,294,247,220,0,196,165,0,73,0,147,0,220,0,330,294,0,247,220,0,196,0,147,0]}
 ];
 // Stretch every melody into a roughly 60-second arrangement at its own tempo.
 // Each track cycles its original motif with a longer phrase structure.
