@@ -9,7 +9,7 @@
 *{box-sizing:border-box}body{margin:0;background:#24152f;color:#fff8e7;font-family:Arial,sans-serif;min-height:100vh}
 #app{max-width:1050px;margin:auto;padding:18px}.title{text-align:center;font-size:34px;font-weight:800;color:#ffb703;margin:5px}.save-score-badge{position:fixed;top:12px;right:12px;z-index:10;background:#180e21;border:1px solid #ffb703;border-radius:10px;padding:9px 12px;text-align:right;box-shadow:0 3px 12px #0006;max-width:calc(100vw - 24px);font-size:12px}.save-score-badge strong{display:block;color:#ffb703;font-size:15px;margin-top:3px}.save-score-badge small{display:block;color:#d7c6e8}@media(max-width:600px){.save-score-badge{position:absolute;top:8px;right:8px;padding:6px 8px;font-size:10px}.save-score-badge strong{font-size:12px}.title{padding-top:42px}}
 .sub{text-align:center;color:#d7c6e8}.top-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:14px;margin-top:16px}
-.panel{background:#38234a;border:1px solid #59366e;border-radius:12px;padding:14px;box-shadow:0 5px 18px #0004}.click-panel{text-align:center;min-height:330px}.button-panel{min-height:330px}
+.panel{background:#38234a;border:1px solid #59366e;border-radius:12px;padding:14px;box-shadow:0 5px 18px #0004}.click-panel{text-align:center;min-height:330px;display:flex;flex-direction:column}.button-panel{min-height:330px}.announcements-panel{margin-top:auto;padding:12px;text-align:left;background:linear-gradient(135deg,#24152f,#302040);border:1px solid #79f66a;border-radius:10px;box-shadow:inset 0 0 18px #79f66a12}.announcements-heading{display:flex;align-items:center;gap:8px;margin-bottom:9px}.announcements-heading h2{margin:0;color:#8cff78;font-size:clamp(13px,1.6vw,17px);line-height:1.25;font-weight:900}.announcements-indicator{flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:#8cff78;box-shadow:0 0 10px #8cff78}.announcement-item{padding:10px;background:#38234a;border:1px solid #59366e;border-radius:7px}.announcement-item strong{display:block;color:#fff8e7;font-size:13px}.announcement-item p{margin:5px 0 0;color:#d7c6e8;font-size:12px;line-height:1.45}.announcement-foot{margin-top:8px;color:#8cff78;font-size:10px;font-weight:800;letter-spacing:.08em}
 .panel-title{font-size:20px;font-weight:800;color:#ffb703;margin-bottom:10px}.score{font-size:28px;font-weight:800;margin-top:10px}.rate{color:#d7c6e8;font-size:13px}.status{color:#ffb703;font-weight:700;min-height:20px;margin:5px}
 button{cursor:pointer;border:0;border-radius:7px;padding:10px 12px;font-weight:700;margin:4px;background:#eee;color:#222}
 #click{font-size:23px;background:#ffb703;color:#382000;padding:20px 55px;margin:12px 4px}.rebirth{background:#c44536;color:white;width:90%}
@@ -226,6 +226,17 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
     <small id="meterText"></small>
     <div class="progress"><div id="bar" class="bar"></div></div>
     <button id="rebirth" class="rebirth" disabled>REBIRTH</button>
+    <section class="announcements-panel" aria-labelledby="announcementsTitle">
+      <div class="announcements-heading">
+        <span class="announcements-indicator" aria-hidden="true"></span>
+        <h2 id="announcementsTitle">UPCOMING EVENTS &amp; ANNOUNCEMENTS</h2>
+      </div>
+      <div class="announcement-item">
+        <strong>📢 Welcome to the announcements board!</strong>
+        <p>Update news, upcoming events and new features will appear here.</p>
+      </div>
+      <div class="announcement-foot">CHECK BACK FOR THE NEXT UPDATE</div>
+    </section>
   </section>
 
   <section class="panel button-panel">
