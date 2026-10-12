@@ -10,8 +10,8 @@
     </linearGradient>
   </defs>
   <rect x="2" y="2" width="124" height="124" rx="23" fill="url(#bg)" stroke="#202020" stroke-width="1.5"/>
-  <text x="7" y="87" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="900" letter-spacing="-7" fill="#000" stroke="#252525" stroke-width="3" paint-order="stroke">MC</text>
-  <text x="7" y="85" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="900" letter-spacing="-7" fill="url(#letters)">MC</text>
-  <circle cx="111" cy="87" r="8" fill="#000" opacity=".55"/>
-  <circle cx="110" cy="85" r="6.3" fill="#ffd400"/>
+  <text x="4" y="91" font-family="Georgia,'Times New Roman',serif" font-size="79" font-weight="700" letter-spacing="-8" fill="#000" stroke="#252525" stroke-width="3" paint-order="stroke">MC</text>
+  <text x="4" y="89" font-family="Georgia,'Times New Roman',serif" font-size="79" font-weight="700" letter-spacing="-8" fill="url(#letters)">MC</text>
+  <circle cx="111" cy="91" r="8" fill="#000" opacity=".55"/>
+  <circle cx="110" cy="89" r="6.3" fill="#ffd400" stroke="#b98500" stroke-width=".7"/>
 </svg>
