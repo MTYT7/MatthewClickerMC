@@ -133,6 +133,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
     <button onclick="startSnake()">🐍 Play Snake</button>
     <button onclick="startMatthewRPG()">⚔️ Matthew RPG <span style="font-size:11px;opacity:.8">v1.3</span></button>
     <button onclick="startWildWestDuel()">🤠 Wild West Double or Nothing</button>
+    <button onclick="startSlotMachine()">🎰 Lucky Slots</button>
     <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
     <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
   </div>
@@ -798,6 +799,68 @@ function openAchievements(tab="unfinished"){
  const done=list.filter(a=>a.done()).length, shown=list.filter(a=>achievementTab==="completed"?a.done():!a.done());
  const cards=shown.map(a=>{const p=a.done()?100:Math.min(99,Math.floor(a.value/a.target*100));return '<div style="padding:13px;margin:10px 0;border:1px solid #694080;border-radius:12px;background:#160d20"><div style="display:flex;justify-content:space-between;gap:10px"><strong>'+(a.done()?"🏆 ":"🔒 ")+a.name+'</strong><b>'+p+'%</b></div><p style="margin:6px 0;color:#ddd">'+a.desc+'</p><div style="height:10px;background:#392641;border-radius:99px;overflow:hidden"><div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#00e5ff,#a855f7)"></div></div><small>'+(a.target===1?(a.done()?"Completed":"0 / 1"):fmt(Math.min(a.value,a.target))+" / "+fmt(a.target))+'</small></div>'}).join("");
  openModal('<h2>🏆 Achievements</h2><p>'+done+' / '+list.length+' completed</p><div style="display:flex;gap:10px;margin:12px 0"><button onclick="openAchievements(\'unfinished\')" '+(achievementTab==="unfinished"?"disabled":"")+'>Unfinished ('+(list.length-done)+')</button><button onclick="openAchievements(\'completed\')" '+(achievementTab==="completed"?"disabled":"")+'>Completed ('+done+')</button></div><div style="max-height:58vh;overflow-y:auto;padding-right:4px">'+(cards||'<p style="padding:20px;text-align:center">Nothing here — keep playing!</p>')+'</div>');
+}
+
+
+/* High-risk slot machine: six equally likely symbols on each independent reel. */
+const slotSymbols=[
+ {icon:"🍒",name:"Cherries",multiplier:3},
+ {icon:"🍋",name:"Lemon",multiplier:5},
+ {icon:"🔔",name:"Bell",multiplier:8},
+ {icon:"💎",name:"Diamond",multiplier:12},
+ {icon:"7️⃣",name:"Lucky Seven",multiplier:25},
+ {icon:"👑",name:"Crown",multiplier:50}
+];
+let slotState={currency:"points",spinning:false};
+window.startSlotMachine=function(){
+ if(typeof window.closeGameMenu==="function")window.closeGameMenu();
+ slotState={currency:"points",spinning:false};
+ openSlotMachine();
+};
+function slotBalance(){return slotState.currency==="crystals"?(Number(s.crystals)||0):(Number(s.clicks)||0)}
+function slotCurrencyName(){return slotState.currency==="crystals"?"Matthew Crystals":"Matthew Points"}
+function slotOpenCurrency(value){
+ if(slotState.spinning)return;
+ slotState.currency=value==="crystals"?"crystals":"points";
+ const bet=document.getElementById("slotBet");
+ if(bet)bet.max=Math.max(1,slotBalance());
+ const balance=document.getElementById("slotBalance");
+ if(balance)balance.textContent="Available: "+fmt(slotBalance())+" "+(slotState.currency==="crystals"?"crystals":"points");
+ const label=document.getElementById("slotBetLabel");
+ if(label)label.textContent="Wager ("+slotCurrencyName()+")";
+}
+function openSlotMachine(){
+ const odds='<div style="text-align:left;background:#180e21;border-radius:8px;padding:10px;margin:12px 0;font-size:12px;line-height:1.7"><b style="color:#ffb703">VISIBLE ODDS · 6 equally likely symbols per reel</b><br>👑 Crown triple: 1 in 216 · pays 50×<br>7️⃣ Seven triple: 1 in 216 · pays 25×<br>💎 Diamond triple: 1 in 216 · pays 12×<br>🔔 Bell triple: 1 in 216 · pays 8×<br>🍋 Lemon triple: 1 in 216 · pays 5×<br>🍒 Cherries triple: 1 in 216 · pays 3×<br>Any triple: 1 in 36 (2.78%) · pair only: 5 in 12 (41.67%) · no match: 55.56%<br>Two matching symbols return 1.1× your wager. No match loses the wager. Payouts include your stake.</div>';
+ openModal('<div style="background:radial-gradient(ellipse at top,#4c1d70,#180e21 75%);border:2px solid #c084fc;border-radius:12px;padding:16px;text-align:center"><div style="font-size:25px;font-weight:900;color:#facc15;letter-spacing:2px">🎰 LUCKY SLOTS 🎰</div><p>Three reels. One spin. Big multipliers.</p><label for="slotCurrency" style="display:block;text-align:left;margin:10px 0 5px">Choose currency</label><select id="slotCurrency" onchange="slotOpenCurrency(this.value)" style="width:100%;padding:10px;background:#180e21;color:#fff8e7;border:1px solid #76518b;border-radius:7px"><option value="points">💰 Matthew Points</option><option value="crystals">💎 Matthew Crystals</option></select><label id="slotBetLabel" for="slotBet" style="display:block;text-align:left;margin:10px 0 5px">Wager (Matthew Points)</label><input id="slotBet" type="number" min="1" step="1" value="1000" style="width:100%;padding:11px;box-sizing:border-box;background:#180e21;color:#fff8e7;border:1px solid #76518b;border-radius:7px"><div id="slotBalance" style="font-size:12px;color:#d7c6e8;margin:7px 0">Available: '+fmt(s.clicks)+' points</div><div id="slotReels" style="display:flex;justify-content:center;gap:8px;margin:16px 0"><div class="slot-reel" style="flex:1;max-width:100px;background:#100a18;border:2px solid #a78bfa;border-radius:10px;padding:16px 4px;font-size:40px">❔</div><div class="slot-reel" style="flex:1;max-width:100px;background:#100a18;border:2px solid #a78bfa;border-radius:10px;padding:16px 4px;font-size:40px">❔</div><div class="slot-reel" style="flex:1;max-width:100px;background:#100a18;border:2px solid #a78bfa;border-radius:10px;padding:16px 4px;font-size:40px">❔</div></div><div id="slotResult" aria-live="polite" style="min-height:42px;font-weight:800;color:#facc15;margin:8px 0">Choose your wager and spin!</div><button id="slotSpinButton" onclick="slotSpin()" style="background:#facc15;color:#271339;font-size:18px;padding:13px 24px">🎰 SPIN</button>'+odds+'</div>');
+}
+function slotSpin(){
+ if(slotState.spinning)return;
+ const input=document.getElementById("slotBet"),bet=Number(input&&input.value);
+ if(!Number.isSafeInteger(bet)||bet<1){alert("Enter a whole-number wager of at least 1.");return}
+ const balance=slotBalance();
+ if(bet>balance){alert("Not enough "+slotCurrencyName()+" for that wager!");return}
+ slotState.spinning=true;
+ const button=document.getElementById("slotSpinButton");
+ if(button){button.disabled=true;button.textContent="SPINNING…"}
+ if(input)input.disabled=true;
+ if(slotState.currency==="crystals")s.crystals-=bet;else s.clicks-=bet;
+ refresh();refreshProfile();save();
+ const reels=[0,1,2].map(()=>slotSymbols[Math.floor(Math.random()*slotSymbols.length)]);
+ const reelEls=document.querySelectorAll("#slotReels .slot-reel");
+ reelEls.forEach((el,i)=>{el.textContent=reels[i].icon;el.style.borderColor="#facc15"});
+ let payout=0,message="",triple=reels.every(x=>x.icon===reels[0].icon);
+ if(triple){payout=Math.floor(bet*reels[0].multiplier);message="JACKPOT! "+reels[0].icon+" "+reels[0].name.toUpperCase()+" TRIPLE! "+reels[0].multiplier+"× payout: "+fmt(payout)+" "+(slotState.currency==="crystals"?"crystals":"points")+"."}
+ else if(reels.some((x,i)=>reels.some((y,j)=>j>i&&x.icon===y.icon))){payout=Math.floor(bet*1.1);message="PAIR! Small return: "+fmt(payout)+" "+(slotState.currency==="crystals"?"crystals":"points")+" (1.1×)."}
+ else{message="NO MATCH — wager lost. Try again if you want."}
+ if(payout>0){if(slotState.currency==="crystals")s.crystals+=payout;else s.clicks+=payout}
+ const result=document.getElementById("slotResult");
+ if(result){result.textContent=message;result.style.color=triple?"#86efac":payout>0?"#facc15":"#fca5a5"}
+ refresh();refreshProfile();save();
+ slotState.spinning=false;
+ if(button){button.disabled=false;button.textContent="🎰 SPIN"}
+ if(input){input.disabled=false;input.max=Math.max(1,slotBalance())}
+ const balanceEl=document.getElementById("slotBalance");
+ if(balanceEl)balanceEl.textContent="Available: "+fmt(slotBalance())+" "+(slotState.currency==="crystals"?"crystals":"points");
 }
 
 let duelState=null;
