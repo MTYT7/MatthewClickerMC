@@ -134,6 +134,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
     <button onclick="startMatthewRPG()">⚔️ Matthew RPG <span style="font-size:11px;opacity:.8">v1.3</span></button>
     <button onclick="startWildWestDuel()">🤠 Wild West Double or Nothing</button>
     <button onclick="startSlotMachine()">🎰 Lucky Slots</button>
+    <button onclick="startBlackjack()">🃏 Blackjack</button>
     <p style="font-size:12px;opacity:.8">Tetris controls: ← → move · ↑ rotate · ↓ drop · Space hard drop</p>
     <button class="gm-secondary" onclick="closeGameMenu()">✖ Close menu</button>
   </div>
@@ -801,6 +802,90 @@ function openAchievements(tab="unfinished"){
  openModal('<h2>🏆 Achievements</h2><p>'+done+' / '+list.length+' completed</p><div style="display:flex;gap:10px;margin:12px 0"><button onclick="openAchievements(\'unfinished\')" '+(achievementTab==="unfinished"?"disabled":"")+'>Unfinished ('+(list.length-done)+')</button><button onclick="openAchievements(\'completed\')" '+(achievementTab==="completed"?"disabled":"")+'>Completed ('+done+')</button></div><div style="max-height:58vh;overflow-y:auto;padding-right:4px">'+(cards||'<p style="padding:20px;text-align:center">Nothing here — keep playing!</p>')+'</div>');
 }
 
+
+
+/* Blackjack: dealer stands on all 17s; blackjack pays 3:2 (stake included). */
+let blackjackState=null;
+window.startBlackjack=function(){
+ if(typeof window.closeGameMenu==="function")window.closeGameMenu();
+ blackjackState={phase:"betting",currency:"points",bet:0,player:[],dealer:[],doubled:false};
+ blackjackRender();
+};
+function bjBalance(){return blackjackState&&blackjackState.currency==="crystals"?(Number(s.crystals)||0):(Number(s.clicks)||0)}
+function bjCurrencyName(){return blackjackState&&blackjackState.currency==="crystals"?"Matthew Crystals":"Matthew Points"}
+function bjCard(){const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];const suits=["♠","♥","♦","♣"];return{rank:ranks[Math.floor(Math.random()*ranks.length)],suit:suits[Math.floor(Math.random()*suits.length)]}}
+function bjHand(cards){let total=0,aces=0;for(const card of cards){if(card.rank==="A"){total+=11;aces++}else total+=["J","Q","K"].includes(card.rank)?10:Number(card.rank)}while(total>21&&aces>0){total-=10;aces--}return{total,soft:aces>0}}
+function bjCardText(card){return card.rank+card.suit}
+function bjIsNatural(cards){return cards.length===2&&bjHand(cards).total===21}
+function bjCardHtml(card,hidden=false){return hidden?'<div style="width:48px;height:68px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7c3aed,#241039);border:2px solid #c4b5fd;border-radius:7px;font-size:25px;color:#fff">✦</div>':'<div style="width:48px;height:68px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;box-sizing:border-box;padding:5px;background:#fff8e7;color:'+(card.suit==="♥"||card.suit==="♦"?"#dc2626":"#171324")+';border:2px solid #c4b5fd;border-radius:7px;font-weight:900"><span>'+card.rank+'</span><span style="font-size:22px;text-align:center">'+card.suit+'</span></div>'}
+function bjRender(){
+ const st=blackjackState;if(!st)return;
+ const betting=st.phase==="betting",playing=st.phase==="playing",done=st.phase==="done";
+ const playerTotal=st.player.length?bjHand(st.player).total:0;
+ const hideHole=playing;
+ const dealerCards=st.dealer.map((card,i)=>bjCardHtml(card,hideHole&&i===1)).join("");
+ const playerCards=st.player.map(card=>bjCardHtml(card)).join("");
+ const dealerTotal=hideHole?"?":bjHand(st.dealer).total;
+ const currencyLabel=st.currency==="crystals"?"crystals":"points";
+ const controls=betting?
+ '<label for="bjCurrency" style="display:block;text-align:left;margin:10px 0 5px">Choose currency</label><select id="bjCurrency" onchange="bjSetCurrency(this.value)" style="width:100%;padding:10px;background:#180e21;color:#fff8e7;border:1px solid #76518b;border-radius:7px"><option value="points" '+(st.currency==="points"?"selected":"")+'>💰 Matthew Points</option><option value="crystals" '+(st.currency==="crystals"?"selected":"")+'>💎 Matthew Crystals</option></select><label for="bjBet" style="display:block;text-align:left;margin:10px 0 5px">Wager ('+bjCurrencyName()+')</label><input id="bjBet" type="number" min="1" step="1" value="'+Math.max(1,Math.min(1000,bjBalance()))+'" max="'+Math.max(1,bjBalance())+'" style="width:100%;box-sizing:border-box;padding:11px;background:#180e21;color:#fff8e7;border:1px solid #76518b;border-radius:7px"><button onclick="bjDeal()">🃏 DEAL</button>':
+ playing?'<button onclick="bjHit()">➕ HIT</button><button onclick="bjStand()">✋ STAND</button><button onclick="bjDouble()" '+(st.doubled||bjBalance()<st.bet?'disabled style="opacity:.45"':'')+'>⬆️ DOUBLE DOWN</button>':
+ '<button onclick="startBlackjack()">🔁 PLAY AGAIN</button>';
+ openModal('<div style="background:radial-gradient(ellipse at top,#14532d,#10251c 75%);border:2px solid #facc15;border-radius:12px;padding:16px;text-align:center;color:#fff8e7"><div style="font-size:25px;font-weight:900;color:#facc15;letter-spacing:2px">🃏 MATTHEW BLACKJACK 🃏</div><p>Beat the dealer without going over 21.</p>'+ (betting?'<div style="font-size:12px;color:#d1fae5">Available: '+fmt(bjBalance())+' '+currencyLabel+'</div>':'<div style="font-size:12px;color:#d1fae5">Wager: '+fmt(st.bet)+(st.currency==="crystals"?" crystals":" points")+(st.doubled?" · DOUBLE DOWN":"")+'</div>')+'<div style="display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0"><div style="background:#123626;border:1px solid #3f7655;border-radius:9px;padding:10px"><b>DEALER · '+dealerTotal+'</b><div style="display:flex;justify-content:center;gap:5px;margin-top:8px;flex-wrap:wrap">'+dealerCards+'</div></div><div style="background:#123626;border:1px solid #3f7655;border-radius:9px;padding:10px"><b>YOU · '+(st.player.length?playerTotal:"—")+'</b><div style="display:flex;justify-content:center;gap:5px;margin-top:8px;flex-wrap:wrap">'+playerCards+'</div></div></div><div id="bjMessage" aria-live="polite" style="font-weight:900;min-height:38px;color:'+(done?'#facc15':'#d1fae5')+'">'+(st.message||"Place your wager, then deal.")+'</div><div>'+controls+'</div><div style="text-align:left;background:#10251c;border-radius:8px;padding:10px;margin-top:12px;font-size:12px;line-height:1.7"><b style="color:#facc15">RULES & PAYOUTS</b><br>• Natural blackjack pays 3:2 (total return 2.5× wager).<br>• Regular win pays 1:1 (total return 2× wager).<br>• Push/tie returns your wager; a loss forfeits it.<br>• Dealer stands on all 17s. Aces count as 1 or 11.<br>• Double down doubles your wager, takes exactly one card, then stands.<br>• Each hand uses a freshly shuffled virtual deck; card draws are random.</div></div>');
+}
+function bjSetCurrency(value){if(!blackjackState||blackjackState.phase!=="betting")return;blackjackState.currency=value==="crystals"?"crystals":"points";bjRender()}
+function bjDeal(){
+ const st=blackjackState;if(!st||st.phase!=="betting")return;
+ const input=document.getElementById("bjBet"),bet=Number(input&&input.value);
+ if(!Number.isSafeInteger(bet)||bet<1){alert("Enter a whole-number wager of at least 1.");return}
+ if(bet>bjBalance()){alert("Not enough "+bjCurrencyName()+" for that wager!");return}
+ st.bet=bet;
+ if(st.currency==="crystals")s.crystals-=bet;else s.clicks-=bet;
+ st.player=[bjCard(),bjCard()];st.dealer=[bjCard(),bjCard()];st.phase="playing";st.message="";
+ refresh();refreshProfile();save();
+ const playerNatural=bjIsNatural(st.player),dealerNatural=bjIsNatural(st.dealer);
+ if(playerNatural||dealerNatural){
+  if(playerNatural&&dealerNatural)bjSettle("push","Both have blackjack — push! Your wager is returned.",st.bet);
+  else if(playerNatural)bjSettle("blackjack","BLACKJACK! Natural 21 pays 3:2!",Math.floor(st.bet*2.5));
+  else bjSettle("loss","Dealer has blackjack. Better luck next hand.",0);
+  return;
+ }
+ bjRender();
+}
+function bjHit(){
+ const st=blackjackState;if(!st||st.phase!=="playing")return;
+ st.player.push(bjCard());
+ if(bjHand(st.player).total>21)bjSettle("loss","BUST! You went over 21 and lost the wager.",0);
+ else if(bjHand(st.player).total===21)bjStand();
+ else bjRender();
+}
+function bjStand(){
+ const st=blackjackState;if(!st||st.phase!=="playing")return;
+ while(bjHand(st.dealer).total<17)st.dealer.push(bjCard());
+ const player=bjHand(st.player).total,dealer=bjHand(st.dealer).total;
+ if(dealer>21)bjSettle("win","Dealer busts! You win.",st.bet*2);
+ else if(player>dealer)bjSettle("win","You beat the dealer! Payout includes your stake.",st.bet*2);
+ else if(player<dealer)bjSettle("loss","Dealer wins this hand. Wager lost.",0);
+ else bjSettle("push","Push — your wager is returned.",st.bet);
+}
+function bjDouble(){
+ const st=blackjackState;if(!st||st.phase!=="playing"||st.doubled)return;
+ if(bjBalance()<st.bet){alert("You need enough currency to match your original wager to double down.");return}
+ if(st.currency==="crystals")s.crystals-=st.bet;else s.clicks-=st.bet;
+ st.bet*=2;st.doubled=true;
+ st.player.push(bjCard());
+ refresh();refreshProfile();save();
+ if(bjHand(st.player).total>21)bjSettle("loss","BUST after doubling down! Both wagers are lost.",0);
+ else bjStand();
+}
+function bjSettle(result,message,payout){
+ const st=blackjackState;if(!st||st.phase==="done")return;
+ st.phase="done";st.message=message;
+ if(payout>0){if(st.currency==="crystals")s.crystals+=payout;else s.clicks+=payout}
+ refresh();refreshProfile();save();bjRender();
+ const msg=document.getElementById("bjMessage");
+ if(msg){msg.textContent=message+(payout>0?" · Returned/paid: "+fmt(payout)+(st.currency==="crystals"?" crystals":" points")+".":"");msg.style.color=result==="loss"?"#fca5a5":result==="push"?"#d1fae5":"#facc15"}
+}
 
 /* High-risk slot machine: six equally likely symbols on each independent reel. */
 const slotSymbols=[
