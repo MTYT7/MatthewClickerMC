@@ -128,8 +128,10 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
 .main-tab:first-child{border-color:#22d3ee!important;background:linear-gradient(135deg,#0e7490,#164e63)!important;color:#ecfeff!important}
 .main-tab:last-child{border-color:#c084fc!important;background:linear-gradient(135deg,#7c3aed,#4c1d95)!important}
 .main-tab.active{filter:brightness(1.18);transform:translateY(-1px);box-shadow:0 4px 0 #160d1d,inset 0 -3px 0 #f0abfc!important;outline:1px solid #e9d5ff;outline-offset:2px}
-.button-panel{padding:18px;background:linear-gradient(145deg,#38234a,#2a1a39);border-color:#6d4385}
-.button-panel .panel-title{padding-bottom:12px;border-bottom:1px solid #ffffff20;line-height:1.35}
+.button-panel{padding:20px;background:radial-gradient(ellipse at top left,#49305f 0%,#30203f 54%,#281a35 100%);border:1px solid #8051a0;box-shadow:0 8px 24px #0004,inset 0 1px 0 #ffffff0c}
+.button-panel .panel-title{padding-bottom:14px;margin-bottom:8px;border-bottom:1px solid #ffffff20;line-height:1.35;color:#f0abfc;display:block}
+.button-panel .panel-title>span:first-child{display:inline-flex;align-items:center;gap:9px}
+.button-panel #achievement{margin-top:18px;border-color:#5d4371;background:#24182f}
 .controls-category{grid-column:1/-1;text-align:left;margin:18px 0 5px;padding:11px 14px;border:1px solid #70449a;border-left:4px solid #c084fc;border-radius:10px;background:linear-gradient(100deg,#482064,#30203f);color:#f3e8ff;font-size:12px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
 .controls-category:first-child{margin-top:4px}
 #controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;align-content:start}
@@ -227,7 +229,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
   </section>
 
   <section class="panel button-panel">
-    <div class="panel-title">GAME HUB <span style="font-size:12px;font-weight:600;color:#d8b4fe;display:block;margin-top:4px">Explore features, rewards and community</span></div>
+    <div class="panel-title"><span style="display:inline-flex;align-items:center;gap:9px"><span aria-hidden="true" style="display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#22d3ee,#6366f1);color:#101827;font-size:17px">✦</span><span>FEATURES</span></span><span style="font-size:12px;font-weight:600;color:#c4b5fd;display:block;margin-top:6px">Upgrades, community and game settings</span></div>
     <div id="controls" class="controls"></div>
     <div class="panel" id="achievement">Achievement: Keep clicking!</div>
   </section>
