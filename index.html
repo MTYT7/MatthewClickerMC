@@ -879,7 +879,7 @@ function safeOpenSaveManager(){try{saveManager()}catch(err){showRuntimeError("Sa
 document.getElementById("profileShopButton")?.addEventListener("click",safeOpenProfileShop);
 document.getElementById("profileShopMenuButton")?.addEventListener("click",safeOpenProfileShop);
 window.addEventListener("error",event=>{if(event?.message)showRuntimeError("JavaScript error",event.message)});
-clickBtn.onclick=clickGame;rebirthBtn.onclick=rebirth;checkHalloweenZombieUnlock();load();buildControls();applyTheme();renderUpgrades();refresh();
+clickBtn.onclick=clickGame;rebirthBtn.onclick=rebirth;try{checkHalloweenZombieUnlock()}catch(e){console.error("Halloween unlock check failed",e)}try{load()}catch(e){console.error("Save initialization failed",e)}try{buildControls()}catch(e){console.error("Button rendering failed",e)}try{applyTheme()}catch(e){console.error("Theme initialization failed",e)}try{renderUpgrades()}catch(e){console.error("Upgrade rendering failed",e)}try{refresh()}catch(e){console.error("Initial UI refresh failed",e)}
 let uiRefreshElapsed=0;
 setInterval(()=>{let now=Date.now(),dt=Math.min((now-lastTick)/1000,2);lastTick=now;let e=auto()*dt;if(e>0)add(e);uiRefreshElapsed+=dt;if(uiRefreshElapsed>=.25){uiRefreshElapsed=0;refresh()}},100);
 setInterval(()=>{save()},30000);setInterval(()=>{if(s.rainbow){updateRainbowTheme()}else{document.body.classList.remove("rainbow-mode");if(document.body.style.background!==s.bg)document.body.style.background=s.bg}},100);
