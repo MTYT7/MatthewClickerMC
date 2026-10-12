@@ -809,7 +809,7 @@ let blackjackState=null;
 window.startBlackjack=function(){
  if(typeof window.closeGameMenu==="function")window.closeGameMenu();
  blackjackState={phase:"betting",currency:"points",bet:0,player:[],dealer:[],doubled:false};
- blackjackRender();
+ bjRender();
 };
 function bjBalance(){return blackjackState&&blackjackState.currency==="crystals"?(Number(s.crystals)||0):(Number(s.clicks)||0)}
 function bjCurrencyName(){return blackjackState&&blackjackState.currency==="crystals"?"Matthew Crystals":"Matthew Points"}
