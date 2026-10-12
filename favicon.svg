@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#160b25"/>
-  <path d="M12 48V16h9l11 15 11-15h9v32H41V31L32 43l-9-12v17z" fill="#c65cff"/>
-  <circle cx="49" cy="47" r="7" fill="#ffc928" stroke="#160b25" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect x="3" y="3" width="122" height="122" rx="18" fill="#303fce" stroke="#050505" stroke-width="2.5"/>
+  <g fill="#ed171f" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" paint-order="stroke">
+    <text x="12" y="70" font-family="Arial,Helvetica,sans-serif" font-size="43" font-weight="900" letter-spacing="-3">MC</text>
+    <text x="12" y="84" font-family="Arial,Helvetica,sans-serif" font-size="11.5" font-weight="800" letter-spacing="-.35">Matthew Clicker</text>
+  </g>
+  <g transform="translate(77 20)">
+    <path d="M2 1V39L11 30L17 42L23 39L17 27H29Z" fill="#fff" stroke="#050505" stroke-width="3" stroke-linejoin="miter"/>
+    <path d="M17 0V-5M32 8L37 3M0 10L-5 5" stroke="#fff" stroke-width="2.5" stroke-linecap="square"/>
+  </g>
 </svg>
