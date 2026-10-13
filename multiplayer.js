@@ -5,11 +5,11 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const MAX_PLAYERS = 4;
-  const DEFAULT_ROUND_SECONDS = 300;
+  const ROUND_DEFAULT_SECONDS = 300;
   const state = {
     peer: null, host: false, hostId: "", connection: null,
     connections: {}, players: {}, phase: "idle",
-    startAt: 0, endAt: 0, timer: null, lastBroadcast: 0, roundDuration: DEFAULT_ROUND_SECONDS, localBackup: null, sharedReady: false
+    startAt: 0, endAt: 0, timer: null, lastBroadcast: 0, roundDuration: ROUND_DEFAULT_SECONDS, localBackup: null, sharedReady: false
   };
   let lastSharedSignature = "";
 
@@ -154,7 +154,7 @@
       state.phase = msg.phase || "lobby";
       state.startAt = msg.startAt || 0;
       state.endAt = msg.endAt || 0;
-      state.roundDuration = Math.max(15, Math.min(3600, Number(msg.roundDuration)||state.roundDuration||DEFAULT_ROUND_SECONDS));
+      state.roundDuration = Math.max(15, Math.min(3600, Number(msg.roundDuration)||state.roundDuration||ROUND_DEFAULT_SECONDS));
       state.players = {};
       (Array.isArray(msg.players) ? msg.players : []).forEach(p => { state.players[p.id] = p; });
       render();
@@ -181,7 +181,7 @@
     } else if (state.phase === "racing") {
       timer.textContent = String(Math.max(0, Math.ceil((state.endAt - Date.now()) / 1000)));
     } else {
-      timer.textContent = String(state.roundDuration || DEFAULT_ROUND_SECONDS);
+      timer.textContent = String(state.roundDuration || ROUND_DEFAULT_SECONDS);
     }
   }
   function endRace() {
@@ -403,7 +403,7 @@
   window.mcOnlineStart = function () {
     if (!state.host || state.phase === "racing" || state.phase === "countdown") return;
     const input = $("onlineRoundDuration");
-    const seconds = Math.max(15, Math.min(3600, Math.floor(Number(input && input.value) || DEFAULT_ROUND_SECONDS)));
+    const seconds = Math.max(15, Math.min(3600, Math.floor(Number(input && input.value) || ROUND_DEFAULT_SECONDS)));
     state.roundDuration = seconds;
     if (input) input.value = String(seconds);
     const startAt = Date.now() + 3000;
@@ -445,7 +445,7 @@
   };
   const durationInput = $("onlineRoundDuration");
   if (durationInput) durationInput.addEventListener("input", () => {
-    const value = Math.max(15, Math.min(3600, Math.floor(Number(durationInput.value)||DEFAULT_ROUND_SECONDS)));
+    const value = Math.max(15, Math.min(3600, Math.floor(Number(durationInput.value)||ROUND_DEFAULT_SECONDS)));
     const label = $("onlineStartButton"); if (label) label.textContent = "🚦 Start race (" + value + "s)";
   });
   setInterval(() => {
