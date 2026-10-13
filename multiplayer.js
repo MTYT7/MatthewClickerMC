@@ -7,7 +7,7 @@
   const MAX_PLAYERS = 4;
   const ROUND_DEFAULT_SECONDS = 300;
   const state = {
-    peer: null, host: false, hostId: "", connection: null,
+    peer: null, host: false, hostId: "", connection: null, mode: "race",
     connections: {}, players: {}, phase: "idle",
     startAt: 0, endAt: 0, timer: null, lastBroadcast: 0, roundDuration: ROUND_DEFAULT_SECONDS, localBackup: null, sharedReady: false
   };
@@ -119,7 +119,12 @@
     }
     const player = state.players[conn.peer];
     if (!player) return;
-    if (msg.type === "sharedSave" && state.host && msg.data && window.mcApplySharedSaveData) {
+    if (msg.type === "coopMode") {
+      state.mode = "coop";
+      broadcast({ type: "coopMode" });
+      window.mcOnlineHideLobby();
+      status("Co-op is active! Everyone can play the main clicker using the shared save.", false);
+    } else if (msg.type === "sharedSave" && state.host && msg.data && window.mcApplySharedSaveData) {
       const hostSaveName = window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save";
       window.mcApplySharedSaveData(msg.data, hostSaveName, true);
       lastSharedSignature = sharedSignature(msg.data);
@@ -163,7 +168,12 @@
       else if (state.phase === "racing") setPhase("racing", "GO! Click as fast as you can!");
       else if (state.phase === "done") setPhase("done", "Race finished! Check the scores above.");
       updateTimer();
+    } else if (msg.type === "coopMode") {
+      state.mode = "coop";
+      window.mcOnlineHideLobby();
+      status("Co-op is active! Everyone can play the main clicker using the shared save.", false);
     } else if (msg.type === "raceStart") {
+      state.mode = "race";
       state.startAt = msg.startAt;
       state.endAt = msg.endAt;
       setPhase("countdown", "Get ready… race starting!");
@@ -402,6 +412,7 @@
   };
   window.mcOnlineStart = function () {
     if (!state.host || state.phase === "racing" || state.phase === "countdown") return;
+    state.mode = "race";
     const input = $("onlineRoundDuration");
     const seconds = Math.max(15, Math.min(3600, Math.floor(Number(input && input.value) || ROUND_DEFAULT_SECONDS)));
     state.roundDuration = seconds;
@@ -438,10 +449,21 @@
     if (state.host) broadcast(packet);
     else if (state.connection && state.connection.open) sendToHost(packet);
   };
+  window.mcOnlineCoop = function() {
+    if (!state.peer || state.phase === "idle") {
+      status("Host or join a room first, then choose Co-op Clicker.", true);
+      return;
+    }
+    state.mode = "coop";
+    if (state.host) broadcast({ type: "coopMode" });
+    else sendToHost({ type: "coopMode" });
+    window.mcOnlineHideLobby();
+    status("Co-op is active! Everyone can play the main clicker using the shared save.", false);
+  };
   window.mcOnlineHideLobby = function() {
     const online = $("onlineScreen"); if (online) online.style.display = "none";
     const overlay = $("gameMenuOverlay"); if (overlay) overlay.style.display = "none";
-    status("Room stays connected. Shared progress syncs while you play.", false);
+    status(state.mode === "coop" ? "Co-op is active. Shared progress syncs while you play." : "Room stays connected. Shared progress syncs while you play.", false);
   };
   const durationInput = $("onlineRoundDuration");
   if (durationInput) durationInput.addEventListener("input", () => {
