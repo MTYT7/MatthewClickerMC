@@ -7,10 +7,11 @@
   const state = {
     peer: null, host: false, hostId: "", connection: null,
     connections: {}, players: {}, phase: "idle",
-    startAt: 0, endAt: 0, timer: null, lastBroadcast: 0
+    startAt: 0, endAt: 0, timer: null, lastBroadcast: 0, roundDuration: DEFAULT_ROUND_SECONDS, localBackup: null, sharedReady: false
   };
   const MAX_PLAYERS = 4;
-  const ROUND_MS = 30000;
+  const DEFAULT_ROUND_SECONDS = 300;
+  let lastSharedSignature = "";
 
   function cleanName(value) {
     return String(value || "Player").replace(/[<>\u0000-\u001f]/g, "").trim().slice(0, 16) || "Player";
@@ -87,6 +88,7 @@
       phase: state.phase,
       startAt: state.startAt,
       endAt: state.endAt,
+      roundDuration: state.roundDuration,
       players: Object.values(state.players).map(p => ({
         id: p.id, name: p.name, clicks: p.clicks || 0, ready: !!p.ready, host: !!p.host
       }))
@@ -110,12 +112,17 @@
         id: conn.peer, name, clicks: 0, ready: false, host: false, conn
       };
       conn.send({ type: "welcome", hostId: state.peer.id, playerId: conn.peer });
+      if (window.mcGetSharedSaveData) conn.send({ type: "sharedSave", data: window.mcGetSharedSaveData(), name: window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save" });
       publishState();
       return;
     }
     const player = state.players[conn.peer];
     if (!player) return;
-    if (msg.type === "ready" && state.phase === "lobby") {
+    if (msg.type === "sharedSave" && state.host && msg.data && window.mcApplySharedSaveData) {
+      window.mcApplySharedSaveData(msg.data, msg.name, true);
+      lastSharedSignature = sharedSignature(msg.data);
+      broadcast({ type: "sharedSave", data: msg.data, name: msg.name || "Shared Save" });
+    } else if (msg.type === "ready" && state.phase === "lobby") {
       player.ready = !!msg.ready;
       publishState();
     } else if (msg.type === "click" && state.phase === "racing" &&
@@ -135,10 +142,17 @@
     if (!msg || typeof msg !== "object") return;
     if (msg.type === "welcome") {
       status("Connected! You're in the room. Get ready.", false);
+    } else if (msg.type === "sharedSave" && !state.host && msg.data && window.mcApplySharedSaveData) {
+      window.mcSharedSaveGuestActive = true;
+      state.sharedReady = true;
+      window.mcApplySharedSaveData(msg.data, msg.name, true);
+      lastSharedSignature = sharedSignature(msg.data);
+      status("Shared save synced. Your own save slots will be restored when you leave.", false);
     } else if (msg.type === "state") {
       state.phase = msg.phase || "lobby";
       state.startAt = msg.startAt || 0;
       state.endAt = msg.endAt || 0;
+      state.roundDuration = Math.max(15, Math.min(3600, Number(msg.roundDuration)||state.roundDuration||DEFAULT_ROUND_SECONDS));
       state.players = {};
       (Array.isArray(msg.players) ? msg.players : []).forEach(p => { state.players[p.id] = p; });
       render();
@@ -165,7 +179,7 @@
     } else if (state.phase === "racing") {
       timer.textContent = String(Math.max(0, Math.ceil((state.endAt - Date.now()) / 1000)));
     } else {
-      timer.textContent = "30";
+      timer.textContent = String(state.roundDuration || DEFAULT_ROUND_SECONDS);
     }
   }
   function endRace() {
@@ -199,6 +213,11 @@
     state.timer = setInterval(tick, 100);
   }
   function resetConnection() {
+    if (!state.host && state.localBackup && window.mcApplySharedSaveData) {
+      window.mcSharedSaveGuestActive = false;
+      window.mcApplySharedSaveData(state.localBackup.data, state.localBackup.name, false);
+      state.localBackup = null;
+    }
     if (state.timer) clearInterval(state.timer);
     state.timer = null;
     if (state.peer) {
@@ -213,6 +232,8 @@
     state.phase = "idle";
     state.startAt = 0;
     state.endAt = 0;
+    state.sharedReady = false;
+    lastSharedSignature = "";
   }
   function peerLibraryReady() {
     if (window.Peer) return Promise.resolve(true);
@@ -274,6 +295,7 @@
   };
   window.mcOnlineHost = async function () {
     resetConnection();
+    window.mcSharedSaveGuestActive = false;
     const result = await makePeer();
     if (!result) return;
     state.peer = result.peer;
@@ -316,6 +338,9 @@
     const hostId = String($("onlineRoomCode").value || "").trim();
     if (!hostId) { status("Enter the host's invite code first.", true); return; }
     resetConnection();
+    if (window.mcSaveCurrent) window.mcSaveCurrent();
+    state.localBackup = { data: window.mcGetSharedSaveData ? window.mcGetSharedSaveData() : null, name: window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Local Save" };
+    window.mcSharedSaveGuestActive = false;
     const result = await makePeer();
     if (!result) return;
     state.peer = result.peer;
@@ -359,13 +384,17 @@
   };
   window.mcOnlineStart = function () {
     if (!state.host || state.phase === "racing" || state.phase === "countdown") return;
+    const input = $("onlineRoundDuration");
+    const seconds = Math.max(15, Math.min(3600, Math.floor(Number(input && input.value) || DEFAULT_ROUND_SECONDS)));
+    state.roundDuration = seconds;
+    if (input) input.value = String(seconds);
     const startAt = Date.now() + 3000;
     state.startAt = startAt;
-    state.endAt = startAt + ROUND_MS;
+    state.endAt = startAt + seconds * 1000;
     Object.values(state.players).forEach(p => { p.clicks = 0; });
     state.phase = "countdown";
     broadcast({ type: "raceStart", startAt, endAt: state.endAt });
-    setPhase("countdown", "Get ready… race starts in 3 seconds!");
+    setPhase("countdown", "Get ready… race starts in 3 seconds! (" + seconds + "s round)");
     publishState();
     startTimer();
   };
@@ -381,6 +410,35 @@
       sendToHost({ type: "click" });
     }
   };
+  function sharedSignature(data) { const copy = { ...data }; delete copy.saved; return JSON.stringify(copy); }
+  window.mcSharedSaveChanged = function(data, slot, name) {
+    if (!data || state.phase === "idle" || !state.peer || (!state.sharedReady && !state.host)) return;
+    const signature = sharedSignature(data);
+    if (signature === lastSharedSignature) return;
+    lastSharedSignature = signature;
+    const packet = { type: "sharedSave", data, name: name || "Shared Save", slot: Number(slot)||1 };
+    if (state.host) broadcast(packet);
+    else if (state.connection && state.connection.open) sendToHost(packet);
+  };
+  window.mcOnlineHideLobby = function() {
+    const online = $("onlineScreen"); if (online) online.style.display = "none";
+    const overlay = $("gameMenuOverlay"); if (overlay) overlay.style.display = "none";
+    status("Room stays connected. Shared progress syncs while you play.", false);
+  };
+  const durationInput = $("onlineRoundDuration");
+  if (durationInput) durationInput.addEventListener("input", () => {
+    const value = Math.max(15, Math.min(3600, Math.floor(Number(durationInput.value)||DEFAULT_ROUND_SECONDS)));
+    const label = $("onlineStartButton"); if (label) label.textContent = "🚦 Start race (" + value + "s)";
+  });
+  setInterval(() => {
+    if (!state.peer || state.phase === "idle" || !window.mcGetSharedSaveData) return;
+    const data = window.mcGetSharedSaveData(); const signature = sharedSignature(data);
+    if (signature === lastSharedSignature) return;
+    lastSharedSignature = signature;
+    const packet = { type: "sharedSave", data, name: window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save" };
+    if (state.host) broadcast(packet);
+    else if (state.sharedReady && state.connection && state.connection.open) sendToHost(packet);
+  }, 750);
   window.addEventListener("beforeunload", () => {
     try { sendToHost({ type: "leave" }); } catch (_) {}
     resetConnection();
