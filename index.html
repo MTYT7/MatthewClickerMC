@@ -958,7 +958,7 @@ function slotOpenCurrency(value){
  const balance=document.getElementById("slotBalance");
  if(balance)balance.textContent="Available: "+fmt(slotBalance())+" "+(slotState.currency==="crystals"?"crystals":"points");
  const label=document.getElementById("slotBetLabel");
- if(label)label.textContent="Wager ("+slotCurrencyName()+")";
+ if(label)label.textContent="Play amount ("+slotCurrencyName()+")";
 }
 function openSlotMachine(){
  const odds='<div style="text-align:left;background:#180e21;border-radius:8px;padding:10px;margin:12px 0;font-size:12px;line-height:1.7"><b style="color:#ffb703">VISIBLE ODDS · 6 equally likely symbols per reel</b><br>👑 Crown triple: 1 in 216 · pays 50×<br>7️⃣ Seven triple: 1 in 216 · pays 25×<br>💎 Diamond triple: 1 in 216 · pays 12×<br>🔔 Bell triple: 1 in 216 · pays 8×<br>🍋 Lemon triple: 1 in 216 · pays 5×<br>🍒 Cherries triple: 1 in 216 · pays 3×<br>Any triple: 1 in 36 (2.78%) · pair only: 5 in 12 (41.67%) · no match: 55.56%<br>Two matching symbols return 1.1× your wager. No match loses the wager. Payouts include your stake.</div>';
