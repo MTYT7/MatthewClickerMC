@@ -71,17 +71,15 @@
     $("onlineJoinArea").style.display = "none";
     $("onlineRoomArea").style.display = "block";
   }
-  // Encode shared saves as JSON text to avoid BinaryPack integer limits on huge totals.
+  // Send every packet as JSON text so PeerJS BinaryPack never has to encode
+  // huge game totals, timestamps, or other numeric save values as integers.
   function safePacket(message) {
-    if (message && message.type === "sharedSave" && message.data && typeof message.data === "object") {
-      return { ...message, data: JSON.stringify(message.data) };
-    }
-    return message;
+    return JSON.stringify(message);
   }
   function decodePacket(message) {
-    if (message && message.type === "sharedSave" && typeof message.data === "string") {
-      try { return { ...message, data: JSON.parse(message.data) }; }
-      catch (err) { console.error("Could not decode shared save packet.", err); return null; }
+    if (typeof message === "string") {
+      try { return JSON.parse(message); }
+      catch (err) { console.error("Could not decode online packet.", err); return null; }
     }
     return message;
   }
@@ -392,7 +390,7 @@
     const conn = result.peer.connect(hostId, { reliable: true });
     state.connection = conn;
     conn.on("open", () => {
-      conn.send({ type: "hello", name: cleanName($("onlineName").value) });
+      sendPacket(conn, { type: "hello", name: cleanName($("onlineName").value) });
       showRoom();
       setInviteCode(hostId);
       status("Connected to host. Waiting for the lobby to sync…", false);
