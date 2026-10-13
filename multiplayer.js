@@ -374,7 +374,7 @@
     state.host = false;
     state.hostId = hostId;
     state.phase = "lobby";
-    const conn = result.peer.connect(hostId, { reliable: true });
+    const conn = result.peer.connect(hostId, { reliable: true, serialization: "json" });
     state.connection = conn;
     conn.on("open", () => {
       conn.send({ type: "hello", name: cleanName($("onlineName").value) });
