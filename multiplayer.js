@@ -61,6 +61,7 @@
         ).join("");
     }
     if ($("onlineStartButton")) $("onlineStartButton").style.display = state.host ? "inline-block" : "none";
+    if ($("onlineRoundDuration")) $("onlineRoundDuration").disabled = !state.host;
     if ($("onlineReadyButton")) $("onlineReadyButton").style.display = state.host ? "none" : "inline-block";
   }
   function setInviteCode(code) {
@@ -119,9 +120,10 @@
     const player = state.players[conn.peer];
     if (!player) return;
     if (msg.type === "sharedSave" && state.host && msg.data && window.mcApplySharedSaveData) {
-      window.mcApplySharedSaveData(msg.data, msg.name, true);
+      const hostSaveName = window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save";
+      window.mcApplySharedSaveData(msg.data, hostSaveName, true);
       lastSharedSignature = sharedSignature(msg.data);
-      broadcast({ type: "sharedSave", data: msg.data, name: msg.name || "Shared Save" });
+      broadcast({ type: "sharedSave", data: msg.data, name: hostSaveName });
     } else if (msg.type === "ready" && state.phase === "lobby") {
       player.ready = !!msg.ready;
       publishState();
@@ -357,7 +359,8 @@
     });
     conn.on("data", receiveGuestMessage);
     conn.on("close", () => {
-      status("Disconnected from the host.", true);
+      resetConnection();
+      status("Disconnected from the host. Your own save has been restored.", true);
       setPhase("idle", "Connection lost. Return to the menu and try again.");
     });
     conn.on("error", () => status("Couldn't connect to that room. Check the invite code and try again.", true));
