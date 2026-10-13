@@ -4,13 +4,13 @@
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
+  const MAX_PLAYERS = 4;
+  const DEFAULT_ROUND_SECONDS = 300;
   const state = {
     peer: null, host: false, hostId: "", connection: null,
     connections: {}, players: {}, phase: "idle",
     startAt: 0, endAt: 0, timer: null, lastBroadcast: 0, roundDuration: DEFAULT_ROUND_SECONDS, localBackup: null, sharedReady: false
   };
-  const MAX_PLAYERS = 4;
-  const DEFAULT_ROUND_SECONDS = 300;
   let lastSharedSignature = "";
 
   function cleanName(value) {
