@@ -170,7 +170,7 @@
     const winner = sortedPlayers()[0];
     const message = winner ? winner.name + " wins the race! 🎉" : "Race finished!";
     broadcast({ type: "raceEnd", winner: winner ? winner.name : "" });
-    if ($("onlineRaceStatus")) $("onlineRaceStatus").textContent = message;
+    setPhase("done", message);
     if ($("onlineClickButton")) $("onlineClickButton").disabled = true;
     publishState();
   }
