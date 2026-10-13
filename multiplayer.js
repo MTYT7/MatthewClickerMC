@@ -71,17 +71,31 @@
     $("onlineJoinArea").style.display = "none";
     $("onlineRoomArea").style.display = "block";
   }
+  // Encode shared saves as JSON text to avoid BinaryPack integer limits on huge totals.
+  function safePacket(message) {
+    if (message && message.type === "sharedSave" && message.data && typeof message.data === "object") {
+      return { ...message, data: JSON.stringify(message.data) };
+    }
+    return message;
+  }
+  function decodePacket(message) {
+    if (message && message.type === "sharedSave" && typeof message.data === "string") {
+      try { return { ...message, data: JSON.parse(message.data) }; }
+      catch (err) { console.error("Could not decode shared save packet.", err); return null; }
+    }
+    return message;
+  }
+  function sendPacket(conn, message) {
+    if (conn && conn.open) {
+      try { conn.send(safePacket(message)); }
+      catch (err) { console.error("Could not send online packet.", err); }
+    }
+  }
   function broadcast(message) {
-    Object.values(state.connections).forEach(conn => {
-      if (conn && conn.open) {
-        try { conn.send(message); } catch (_) {}
-      }
-    });
+    Object.values(state.connections).forEach(conn => sendPacket(conn, message));
   }
   function sendToHost(message) {
-    if (state.connection && state.connection.open) {
-      try { state.connection.send(message); } catch (_) {}
-    }
+    sendPacket(state.connection, message);
   }
   function snapshot() {
     return {
@@ -104,7 +118,7 @@
     if (!msg || typeof msg !== "object") return;
     if (msg.type === "hello") {
       if (Object.keys(state.players).length >= MAX_PLAYERS) {
-        try { conn.send({ type: "error", message: "This room is full (maximum 4 players)." }); } catch (_) {}
+        sendPacket(conn, { type: "error", message: "This room is full (maximum 4 players)." });
         conn.close();
         return;
       }
@@ -112,8 +126,8 @@
       state.players[conn.peer] = {
         id: conn.peer, name, clicks: 0, ready: false, host: false, conn
       };
-      conn.send({ type: "welcome", hostId: state.peer.id, playerId: conn.peer });
-      if (window.mcGetSharedSaveData) conn.send({ type: "sharedSave", data: window.mcGetSharedSaveData(), name: window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save" });
+      sendPacket(conn, { type: "welcome", hostId: state.peer.id, playerId: conn.peer });
+      if (window.mcGetSharedSaveData) sendPacket(conn, { type: "sharedSave", data: window.mcGetSharedSaveData(), name: window.mcGetActiveSaveName ? window.mcGetActiveSaveName() : "Shared Save" });
       publishState();
       return;
     }
@@ -339,15 +353,14 @@
     render();
     result.peer.on("connection", conn => {
       // Match the joiner's JSON serialization so large clicker save values do not hit BinaryPack integer limits.
-      conn.serialization = "json";
       if (Object.keys(state.players).length >= MAX_PLAYERS) {
-        conn.on("open", () => { try { conn.send({ type: "error", message: "This room is full (maximum 4 players)." }); } catch (_) {} conn.close(); });
+        conn.on("open", () => { sendPacket(conn, { type: "error", message: "This room is full (maximum 4 players)." }); conn.close(); });
         return;
       }
       state.connections[conn.peer] = conn;
-      conn.on("data", msg => acceptHostMessage(conn, msg));
+      conn.on("data", msg => acceptHostMessage(conn, decodePacket(msg)));
       conn.on("open", () => {
-        try { conn.send({ type: "welcome", hostId: state.peer.id, playerId: conn.peer }); } catch (_) {}
+        sendPacket(conn, { type: "welcome", hostId: state.peer.id, playerId: conn.peer });
         publishState();
       });
       conn.on("close", () => {
@@ -384,7 +397,7 @@
       setInviteCode(hostId);
       status("Connected to host. Waiting for the lobby to sync…", false);
     });
-    conn.on("data", receiveGuestMessage);
+    conn.on("data", msg => receiveGuestMessage(decodePacket(msg)));
     conn.on("close", () => {
       resetConnection();
       status("Disconnected from the host. Your own save has been restored.", true);
