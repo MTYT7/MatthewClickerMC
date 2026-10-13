@@ -247,7 +247,13 @@
       document.head.appendChild(script);
     });
   }
-  async function makePeer() {
+  function makeShortRoomCode() {
+    const alphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+    let code = "";
+    for (let i = 0; i < 5; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return code;
+  }
+  async function makePeer(createRoom = false, attempt = 0) {
     status("Connecting to the online service…", false);
     const ready = await peerLibraryReady();
     if (!ready) {
@@ -255,12 +261,20 @@
       return null;
     }
     return new Promise(resolve => {
-      const peer = new window.Peer();
+      const peer = createRoom ? new window.Peer(makeShortRoomCode()) : new window.Peer();
       let settled = false;
       peer.on("open", id => {
         if (!settled) { settled = true; resolve({ peer, id }); }
       });
       peer.on("error", err => {
+        if (createRoom && err && err.type === "unavailable-id" && attempt < 5) {
+          if (!settled) {
+            settled = true;
+            try { peer.destroy(); } catch (_) {}
+            resolve(makePeer(true, attempt + 1));
+          }
+          return;
+        }
         status("Connection error: " + (err && err.type === "peer-unavailable" ? "room not found" : (err && err.type) || "could not connect") + ".", true);
         if (!settled) { settled = true; resolve(null); }
       });
@@ -268,6 +282,7 @@
         if (!settled) {
           settled = true;
           status("The online service took too long to respond. Check your connection and try again.", true);
+          try { peer.destroy(); } catch (_) {}
           resolve(null);
         }
       }, 15000);
@@ -298,7 +313,7 @@
   window.mcOnlineHost = async function () {
     resetConnection();
     window.mcSharedSaveGuestActive = false;
-    const result = await makePeer();
+    const result = await makePeer(true);
     if (!result) return;
     state.peer = result.peer;
     state.host = true;
@@ -337,7 +352,7 @@
     startTimer();
   };
   window.mcOnlineJoin = async function () {
-    const hostId = String($("onlineRoomCode").value || "").trim();
+    const hostId = String($("onlineRoomCode").value || "").trim().toUpperCase();
     if (!hostId) { status("Enter the host's invite code first.", true); return; }
     resetConnection();
     if (window.mcSaveCurrent) window.mcSaveCurrent();
