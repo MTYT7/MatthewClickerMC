@@ -120,7 +120,11 @@
       publishState();
     } else if (msg.type === "click" && state.phase === "racing" &&
                Date.now() >= state.startAt && Date.now() < state.endAt) {
-      player.clicks = Math.min(1000000, (player.clicks || 0) + 1);
+      const now = Date.now();
+      if (!player.lastClickAt || now - player.lastClickAt >= 40) {
+        player.lastClickAt = now;
+        player.clicks = Math.min(1000000, (player.clicks || 0) + 1);
+      }
     } else if (msg.type === "leave") {
       delete state.players[conn.peer];
       delete state.connections[conn.peer];
