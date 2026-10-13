@@ -338,6 +338,8 @@
     setPhase("lobby", "Waiting for players. You can start when you're ready.");
     render();
     result.peer.on("connection", conn => {
+      // Match the joiner's JSON serialization so large clicker save values do not hit BinaryPack integer limits.
+      conn.serialization = "json";
       if (Object.keys(state.players).length >= MAX_PLAYERS) {
         conn.on("open", () => { try { conn.send({ type: "error", message: "This room is full (maximum 4 players)." }); } catch (_) {} conn.close(); });
         return;
