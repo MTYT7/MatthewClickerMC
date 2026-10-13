@@ -164,7 +164,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
   </div>
   <div class="gm-card" id="onlineScreen" style="display:none">
     <h2>🌐 MATTHEW CLICKER ONLINE</h2>
-    <p>Race together, choose the round length, and share one live Matthew Clicker save while you are connected.</p>
+    <p>Race against friends, or team up in the full Matthew Clicker game. Co-op shares points, upgrades, and progress while everyone stays connected.</p>
     <div id="onlineStatus" style="padding:10px;border-radius:10px;background:#21132d;margin:12px 0">Choose Host Room or Join Room to connect.</div>
     <label for="onlineName" style="display:block;text-align:left;margin:10px 0 5px">Your player name</label>
     <input id="onlineName" maxlength="16" placeholder="Player name" value="Player" style="width:100%;box-sizing:border-box;padding:11px;border-radius:8px;border:1px solid #76518b;background:#180e21;color:#fff8e7">
@@ -192,7 +192,7 @@ button:active{transform:translateY(1px);box-shadow:0 1px 0 #160d1d}
       <button id="onlineReadyButton" onclick="mcOnlineReady()">☑ Ready</button>
       <button id="onlineStartButton" onclick="mcOnlineStart()" style="display:none">🚦 Start race</button>
       <button id="onlineClickButton" onclick="mcOnlineClick()" disabled style="font-size:20px;padding:16px 24px;background:#ffb703;color:#382000">🖱️ CLICK!</button>
-      <button class="gm-secondary" onclick="mcOnlineHideLobby()">🎮 Play Clicker (stay connected)</button>
+      <button class="gm-secondary" onclick="mcOnlineCoop()">🤝 Play Co-op Clicker (share progress)</button>
     </div>
     <p style="font-size:11px;opacity:.75;line-height:1.5">Shared progress syncs while the host is online. The host’s save keeps the shared progress; guests’ own save slots are restored when they leave. Invite codes work like room addresses, so only share them with people you trust. PeerJS may be blocked on some networks.</p>
     <button class="gm-secondary" onclick="closeOnlineLobby()">↩ Game Menu</button>
